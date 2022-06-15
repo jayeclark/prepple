@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
+    "test:unit": "echo \"No unit tests specified\"",
+    "test:integration": "echo \"No integration tests specified\"",
     "cdk": "cdk"
   },
   "repository": {
