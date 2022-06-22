@@ -20,6 +20,7 @@ export class DeploymentPipeline extends Stack {
           connectionArn: 'arn:aws:codestar-connections:us-west-2:541563788130:connection/d0c1c474-baaf-44e6-b4dd-ee755ed47cd9',
         }),
         commands: [
+          'npm install',
           'npm run test:unit',
           'npm run test:integration',
           'npm run build',
