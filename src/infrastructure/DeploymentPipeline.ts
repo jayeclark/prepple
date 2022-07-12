@@ -2,7 +2,7 @@ import { App, Stack, StackProps } from 'aws-cdk-lib';
 import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
 import { PipelineDeploymentStage } from './PipelineDeploymentStage';
 
-import { PipelineStageConfig, stages } from './config/stageConfig';
+import { PipelineStageConfig, stages } from './infrastructure/config/stageConfig';
 
 export class DeploymentPipeline extends Stack {
   readonly context: App;
