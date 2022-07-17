@@ -2,7 +2,7 @@
   "name": "my-dev-interview",
   "version": "1.0.0",
   "description": "Remote interview planning, practice & sharing platform",
-  "main": "./src/app.ts",
+  "main": "./src/infrastructure/app.ts",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
