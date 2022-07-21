@@ -16,3 +16,7 @@ export enum Domain {
   GAMMA = "gamma",
   PROD = "prod"
 }
+
+export const FrontEnd = {
+  DOCKER_IMAGE_ASSET_DIRECTORY: "./src/frontend"
+}
