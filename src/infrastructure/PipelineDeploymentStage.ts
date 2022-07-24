@@ -34,7 +34,7 @@ export class PipelineDeploymentStage extends Stage {
       backendStack.addDependency(vpcStack);
       backendStack.addDependency(dnsDelegatorStack);
 
-      const frontEndStack = this.createStack(FrontEndStack, environment);
+      const frontEndStack = this.createStack(FrontEndStack, environment, { vpcStack: vpcStack as VpcStack });
       frontEndStack.addDependency(backendStack);
 
       const eventPlatformStack = this.createStack(EventPlatformStack, environment);
@@ -53,12 +53,16 @@ export class PipelineDeploymentStage extends Stage {
 
   }
 
-  createStack(StackConstruct: typeof Stack, environment: DeploymentEnvironment, stackName?: string) {
-    const uniqueStackName = getCfnResourceName(stackName || StackConstruct.name, environment);
+  createStack(StackConstruct: typeof Stack, environment: DeploymentEnvironment, options?: {
+    stackName?: string,
+    vpcStack?: VpcStack
+  }) {
+    const uniqueStackName = getCfnResourceName(options?.stackName || StackConstruct.name, environment);
     
     const stackProps: DefaultCustomStackProps = {
       ...this.props as StackProps,
       deploymentEnvironment: environment,
+      ...options
     }
     return new StackConstruct(this, uniqueStackName, stackProps)
   }
