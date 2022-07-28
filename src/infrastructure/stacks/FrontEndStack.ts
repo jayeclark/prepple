@@ -20,11 +20,10 @@ export class FrontEndStack extends Stack {
     this.deploymentEnvironment = props.deploymentEnvironment;
     // Frontend
 
-    const ecrRepository = this.createEcrRepository();
     const dockerImageAsset = this.buildDockerImageAsset();
     const lambdaVpc = Vpc.fromLookup(this, 'vpc', { vpcId: props.vpcStack.node.id })
     const frontEndLambda = new DockerImageFunction(this, getCfnResourceName('LambdaAsset', this.deploymentEnvironment), {
-      code: DockerImageCode.fromEcr(ecrRepository),
+      code: DockerImageCode.fromImageAsset(dockerImageAsset.imageUri),
       vpc: lambdaVpc,
       vpcSubnets: {
         subnetType: SubnetType.PUBLIC
@@ -34,12 +33,6 @@ export class FrontEndStack extends Stack {
     
     // Account, Subscription, Practice, Plan, Share, Resume Builder, Custom Practice Sessions
     
-  }
-
-  createEcrRepository() {
-    return new Repository(this, getCfnResourceName('frontend-ecr-repo', this.deploymentEnvironment), {
-      repositoryName: getCfnResourceName('frontend-ecr-repo', this.deploymentEnvironment)
-    });
   }
 
   buildDockerImageAsset() {
