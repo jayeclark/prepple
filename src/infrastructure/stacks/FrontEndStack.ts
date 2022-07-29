@@ -3,9 +3,8 @@ import { getCfnResourceName } from "../utils/cfnUtils";
 import { DefaultCustomStackProps } from "../utils/types";
 import { DockerImageAsset } from "aws-cdk-lib/aws-ecr-assets";
 import { DockerImageCode, DockerImageFunction } from "aws-cdk-lib/aws-lambda";
-import { Repository } from "aws-cdk-lib/aws-ecr";
 import { FrontEnd } from "../utils/constants";
-import { VpcStack } from "../../../build/stacks/VpcStack";
+import { VpcStack } from "../stacks/VpcStack";
 import { SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
 
 interface FrontendStackProps extends DefaultCustomStackProps {
