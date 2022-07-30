@@ -1,6 +1,6 @@
 import { App, CfnOutput, Duration, Stack, StackProps } from "aws-cdk-lib";
 import { Vpc, IpAddresses, SubnetType, FlowLog, FlowLogDestination, FlowLogTrafficType, FlowLogResourceType, SecurityGroup, CfnEIP, NatProvider, InstanceType } from "aws-cdk-lib/aws-ec2";
-import { getCfnResourceName } from "../../../build/utils/cfnUtils";
+import { getCfnResourceName } from "../utils/cfnUtils";
 import { DeploymentEnvironment } from "../utils/cfnUtils";
 import { BlockPublicAccess, Bucket, BucketAccessControl, BucketEncryption } from "aws-cdk-lib/aws-s3";
 import { Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
