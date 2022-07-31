@@ -64,6 +64,10 @@ export class PipelineDeploymentStage extends Stage {
       deploymentEnvironment: environment,
       ...options
     }
-    return new StackConstruct(this, uniqueStackName, stackProps)
+    return new StackConstruct(this, uniqueStackName, {
+      ...stackProps, env: {
+        account: environment.accountId?.toString(),
+        region: environment.region
+    } })
   }
 }

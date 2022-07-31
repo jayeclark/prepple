@@ -39,8 +39,13 @@ export class VpcStack extends Stack {
       },{
         cidrMask: 24,
         name: 'frontend',
+        subnetType: SubnetType.PRIVATE_WITH_EGRESS
+        },
+        {
+        cidrMask: 24,
+        name: 'public',
         subnetType: SubnetType.PUBLIC
-      }]
+        }]
     })
 
     new CfnOutput(this, "VPCId", {
