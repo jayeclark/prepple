@@ -1,15 +1,16 @@
-import * as path from "path";
 import { App, Stack } from "aws-cdk-lib";
 import { getCfnResourceName } from "../utils/cfnUtils";
 import { DefaultCustomStackProps } from "../utils/types";
 import { DockerImageAsset } from "aws-cdk-lib/aws-ecr-assets";
 import { DockerImageCode, DockerImageFunction } from "aws-cdk-lib/aws-lambda";
 import { FrontEnd } from "../utils/constants";
+import { FrontEndDockerImageStack } from "./FrontEndDockerImageStack";
 import { VpcStack } from "../stacks/VpcStack";
 import { IVpc, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
 
 interface FrontendStackProps extends DefaultCustomStackProps {
   vpcStack: VpcStack
+  dockerImageStack: FrontEndDockerImageStack
 }
 
 export class FrontEndStack extends Stack {
@@ -20,10 +21,10 @@ export class FrontEndStack extends Stack {
     this.deploymentEnvironment = props.deploymentEnvironment;
     // Frontend
 
-    const dockerImageAsset = this.buildDockerImageAsset();
+    const dockerImageAsset = props.dockerImageStack.imageAsset;
     const lambdaVpc: IVpc = props.vpcStack.vpc
     const frontEndLambda = new DockerImageFunction(this, getCfnResourceName('LambdaAsset', this.deploymentEnvironment), {
-      code: DockerImageCode.fromEcr(dockerImageAsset.repository),
+      code: DockerImageCode.fromImageAsset(FrontEnd.DOCKER_IMAGE_ASSET_DIRECTORY),
       vpc: lambdaVpc,
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS
