@@ -9,7 +9,6 @@ import { DnsDelegatorStack } from "./stacks/DnsDelegatorStack";
 import { AdminUIStack } from "./stacks/AdminUiStack";
 import { DeploymentEnvironment, getCfnResourceName } from "./utils/cfnUtils";
 import { DefaultCustomStackProps } from "./utils/types";
-import { FrontEndDockerImageStack } from "./stacks/FrontEndDockerImageStack";
 
 interface PipelineDeploymentStageProps extends StageProps {
   deploymentEnvironments: DeploymentEnvironment[]
@@ -35,14 +34,10 @@ export class PipelineDeploymentStage extends Stage {
       backendStack.addDependency(vpcStack);
       backendStack.addDependency(dnsDelegatorStack);
 
-      const frontEndDockerImageStack = this.createStack(FrontEndDockerImageStack, environment)
-
       const frontEndStack = this.createStack(FrontEndStack, environment, {
         vpcStack: vpcStack as VpcStack,
-        dockerImageStack: frontEndDockerImageStack as FrontEndDockerImageStack
       });
       frontEndStack.addDependency(backendStack);
-      frontEndStack.addDependency(frontEndDockerImageStack);
 
       const eventPlatformStack = this.createStack(EventPlatformStack, environment);
       eventPlatformStack.addDependency(backendStack);
@@ -63,7 +58,6 @@ export class PipelineDeploymentStage extends Stage {
   createStack(StackConstruct: typeof Stack, environment: DeploymentEnvironment, options?: {
     stackName?: string,
     vpcStack?: VpcStack,
-    dockerImageStack?: FrontEndDockerImageStack
   }) {
     const uniqueStackName = getCfnResourceName(options?.stackName || StackConstruct.name, environment);
     
