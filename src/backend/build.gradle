@@ -1,9 +1,18 @@
+plugins {
+    id 'java-library'
+}
+
 apply plugin: 'java'
 
 repositories {
   jcenter()
   mavenLocal()
   mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaLanguageVersion.of(11)
+    targetCompatibility = JavaLanguageVersion.of(11)
 }
 
 dependencies {
