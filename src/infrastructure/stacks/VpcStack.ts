@@ -6,6 +6,9 @@ import { BlockPublicAccess, Bucket, BucketAccessControl, BucketEncryption } from
 import { Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
 
+export const VPC_ID_EXPORT_NAME = "MyDevInterviewVPCStack:vpcId";
+export const SECURITY_GROUP_ID_EXPORT_NAME = "noInboundAllOutboundSecurityGroup";
+  
 interface VpcProps extends StackProps {
   deploymentEnvironment: DeploymentEnvironment
 }
@@ -51,7 +54,7 @@ export class VpcStack extends Stack {
     new CfnOutput(this, "VPCId", {
       value: this.vpc.vpcId,
       description: "My Dev Interview VPC ID",
-      exportName: "MyDevInterviewVPCStack:vpcId"
+      exportName: VPC_ID_EXPORT_NAME
     });
 
     const noInboundAllOutboundSecurityGroup = new SecurityGroup(this, getCfnResourceName("noInboundAllOutboundSecurityGroup", props.deploymentEnvironment), {
@@ -62,7 +65,7 @@ export class VpcStack extends Stack {
     })
 
     new CfnOutput(this, "noInboundAllOutboundSecurityGroup", {
-      exportName: "noInboundAllOutboundSecurityGroup",
+      exportName: SECURITY_GROUP_ID_EXPORT_NAME,
       value: noInboundAllOutboundSecurityGroup.securityGroupId,
     })
 
