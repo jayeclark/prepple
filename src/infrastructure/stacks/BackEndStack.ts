@@ -1,4 +1,4 @@
-import { App, CfnOutput, Fn, RemovalPolicy, Stack, Stage } from 'aws-cdk-lib';
+import { App, CfnOutput, RemovalPolicy, Stack } from 'aws-cdk-lib';
 import { Function, Runtime, Code } from "aws-cdk-lib/aws-lambda";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { InstanceType, InstanceSize, InstanceClass, Vpc, IVpc, SubnetType, SecurityGroup } from "aws-cdk-lib/aws-ec2";
@@ -10,13 +10,11 @@ import {
   Credentials,
 } from "aws-cdk-lib/aws-rds";
 import { DatabaseCluster as DocdbDatabaseCluster } from "aws-cdk-lib/aws-docdb";
-import path = require("path");
-import { getCfnResourceName } from '../utils/cfnUtils';
-import { DefaultCustomStackProps } from "../utils/types";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
-import { DeploymentEnvironment } from '../../../build/utils/cfnUtils';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { LambdaRestApi, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
+import { getCfnResourceName, DeploymentEnvironment } from '../utils/cfnUtils';
+import { DefaultCustomStackProps } from "../utils/types";
 
 interface BackEndStackProps extends DefaultCustomStackProps {
   vpc: Vpc;
