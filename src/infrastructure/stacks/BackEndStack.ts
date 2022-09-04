@@ -15,9 +15,10 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { getCfnResourceName, DeploymentEnvironment } from '../utils/cfnUtils';
 import { DefaultCustomStackProps } from "../utils/types";
+import { VpcStack } from './VpcStack';
 
 interface BackEndStackProps extends DefaultCustomStackProps {
-  vpc: Vpc;
+  vpcStack: VpcStack;
 }
 
 const POSTGRES_READ_REPLICA_COUNT = 1;
@@ -53,13 +54,13 @@ export class BackEndStack extends Stack {
       { removalPolicy: RemovalPolicy.DESTROY }
     );
 
-    const { postgresWriteInstance, postgresReadReplicas, pgCredentials } = this.createPostgresDBResources(props.vpc, props.deploymentEnvironment);
+    const { postgresWriteInstance, postgresReadReplicas, pgCredentials } = this.createPostgresDBResources(props.vpcStack.vpc, props.deploymentEnvironment);
     const pgReadEndpoints: Record<string, string> = {};
     postgresReadReplicas.forEach((replica, index) => {
       const key = `PG_READ_ENDPOINT_${index + 1}`;
       pgReadEndpoints[key] = replica.dbInstanceEndpointAddress;
     })
-    const { docdbCluster, docdbCredentials } = this.createDocDBResources(props.vpc, props.deploymentEnvironment);
+    const { docdbCluster, docdbCredentials } = this.createDocDBResources(props.vpcStack.vpc, props.deploymentEnvironment);
 
     const springApp = new Function(this, 'LambdaAPI', {
       runtime: Runtime.JAVA_11,

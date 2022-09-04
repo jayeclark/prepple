@@ -30,7 +30,7 @@ export class PipelineDeploymentStage extends Stage {
 
       const dnsDelegatorStack = this.createStack(DnsDelegatorStack, environment);
 
-      const backendStack = this.createStack(BackEndStack, environment);
+      const backendStack = this.createStack(BackEndStack, environment, { vpcStack: vpcStack as VpcStack });
       backendStack.addDependency(vpcStack);
       backendStack.addDependency(dnsDelegatorStack);
 
