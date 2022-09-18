@@ -16,6 +16,7 @@ import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { getCfnResourceName, DeploymentEnvironment } from '../utils/cfnUtils';
 import { DefaultCustomStackProps } from "../utils/types";
 import { VpcStack } from './VpcStack';
+import path = require('path');
 
 interface BackEndStackProps extends DefaultCustomStackProps {
   vpcStack: VpcStack;
@@ -65,7 +66,7 @@ export class BackEndStack extends Stack {
     const springApp = new Function(this, 'LambdaAPI', {
       runtime: Runtime.JAVA_11,
       handler: 'com.mydevinterview.api.StreamLambdaHandler::handleRequest',
-      code: Code.fromAsset('../../backend'),
+      code: Code.fromAsset(path.join(__dirname, "../../backend")),
       environment: {
         PG_WRITE_ENDPOINT: postgresWriteInstance.dbInstanceEndpointAddress,
         ...pgReadEndpoints,
