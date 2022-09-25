@@ -32,24 +32,19 @@ export class VpcStack extends Stack {
       enableDnsHostnames: true,
       enableDnsSupport: true,
       subnetConfiguration: [{
-        cidrMask: 28,
         name: 'db1',
         subnetType: SubnetType.PRIVATE_ISOLATED
       },{
-        cidrMask: 28,
         name: 'db2',
         subnetType: SubnetType.PRIVATE_ISOLATED
       },{
-        cidrMask: 28,
         name: 'backend',
         subnetType: SubnetType.PRIVATE_WITH_EGRESS
       },{
-        cidrMask: 28,
         name: 'frontend',
         subnetType: SubnetType.PRIVATE_WITH_EGRESS
         },
         {
-        cidrMask: 28,
         name: 'public',
         subnetType: SubnetType.PUBLIC
         }]
