@@ -26,7 +26,7 @@ export class VpcStack extends Stack {
 
     this.vpc = new Vpc(this, getCfnResourceName('Vpc', props.deploymentEnvironment), {
       ipAddresses: IpAddresses.cidr('10.192.0.0/24'),
-      maxAzs: 1,
+      maxAzs: 2,
       natGatewayProvider,
       natGateways: 2,
       enableDnsHostnames: true,
