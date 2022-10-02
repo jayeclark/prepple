@@ -25,18 +25,16 @@ export class VpcStack extends Stack {
     });
 
     this.vpc = new Vpc(this, getCfnResourceName('Vpc', props.deploymentEnvironment), {
-      ipAddresses: IpAddresses.cidr('10.192.0.0/16'),
+      ipAddresses: IpAddresses.cidr('10.192.0.0/24'),
       maxAzs: 1,
       natGatewayProvider,
       natGateways: 2,
       enableDnsHostnames: true,
       enableDnsSupport: true,
       subnetConfiguration: [{
-        name: 'db1',
-        subnetType: SubnetType.PRIVATE_ISOLATED
-      },{
-        name: 'db2',
-        subnetType: SubnetType.PRIVATE_ISOLATED
+        name: 'db',
+        subnetType: SubnetType.PRIVATE_ISOLATED,
+
       },{
         name: 'backend',
         subnetType: SubnetType.PRIVATE_WITH_EGRESS
