@@ -54,16 +54,16 @@ export class VpcStack extends Stack {
       exportName: VPC_ID_EXPORT_NAME
     });
 
-    const noInboundAllOutboundSecurityGroup = new SecurityGroup(this, getCfnResourceName("noInboundAllOutboundSecurityGroup", props.deploymentEnvironment), {
+    const noInboundAnyOutboundSecurityGroup = new SecurityGroup(this, getCfnResourceName("noInboundAnyOutboundSecurityGroup", props.deploymentEnvironment), {
       vpc: this.vpc,
       allowAllOutbound: true,
       description: "No inbound / all outbound",
-      securityGroupName: "noInboundAllOutboundSecurityGroup",
+      securityGroupName: "noInboundAnyOutboundSecurityGroup",
     })
 
-    new CfnOutput(this, "noInboundAllOutboundSecurityGroup", {
+    new CfnOutput(this, "noInboundAnyOutboundSecurityGroup", {
       exportName: SECURITY_GROUP_ID_EXPORT_NAME,
-      value: noInboundAllOutboundSecurityGroup.securityGroupId,
+      value: noInboundAnyOutboundSecurityGroup.securityGroupId,
     })
 
     const vpcLogBucket = new Bucket(this, "s3LogBucket", {
