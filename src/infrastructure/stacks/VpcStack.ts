@@ -21,7 +21,7 @@ export class VpcStack extends Stack {
     super(scope, id, props)
 
     const natGatewayProvider = NatProvider.instance({
-      instanceType: new InstanceType('t3.small'),
+      instanceType: new InstanceType('t3.micro'),
     });
 
     this.vpc = new Vpc(this, getCfnResourceName('Vpc', props.deploymentEnvironment), {
