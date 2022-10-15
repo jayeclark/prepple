@@ -25,7 +25,7 @@ interface BackEndStackProps extends DefaultCustomStackProps {
 const POSTGRES_READ_REPLICA_COUNT = 1;
 const DOCDB_READ_REPLICA_COUNT = 1;
 export const POSTGRES_USERNAME = 'postgres';
-export const POSTGRES_DBNAME = 'postgres';
+export const POSTGRES_DBNAME = 'pg';
 export const DOCDB_USERNAME = 'mydevinterview';
 export const DOCDB_DBNAME = 'docdb';
 
