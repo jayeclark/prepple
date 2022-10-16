@@ -180,10 +180,8 @@ export class BackEndStack extends Stack {
       }
     });
 
-    new CfnOutput(this, `${dbName} Secret Name`, { exportName: getSecretNameExportName(dbName), value: dbCredentialsSecret.secretName }); 
     new CfnOutput(this, `${dbName} Secret ARN`, { exportName: getSecretArnExportName(dbName), value: dbCredentialsSecret.secretArn}); 
-    new CfnOutput(this, `${dbName} Secret Full ARN`, { exportName: getSecretFullArnExportName(dbName), value: dbCredentialsSecret.secretFullArn || '' });
-
+    
     return dbCredentialsSecret;
   }
 
