@@ -107,10 +107,6 @@ export class BackEndStack extends Stack {
 
   createPostgresDBResources(vpc: Vpc, env: DeploymentEnvironment) {  
     const pgCredentials = this.createPostgresDBCredentials(env);
-    new StringParameter(this, 'PostgresCredentialsArn', {
-      parameterName: `${env.stage}-credentials-arn`,
-      stringValue: pgCredentials.secretArn,
-    });
 
     const defaultSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `SG-${env.stage}`, vpc.vpcDefaultSecurityGroup);
 
@@ -180,8 +176,10 @@ export class BackEndStack extends Stack {
       }
     });
 
+    new CfnOutput(this, `${dbName} Secret Name`, { exportName: getSecretNameExportName(dbName), value: dbCredentialsSecret.secretName }); 
     new CfnOutput(this, `${dbName} Secret ARN`, { exportName: getSecretArnExportName(dbName), value: dbCredentialsSecret.secretArn}); 
-    
+    new CfnOutput(this, `${dbName} Secret Full ARN`, { exportName: getSecretFullArnExportName(dbName), value: dbCredentialsSecret.secretFullArn || '' });
+
     return dbCredentialsSecret;
   }
 
