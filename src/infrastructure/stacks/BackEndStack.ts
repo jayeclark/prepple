@@ -30,15 +30,15 @@ export const DOCDB_USERNAME = 'mydevinterview';
 export const DOCDB_DBNAME = 'docdb';
 
 export function getSecretNameExportName(dbName: string) {
-  return getExportName('MyDevInterview', 'postgres', 'secret-name');
+  return getExportName('MyDevInterview', dbName, 'secret-name');
 }
 
 export function getSecretArnExportName(dbName: string) {
-  return getExportName('MyDevInterview', 'postgres', 'secret-arn');
+  return getExportName('MyDevInterview', dbName, 'secret-arn');
 }
 
 export function getSecretFullArnExportName(dbName: string) {
-  return getExportName('MyDevInterview', 'postgres', 'secret-full-arn');
+  return getExportName('MyDevInterview', dbName, 'secret-full-arn');
 }
 
 function getExportName(prefix: string, dbName: string, exportedProperty: string) {
