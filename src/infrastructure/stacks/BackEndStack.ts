@@ -49,12 +49,6 @@ export class BackEndStack extends Stack {
   constructor(scope: App, id: string, props: BackEndStackProps) {
     super(scope, id, props)
 
-    const placeholderBucket = new Bucket(
-      this,
-      getCfnResourceName('BackendPlaceholderBucket', props.deploymentEnvironment),
-      { removalPolicy: RemovalPolicy.DESTROY }
-    );
-
     const { postgresWriteInstance, postgresReadReplicas, pgCredentials } = this.createPostgresDBResources(props.vpcStack.vpc, props.deploymentEnvironment);
     const pgReadEndpoints: Record<string, string> = {};
     postgresReadReplicas.forEach((replica, index) => {
