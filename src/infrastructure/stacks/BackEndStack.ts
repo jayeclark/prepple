@@ -111,7 +111,7 @@ export class BackEndStack extends Stack {
     const defaultSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `SG-${env.stage}`, vpc.vpcDefaultSecurityGroup);
 
     const postgresWriteInstance: RdsDatabaseInstance = new RdsDatabaseInstance(this, getCfnResourceName('PostgresInstance', env), {
-      engine: DatabaseInstanceEngine.postgres({ version: PostgresEngineVersion.VER_12_3 }),
+      engine: DatabaseInstanceEngine.postgres({ version: PostgresEngineVersion.VER_14_5 }),
       instanceType: InstanceType.of(InstanceClass.BURSTABLE2, InstanceSize.SMALL),
       vpc,
       securityGroups: [defaultSecurityGroup],
