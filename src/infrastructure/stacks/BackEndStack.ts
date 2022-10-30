@@ -119,7 +119,7 @@ export class BackEndStack extends Stack {
     for (count = 1; count <= POSTGRES_READ_REPLICA_COUNT; count += 1) {
       const currentReadReplicaInstance = new RdsDatabaseInstanceReadReplica(this, getCfnResourceName(`PostgresReadReplica-${count}`, env), {
         sourceDatabaseInstance: postgresWriteInstance,
-        instanceType: InstanceType.of(InstanceClass.BURSTABLE2, InstanceSize.SMALL),
+        instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
         vpc,
       });
       postgresReadReplicas.push(currentReadReplicaInstance);
