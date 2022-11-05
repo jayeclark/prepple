@@ -106,7 +106,7 @@ export class BackEndStack extends Stack {
 
     const postgresWriteInstance: RdsDatabaseInstance = new RdsDatabaseInstance(this, getCfnResourceName('PostgresInstance', env), {
       engine: DatabaseInstanceEngine.postgres({ version: PostgresEngineVersion.VER_14_5 }),
-      instanceType: InstanceType.of(InstanceClass.BURSTABLE2, InstanceSize.SMALL),
+      instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
       vpc,
       securityGroups: [defaultSecurityGroup],
       maxAllocatedStorage: 200,
