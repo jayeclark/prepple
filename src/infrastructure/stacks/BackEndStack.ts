@@ -144,7 +144,7 @@ export class BackEndStack extends Stack {
         username: docdbCredentials.secretValueFromJson('username').toString(),
         password: docdbCredentials.secretValueFromJson('password'),
       },
-      instanceType: InstanceType.of(InstanceClass.BURSTABLE2, InstanceSize.SMALL),
+      instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
       instances: 1 + DOCDB_READ_REPLICA_COUNT,
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_ISOLATED,
