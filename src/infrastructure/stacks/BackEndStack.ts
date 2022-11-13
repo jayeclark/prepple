@@ -77,7 +77,7 @@ export class BackEndStack extends Stack {
 
     postgresWriteInstance.grantConnect(springApp);
 
-    const restAPI = new LambdaRestApi(this, `API-${props.deploymentEnvironment.stage}`, {
+    const restAPI = new LambdaRestApi(this, `Backend-API-${props.deploymentEnvironment.stage}`, {
       handler: springApp,
     })
 

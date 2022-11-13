@@ -6,6 +6,7 @@ import { DockerImageCode, DockerImageFunction } from "aws-cdk-lib/aws-lambda";
 import { FrontEnd } from "../utils/constants";
 import { VpcStack } from "../stacks/VpcStack";
 import { IVpc, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
+import { LambdaRestApi } from "aws-cdk-lib/aws-apigateway";
 
 interface FrontendStackProps extends DefaultCustomStackProps {
   vpcStack: VpcStack
@@ -28,6 +29,9 @@ export class FrontEndStack extends Stack {
       }
     })
 
+    const restAPI = new LambdaRestApi(this, `Frontend-API-${props.deploymentEnvironment.stage}`, {
+      handler: frontEndLambda,
+    })
     
     // Account, Subscription, Practice, Plan, Share, Resume Builder, Custom Practice Sessions
     
