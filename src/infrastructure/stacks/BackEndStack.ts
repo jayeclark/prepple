@@ -59,7 +59,7 @@ export class BackEndStack extends Stack {
 
     const springApp = new Function(this, 'LambdaAPI', {
       runtime: Runtime.JAVA_11,
-      handler: 'org.springframework.cloud.function.adapter.aws.SpringBootApiGatewayRequestHandler', //'com.mydevinterview.api.StreamLambdaHandler::handleRequest',
+      handler: 'com_mydevinterview_api_StreamLambdaHandler::handleRequest', //'com.mydevinterview.api.StreamLambdaHandler::handleRequest',
       code: Code.fromAsset(path.join(__dirname, "../../backend")),
       environment: {
         PG_WRITE_ENDPOINT: postgresWriteInstance.dbInstanceEndpointAddress,
