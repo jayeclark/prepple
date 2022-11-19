@@ -1,11 +1,10 @@
-package com.mydevinterview.api;
+package com.prepple.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
-import com.mydevinterview.api.controller.PingController;
-
+import com.prepple.api.controller.PingController;
 
 @SpringBootApplication
 // We use direct @Import instead of @ComponentScan to speed up cold starts

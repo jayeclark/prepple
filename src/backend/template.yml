@@ -1,15 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: AWS Serverless Spring Boot 2 API - com.mydevinterview.api::my-dev-interview
+Description: AWS Serverless Spring Boot 2 API - com.prepple.api::prepple-api
 Globals:
   Api:
     EndpointConfiguration: REGIONAL
 
 Resources:
-  MyDevInterviewFunction:
+  PreppleAPI:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: com.mydevinterview.api.StreamLambdaHandler::handleRequest
+      Handler: com.prepple.api.StreamLambdaHandler::handleRequest
       Runtime: java11
       CodeUri: .
       MemorySize: 512
@@ -27,4 +27,4 @@ Outputs:
     Description: URL for application
     Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/ping'
     Export:
-      Name: MyDevInterviewApi
+      Name: PreppleApi

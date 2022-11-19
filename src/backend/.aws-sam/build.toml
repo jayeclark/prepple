@@ -8,6 +8,6 @@ architecture = "x86_64"
 handler = "com.mydevinterview.api.StreamLambdaHandler::handleRequest"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["MyDevInterviewFunction"]
+functions = ["PreppleAPI"]
 
 [layer_build_definitions]

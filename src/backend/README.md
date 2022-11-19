@@ -16,7 +16,7 @@ You can use the SAM CLI to quickly build the project
 $ mvn archetype:generate -DartifactId=my-dev-interview -DarchetypeGroupId=com.amazonaws.serverless.archetypes -DarchetypeArtifactId=aws-serverless-jersey-archetype -DarchetypeVersion=1.9.1 -DgroupId=com.mydevinterview.api -Dversion=1.0-SNAPSHOT -Dinteractive=false
 $ cd my-dev-interview
 $ sam build
-Building resource 'MyDevInterviewFunction'
+Building resource 'PreppleAPI'
 Running JavaGradleWorkflow:GradleBuild
 Running JavaGradleWorkflow:CopyArtifacts
 

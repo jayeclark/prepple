@@ -1,4 +1,4 @@
-package com.mydevinterview.api;
+package com.prepple.api;
 
 
 import com.amazonaws.serverless.proxy.internal.LambdaContainerHandler;
