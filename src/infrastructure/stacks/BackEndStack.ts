@@ -59,6 +59,7 @@ export class BackEndStack extends Stack {
 
     const springApp = new Function(this, 'LambdaAPI', {
       runtime: Runtime.JAVA_11,
+      memorySize: 256,
       handler: 'com.prepple.api.StreamLambdaHandler::handleRequest', //'com.mydevinterview.api.StreamLambdaHandler::handleRequest',
       code: Code.fromAsset(path.join(__dirname, "../../backend/.aws-sam/build/PreppleAPI")), 
       environment: {
