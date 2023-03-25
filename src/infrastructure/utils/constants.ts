@@ -20,3 +20,5 @@ export enum Domain {
 export const FrontEnd = {
   DOCKER_IMAGE_ASSET_DIRECTORY: "./src/frontend"
 }
+
+export const DOMAIN_NAME = "prepple.com";

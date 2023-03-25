@@ -1,4 +1,4 @@
-import { Domain, Realm, Region } from "./constants";
+import { DOMAIN_NAME, Domain, Realm, Region } from "./constants";
 
 export interface DeploymentEnvironment {
   accountId?: number;
@@ -12,3 +12,8 @@ export function getCfnResourceName(resourceName: string, environment: Deployment
   const { realm, stage, user } = environment;
   return `${resourceName}-${realm.toString()}-${stage}${user ? `-${user}`:''}`
 } 
+
+export function getDomainName({ realm, stage }: DeploymentEnvironment) {
+  let subdomain = stage != Domain.PROD ? `${realm.toLowerCase()}-${stage.toLowerCase()}` : 'www';
+  return subdomain + "." + DOMAIN_NAME;
+}

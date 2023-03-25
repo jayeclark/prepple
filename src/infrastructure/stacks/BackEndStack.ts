@@ -13,11 +13,11 @@ import { DatabaseCluster as DocdbDatabaseCluster } from "aws-cdk-lib/aws-docdb";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
-import { getCfnResourceName, DeploymentEnvironment } from '../utils/cfnUtils';
+import { getCfnResourceName, DeploymentEnvironment, getDomainName } from '../utils/cfnUtils';
 import { DefaultCustomStackProps } from "../utils/types";
 import { VpcStack } from './VpcStack';
 import path = require('path');
-import { CfnUserPoolGroup, UserPool, VerificationEmailStyle } from 'aws-cdk-lib/aws-cognito';
+import { CfnUserPoolClient, CfnUserPoolGroup, UserPool, UserPoolIdentityProvider, UserPoolIdentityProviderOidc, VerificationEmailStyle } from 'aws-cdk-lib/aws-cognito';
 import { FederatedPrincipal, Role, PolicyStatementProps, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { UserPoolGroupTypes, UserPoolGroupConfig } from '../config/userPoolConfig';
 import { VIDEO_BUCKET_NAME, PHOTO_BUCKET_NAME, TRANSCRIPT_BUCKET_NAME, VIDEO_RESUME_BUCKET_NAME } from '../config/resourceNames';
@@ -50,17 +50,19 @@ function getExportName(prefix: string, dbName: string, exportedProperty: string)
 }
 
 export class BackEndStack extends Stack {
+  private readonly env: DeploymentEnvironment;
   constructor(scope: App, id: string, props: BackEndStackProps) {
     super(scope, id, props)
+    this.env = props.deploymentEnvironment;
 
     // Data stores
-    const { postgresWriteInstance, postgresReadReplicas, pgCredentials } = this.createPostgresDBResources(props.vpcStack.vpc, props.deploymentEnvironment);
+    const { postgresWriteInstance, postgresReadReplicas, pgCredentials } = this.createPostgresDBResources(props.vpcStack.vpc);
     const pgReadEndpoints: Record<string, string> = {};
     postgresReadReplicas.forEach((replica, index) => {
       const key = `PG_READ_ENDPOINT_${index + 1}`;
       pgReadEndpoints[key] = replica.dbInstanceEndpointAddress;
     })
-    const { docdbCluster, docdbCredentials } = this.createDocDBResources(props.vpcStack.vpc, props.deploymentEnvironment);
+    const { docdbCluster, docdbCredentials } = this.createDocDBResources(props.vpcStack.vpc);
 
     // Storage
     const videoBucketName = getCfnResourceName(VIDEO_BUCKET_NAME, props.deploymentEnvironment);
@@ -77,8 +79,9 @@ export class BackEndStack extends Stack {
 
     const buckets = { videoBucket, photoBucket, transcriptsBucket, videoResumeBucket };
 
-    // User Pool
-    const userPool = this.createUserPool(props.deploymentEnvironment, buckets);
+    // User Pool & 
+    const userPool = this.createUserPool(buckets);
+    const userPoolClient = this.createUserPoolClient(userPool.userPoolId);
 
     // Spring App
     const springApp = new Function(this, 'LambdaAPI', {
@@ -106,6 +109,8 @@ export class BackEndStack extends Stack {
       handler: springApp,
     })
 
+
+
     // Backend
     // Requires RDS (postgresql)
 
@@ -124,12 +129,12 @@ export class BackEndStack extends Stack {
     // - Subscription functions
   }
 
-  createPostgresDBResources(vpc: Vpc, env: DeploymentEnvironment) {  
-    const pgCredentials = this.createPostgresDBCredentials(env);
+  createPostgresDBResources(vpc: Vpc) {  
+    const pgCredentials = this.createPostgresDBCredentials();
 
-    const defaultSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `SG-${env.stage}`, vpc.vpcDefaultSecurityGroup);
+    const defaultSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `SG-${this.env.stage}`, vpc.vpcDefaultSecurityGroup);
 
-    const postgresWriteInstance: RdsDatabaseInstance = new RdsDatabaseInstance(this, getCfnResourceName('PostgresInstance', env), {
+    const postgresWriteInstance: RdsDatabaseInstance = new RdsDatabaseInstance(this, getCfnResourceName('PostgresInstance', this.env), {
       engine: DatabaseInstanceEngine.postgres({ version: PostgresEngineVersion.VER_14_5 }),
       instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
       vpc,
@@ -142,7 +147,7 @@ export class BackEndStack extends Stack {
 
     let count = 1;
     for (count = 1; count <= POSTGRES_READ_REPLICA_COUNT; count += 1) {
-      const currentReadReplicaInstance = new RdsDatabaseInstanceReadReplica(this, getCfnResourceName(`PostgresReadReplica-${count}`, env), {
+      const currentReadReplicaInstance = new RdsDatabaseInstanceReadReplica(this, getCfnResourceName(`PostgresReadReplica-${count}`, this.env), {
         sourceDatabaseInstance: postgresWriteInstance,
         instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
         vpc,
@@ -150,17 +155,17 @@ export class BackEndStack extends Stack {
       postgresReadReplicas.push(currentReadReplicaInstance);
     }
 
-    new CfnOutput(this, `RDSWriteEndpoint-${env.stage}`, { value: postgresWriteInstance.dbInstanceEndpointAddress });
+    new CfnOutput(this, `RDSWriteEndpoint-${this.env.stage}`, { value: postgresWriteInstance.dbInstanceEndpointAddress });
     postgresReadReplicas.forEach((replica, index) => {
-      new CfnOutput(this, `RDSReadEndpoint${index+1}-${env.stage}`, { value: replica.dbInstanceEndpointAddress });
+      new CfnOutput(this, `RDSReadEndpoint${index+1}-${this.env.stage}`, { value: replica.dbInstanceEndpointAddress });
     })
     return { postgresWriteInstance, postgresReadReplicas, pgCredentials }
   }
 
-  createDocDBResources(vpc: IVpc, env: DeploymentEnvironment) {
-    const docdbCredentials = this.createDocDBCredentials(env);
+  createDocDBResources(vpc: IVpc) {
+    const docdbCredentials = this.createDocDBCredentials();
     new StringParameter(this, 'DocdbCredentialsArn', {
-      parameterName: `${env.stage}-credentials-arn`,
+      parameterName: `${this.env.stage}-credentials-arn`,
       stringValue: docdbCredentials.secretArn,
     });
 
@@ -182,9 +187,9 @@ export class BackEndStack extends Stack {
     return { docdbCluster, docdbCredentials };
   }
 
-  createDBCredentials(env: DeploymentEnvironment, username: string, dbName: string) {
-    const dbCredentialsSecret = new Secret(this, `${env.stage}-${dbName}-CredentialsSecret`, {
-      secretName: `${env.stage}-${dbName}-credentials`,
+  createDBCredentials(username: string, dbName: string) {
+    const dbCredentialsSecret = new Secret(this, `${this.env.stage}-${dbName}-CredentialsSecret`, {
+      secretName: `${this.env.stage}-${dbName}-credentials`,
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
           username,
@@ -202,16 +207,16 @@ export class BackEndStack extends Stack {
     return dbCredentialsSecret;
   }
 
-  createPostgresDBCredentials(env: DeploymentEnvironment) {
-    return this.createDBCredentials(env, POSTGRES_USERNAME, POSTGRES_DBNAME);
+  createPostgresDBCredentials() {
+    return this.createDBCredentials(POSTGRES_USERNAME, POSTGRES_DBNAME);
   }
 
-  createDocDBCredentials(env: DeploymentEnvironment) {
-    return this.createDBCredentials(env, DOCDB_USERNAME, DOCDB_DBNAME);
+  createDocDBCredentials() {
+    return this.createDBCredentials(DOCDB_USERNAME, DOCDB_DBNAME);
   }
 
-  createUserPool(env: DeploymentEnvironment, buckets: Record<string, Bucket>) {
-    const userPool = new UserPool(this, getCfnResourceName('UserPool', env), {
+  createUserPool(buckets: Record<string, Bucket>) {
+    const userPool = new UserPool(this, getCfnResourceName('UserPool', this.env), {
       selfSignUpEnabled: true,
       userVerification: {
         emailSubject: 'Verify your email for full access to Prepple.',
@@ -233,7 +238,7 @@ export class BackEndStack extends Stack {
     const groups: any = {};
     groupKeys.forEach((group) => {
       // create user pool group and role
-      const { userPoolGroup, userPoolRole } = this.createUserPoolGroupAndRole(group, env, userPool.userPoolId);
+      const { userPoolGroup, userPoolRole } = this.createUserPoolGroupAndRole(group, userPool.userPoolId);
       
       // add permissions to user pool role based on configuration
       const policyStatements: PolicyStatement[] = this.generateUserPoolGroupPolicyStatements(UserPoolGroupConfig[group as UserPoolGroupTypes], buckets);
@@ -243,12 +248,12 @@ export class BackEndStack extends Stack {
     return userPool;
   }
 
-  createUserPoolGroupAndRole(groupName: string, env: DeploymentEnvironment, userPoolId: string) {
-    const userPoolGroup = new CfnUserPoolGroup(this, getCfnResourceName(`${groupName}Group`, env), {
+  createUserPoolGroupAndRole(groupName: string, userPoolId: string) {
+    const userPoolGroup = new CfnUserPoolGroup(this, getCfnResourceName(`${groupName}Group`, this.env), {
       groupName: groupName.toLowerCase(),
-      userPoolId: userPoolId
+      userPoolId: userPoolId,
     })
-    const userPoolRole = new Role(this, getCfnResourceName(`${groupName}Role`, env), {
+    const userPoolRole = new Role(this, getCfnResourceName(`${groupName}Role`, this.env), {
       assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
         StringEquals: { 'cognito-identity.amazonaws.com:aud': userPoolId },
         'ForAnyValue:StringLike': { 'cognito-identity.amazonaws.com:amr': 'authenticated' },
@@ -277,5 +282,18 @@ export class BackEndStack extends Stack {
     })
 
     return policyStatements;
+  }
+
+  createUserPoolClient(userPoolId: string) {
+    const userPoolClientName = getCfnResourceName('prepple-auth-client', this.env);
+    return new CfnUserPoolClient(this, userPoolClientName, {
+      clientName: userPoolClientName,
+      generateSecret: false,
+      userPoolId,
+      allowedOAuthFlows: ['code'],
+      allowedOAuthScopes: ['openid', 'email', 'profile'],
+      callbackUrLs: [getDomainName(this.env)],
+      supportedIdentityProviders: ['COGNITO', 'FACEBOOK', 'GOOGLE']
+    })
   }
 }
