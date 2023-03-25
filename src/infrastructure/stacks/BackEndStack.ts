@@ -1,4 +1,4 @@
-import { App, CfnOutput, RemovalPolicy, Stack } from 'aws-cdk-lib';
+import { App, CfnOutput, Stack } from 'aws-cdk-lib';
 import { Function, Runtime, Code } from "aws-cdk-lib/aws-lambda";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { InstanceType, InstanceSize, InstanceClass, Vpc, IVpc, SubnetType, SecurityGroup } from "aws-cdk-lib/aws-ec2";
@@ -17,6 +17,10 @@ import { getCfnResourceName, DeploymentEnvironment } from '../utils/cfnUtils';
 import { DefaultCustomStackProps } from "../utils/types";
 import { VpcStack } from './VpcStack';
 import path = require('path');
+import { CfnUserPoolGroup, UserPool, VerificationEmailStyle } from 'aws-cdk-lib/aws-cognito';
+import { FederatedPrincipal, Role, PolicyStatementProps, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { UserPoolGroupTypes, UserPoolGroupConfig } from '../config/userPoolConfig';
+import { VIDEO_BUCKET_NAME, PHOTO_BUCKET_NAME, TRANSCRIPT_BUCKET_NAME, VIDEO_RESUME_BUCKET_NAME } from '../config/resourceNames';
 
 interface BackEndStackProps extends DefaultCustomStackProps {
   vpcStack: VpcStack;
@@ -49,6 +53,7 @@ export class BackEndStack extends Stack {
   constructor(scope: App, id: string, props: BackEndStackProps) {
     super(scope, id, props)
 
+    // Data stores
     const { postgresWriteInstance, postgresReadReplicas, pgCredentials } = this.createPostgresDBResources(props.vpcStack.vpc, props.deploymentEnvironment);
     const pgReadEndpoints: Record<string, string> = {};
     postgresReadReplicas.forEach((replica, index) => {
@@ -57,6 +62,22 @@ export class BackEndStack extends Stack {
     })
     const { docdbCluster, docdbCredentials } = this.createDocDBResources(props.vpcStack.vpc, props.deploymentEnvironment);
 
+    // Storage
+    const videoBucketName = getCfnResourceName(VIDEO_BUCKET_NAME, props.deploymentEnvironment);
+    const videoBucket = new Bucket(this, videoBucketName, { bucketName: videoBucketName });
+
+    const photoBucketName = getCfnResourceName(PHOTO_BUCKET_NAME, props.deploymentEnvironment);
+    const photoBucket = new Bucket(this, photoBucketName, { bucketName: photoBucketName });
+    
+    const transcriptsBucketName = getCfnResourceName(TRANSCRIPT_BUCKET_NAME, props.deploymentEnvironment);
+    const transcriptsBucket = new Bucket(this, transcriptsBucketName, { bucketName: transcriptsBucketName });
+
+    const videoResumeBucketName = getCfnResourceName(VIDEO_RESUME_BUCKET_NAME, props.deploymentEnvironment);
+    const videoResumeBucket = new Bucket(this, videoResumeBucketName, { bucketName: videoResumeBucketName })
+
+    const buckets = { videoBucket, photoBucket, transcriptsBucket, videoResumeBucket };
+
+    // Spring App
     const springApp = new Function(this, 'LambdaAPI', {
       runtime: Runtime.JAVA_11,
       memorySize: 256,
@@ -184,5 +205,73 @@ export class BackEndStack extends Stack {
 
   createDocDBCredentials(env: DeploymentEnvironment) {
     return this.createDBCredentials(env, DOCDB_USERNAME, DOCDB_DBNAME);
+  }
+
+  createUserPool(env: DeploymentEnvironment, buckets: Record<string, Bucket>) {
+    const userPool = new UserPool(this, getCfnResourceName('UserPool', env), {
+      selfSignUpEnabled: true,
+      userVerification: {
+        emailSubject: 'Verify your email for full access to Prepple.',
+        emailBody: 'Hello {username},\n\nThanks for signing up for an account with Prepple! Your verification code is {####}',
+        emailStyle: VerificationEmailStyle.CODE,
+        smsMessage: 'Hello {username}, Thanks for signing up for an account with Prepple! Your verification code is {####}'
+      },
+      passwordPolicy: {
+        minLength: 8,
+        requireLowercase: true,
+        requireUppercase: true,
+        requireDigits: true,
+        requireSymbols: true
+      }
+    })
+
+    // Create user pool groups
+    const groupKeys = Object.keys(UserPoolGroupConfig);
+    const groups: any = {};
+    groupKeys.forEach((group) => {
+      // create user pool group and role
+      const { userPoolGroup, userPoolRole } = this.createUserPoolGroupAndRole(group, env, userPool.userPoolId);
+      
+      // add permissions to user pool role based on configuration
+      const policyStatements: PolicyStatement[] = this.generateUserPoolGroupPolicyStatements(UserPoolGroupConfig[group as UserPoolGroupTypes], buckets);
+      policyStatements.forEach((policyStatement) => userPoolRole.addToPolicy(policyStatement));
+      groups[group] = { group: userPoolGroup, role: userPoolRole };
+    })
+  }
+
+  createUserPoolGroupAndRole(groupName: string, env: DeploymentEnvironment, userPoolId: string) {
+    const userPoolGroup = new CfnUserPoolGroup(this, getCfnResourceName(`${groupName}Group`, env), {
+      groupName: groupName.toLowerCase(),
+      userPoolId: userPoolId
+    })
+    const userPoolRole = new Role(this, getCfnResourceName(`${groupName}Role`, env), {
+      assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
+        StringEquals: { 'cognito-identity.amazonaws.com:aud': userPoolId },
+        'ForAnyValue:StringLike': { 'cognito-identity.amazonaws.com:amr': 'authenticated' },
+      }, 'sts:AssumeRoleWithWebIdentity')
+    })
+    return { userPoolGroup, userPoolRole };
+  }
+
+  generateUserPoolGroupPolicyStatements(statementConfig: PolicyStatementProps[], buckets: Record<string, Bucket>): PolicyStatement[] {
+    const policyStatements: PolicyStatement[] = [];
+    const bucketKeys: string[] = Object.keys(buckets);
+
+    statementConfig.forEach((statement: PolicyStatementProps) => {
+      const newStatementConfig = { ...statement };
+      
+      newStatementConfig.resources = newStatementConfig.resources?.map((resource) => {
+        let newResource = resource;
+        bucketKeys.forEach((key) => {
+          newResource = newResource.replace(`{{${key}}}`, buckets[key].bucketName)
+        })
+        return newResource;
+      }) || undefined;      
+      
+      const policyStatement = new PolicyStatement(newStatementConfig);
+      policyStatements.push(policyStatement);
+    })
+
+    return policyStatements;
   }
 }
