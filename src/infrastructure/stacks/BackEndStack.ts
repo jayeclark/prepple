@@ -77,6 +77,9 @@ export class BackEndStack extends Stack {
 
     const buckets = { videoBucket, photoBucket, transcriptsBucket, videoResumeBucket };
 
+    // User Pool
+    const userPool = this.createUserPool(props.deploymentEnvironment, buckets);
+
     // Spring App
     const springApp = new Function(this, 'LambdaAPI', {
       runtime: Runtime.JAVA_11,
@@ -237,6 +240,7 @@ export class BackEndStack extends Stack {
       policyStatements.forEach((policyStatement) => userPoolRole.addToPolicy(policyStatement));
       groups[group] = { group: userPoolGroup, role: userPoolRole };
     })
+    return userPool;
   }
 
   createUserPoolGroupAndRole(groupName: string, env: DeploymentEnvironment, userPoolId: string) {
