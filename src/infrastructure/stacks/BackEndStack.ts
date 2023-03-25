@@ -21,6 +21,7 @@ import { CfnUserPoolClient, CfnUserPoolGroup, UserPool, UserPoolIdentityProvider
 import { FederatedPrincipal, Role, PolicyStatementProps, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { UserPoolGroupTypes, UserPoolGroupConfig } from '../config/userPoolConfig';
 import { VIDEO_BUCKET_NAME, PHOTO_BUCKET_NAME, TRANSCRIPT_BUCKET_NAME, VIDEO_RESUME_BUCKET_NAME } from '../config/resourceNames';
+import { Domain } from '../utils/constants';
 
 interface BackEndStackProps extends DefaultCustomStackProps {
   vpcStack: VpcStack;
@@ -80,7 +81,7 @@ export class BackEndStack extends Stack {
     const buckets = { videoBucket, photoBucket, transcriptsBucket, videoResumeBucket };
 
     // User Pool & 
-    const userPool = this.createUserPool(buckets);
+    const { userPool, groups } = this.createUserPool(buckets);
     const userPoolClient = this.createUserPoolClient(userPool.userPoolId);
 
     // Spring App
@@ -109,7 +110,9 @@ export class BackEndStack extends Stack {
       handler: springApp,
     })
 
-
+    if (props.deploymentEnvironment.stage === Domain.BETA) {
+      this.createSSMParameters(userPool, userPoolClient, groups);
+    }
 
     // Backend
     // Requires RDS (postgresql)
@@ -165,7 +168,7 @@ export class BackEndStack extends Stack {
   createDocDBResources(vpc: IVpc) {
     const docdbCredentials = this.createDocDBCredentials();
     new StringParameter(this, 'DocdbCredentialsArn', {
-      parameterName: `${this.env.stage}-credentials-arn`,
+      parameterName: `${this.env.stage}-pg-credentials-arn`,
       stringValue: docdbCredentials.secretArn,
     });
 
@@ -245,7 +248,7 @@ export class BackEndStack extends Stack {
       policyStatements.forEach((policyStatement) => userPoolRole.addToPolicy(policyStatement));
       groups[group] = { group: userPoolGroup, role: userPoolRole };
     })
-    return userPool;
+    return { userPool, groups };
   }
 
   createUserPoolGroupAndRole(groupName: string, userPoolId: string) {
@@ -295,5 +298,37 @@ export class BackEndStack extends Stack {
       callbackUrLs: [getDomainName(this.env)],
       supportedIdentityProviders: ['COGNITO', 'FACEBOOK', 'GOOGLE']
     })
+  }
+
+  createSSMParameters(userPool: UserPool, userPoolClient: CfnUserPoolClient, userPoolGroups: Record<string, CfnUserPoolGroup>) {
+    new StringParameter(this, getCfnResourceName('user-pool-id', this.env), {
+      parameterName: getCfnResourceName('user-pool-id', this.env),
+      stringValue: userPool.userPoolId,
+    });
+
+    new StringParameter(this, getCfnResourceName('cognito-client-id', this.env), {
+      parameterName: getCfnResourceName('cognito-client-id', this.env),
+      stringValue: userPoolClient.logicalId,
+    });
+
+    new StringParameter(this, getCfnResourceName('region', this.env), {
+      parameterName: getCfnResourceName('region', this.env),
+      stringValue: this.env.region,
+    });
+
+    new StringParameter(this, getCfnResourceName('aws-access-key-id', this.env), {
+      parameterName: getCfnResourceName('aws-access-key-idgion', this.env),
+      stringValue: process.env.AWS_ACCESS_KEY_ID as string,
+    });
+
+    new StringParameter(this, getCfnResourceName('aws-secret-access-key', this.env), {
+      parameterName: getCfnResourceName('aws-secret-access=key', this.env),
+      stringValue: process.env.AWS_SECRET_ACCESS_KEY as string,
+    });
+    
+    new StringParameter(this, getCfnResourceName('freemium-group', this.env), {
+      parameterName: getCfnResourceName('freemium-group', this.env),
+      stringValue: userPoolGroups.FREEMIUM.groupName as string,
+    });
   }
 }
