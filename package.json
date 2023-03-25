@@ -1,5 +1,5 @@
 {
-  "name": "my-dev-interview",
+  "name": "prepple",
   "version": "1.0.0",
   "description": "Remote interview planning, practice & sharing platform",
   "main": "./src/infrastructure/app.ts",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jayeclark/my-dev-interview.git"
+    "url": "git+https://github.com/jayeclark/prepple.git"
   },
   "author": "jay@jayeclark.dev",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jayeclark/my-dev-interview/issues"
+    "url": "https://github.com/jayeclark/prepple/issues"
   },
-  "homepage": "https://github.com/jayeclark/my-dev-interview#readme",
+  "homepage": "https://github.com/jayeclark/prepple#readme",
   "dependencies": {
     "@types/jest": "^29.4.0",
     "@types/node": "^18.11.18",

@@ -2,7 +2,7 @@
 
 [function_build_definitions]
 [function_build_definitions.1badc3ec-40fd-4784-83f5-17ad61b83356]
-codeuri = "/Users/jayclark/Desktop/Repos/my-dev-interview/src/backend"
+codeuri = "/Users/jayclark/Desktop/Repos/prepple/src/backend"
 runtime = "java11"
 architecture = "x86_64"
 handler = "com.mydevinterview.api.StreamLambdaHandler::handleRequest"

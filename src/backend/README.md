@@ -1,5 +1,5 @@
-# my-dev-interview serverless API
-The my-dev-interview project, created with [`aws-serverless-java-container`](https://github.com/awslabs/aws-serverless-java-container).
+# Prepple Serverless API
+The prepple project, created with [`aws-serverless-java-container`](https://github.com/awslabs/aws-serverless-java-container).
 
 The starter project defines a simple `/ping` resource that can accept `GET` requests with its tests.
 
@@ -13,8 +13,8 @@ The project folder also includes a `template.yml` file. You can use this [SAM](h
 ## Building the project
 You can use the SAM CLI to quickly build the project
 ```bash
-$ mvn archetype:generate -DartifactId=my-dev-interview -DarchetypeGroupId=com.amazonaws.serverless.archetypes -DarchetypeArtifactId=aws-serverless-jersey-archetype -DarchetypeVersion=1.9.1 -DgroupId=com.mydevinterview.api -Dversion=1.0-SNAPSHOT -Dinteractive=false
-$ cd my-dev-interview
+$ mvn archetype:generate -DartifactId=prepple -DarchetypeGroupId=com.amazonaws.serverless.archetypes -DarchetypeArtifactId=aws-serverless-jersey-archetype -DarchetypeVersion=1.9.1 -DgroupId=com.prepple.api -Dversion=1.0-SNAPSHOT -Dinteractive=false
+$ cd prepple
 $ sam build
 Building resource 'PreppleAPI'
 Running JavaGradleWorkflow:GradleBuild

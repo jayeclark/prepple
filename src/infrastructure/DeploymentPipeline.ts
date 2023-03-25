@@ -17,7 +17,7 @@ export class DeploymentPipeline extends Stack {
     const pipeline = new CodePipeline(this, 'Pipeline', {
       crossAccountKeys: true,
       synth: new ShellStep('Synth', {
-        input: CodePipelineSource.connection('jayeclark/my-dev-interview', 'main', {
+        input: CodePipelineSource.connection('jayeclark/prepple', 'main', {
           connectionArn: 'arn:aws:codestar-connections:us-west-2:541563788130:connection/d0c1c474-baaf-44e6-b4dd-ee755ed47cd9',
         }),
         commands: [
