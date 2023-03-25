@@ -1,5 +1,6 @@
-# Prepple - Unlock Your Interview Potential
 ![Prepple Logo](./prepple.png)
+# Prepple - Unlock Your Interview Potential
+
 ## Description
 Prepple is a web and mobile application in development that helps job seekers unlock their full interview potential through AI-assisted answer planning, virtual interview practice, and social feedback gathering. It includes a number of features to help prepare for virtual and in-person interviews:
 * Plan STAR, CARL, or SOAR style responses to behavioral interview questions and receive AI feedback on the content, tone, and clarity of the planned response
