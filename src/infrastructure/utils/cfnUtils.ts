@@ -15,5 +15,5 @@ export function getCfnResourceName(resourceName: string, environment: Deployment
 
 export function getDomainName({ realm, stage }: DeploymentEnvironment) {
   let subdomain = stage != Domain.PROD ? `${realm.toLowerCase()}-${stage.toLowerCase()}` : 'www';
-  return `https://${subdomain}.${ DOMAIN_NAME } `;
+  return `https://${subdomain}.${ DOMAIN_NAME }`;
 }
