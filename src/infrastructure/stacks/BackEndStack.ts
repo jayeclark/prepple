@@ -182,7 +182,7 @@ export class BackEndStack extends Stack {
   createDocDBResources(vpc: IVpc) {
     const docdbCredentials = this.createDocDBCredentials();
     new StringParameter(this, getCfnResourceName('DocdbCredentialsArn', this.env), {
-      parameterName: `${this.env.stage}-pg-credentials-arn`,
+      parameterName: `${this.env.stage}-docdb-credentials-arn`,
       stringValue: docdbCredentials.secretArn,
     });
 
