@@ -20,17 +20,25 @@ import { FederatedPrincipal, Role, PolicyStatementProps, PolicyStatement } from 
 import { UserPoolGroupTypes, UserPoolGroupConfig } from '../config/userPoolConfig';
 import { VIDEO_BUCKET_NAME, PHOTO_BUCKET_NAME, TRANSCRIPT_BUCKET_NAME, VIDEO_RESUME_BUCKET_NAME } from '../config/resourceNames';
 import { Domain } from '../utils/constants';
-import { PG_ENGINE, PG_WRITE_INSTANCE_TYPE, PG_MAX_ALLOCATED_STORAGE, PG_PORT, PG_DBNAME, PG_READ_INSTANCE_TYPE, DOCDB_INSTANCE_TYPE, DOCDB_READ_INSTANCE_COUNT } from '../config/backendStackConfig';
+import {
+  PG_ENGINE,
+  PG_WRITE_INSTANCE_TYPE,
+  PG_MAX_ALLOCATED_STORAGE,
+  PG_PORT,
+  PG_DBNAME,
+  PG_READ_INSTANCE_TYPE,
+  DOCDB_INSTANCE_TYPE,
+  DOCDB_READ_INSTANCE_COUNT,
+  POSTGRES_USERNAME,
+  DOCDB_USERNAME,
+  POSTGRES_READ_INSTANCE_COUNT,
+  POSTGRES_DB_ABBREVIATION,
+  DOCDB_DB_ABBREVIATION
+} from '../config/backendStackConfig';
 
 interface BackEndStackProps extends DefaultCustomStackProps {
   vpcStack: VpcStack;
 }
-
-const POSTGRES_READ_REPLICA_COUNT = 1;
-export const POSTGRES_USERNAME = 'postgres';
-export const POSTGRES_DB_ABBREVIATION = 'pg';
-export const DOCDB_USERNAME = 'mydevinterview';
-export const DOCDB_DB_ABBREVIATION = 'docdb';
 
 export function getSecretNameExportName(dbName: string) {
   return getExportName('MyDevInterview', dbName, 'secret-name');
@@ -155,7 +163,7 @@ export class BackEndStack extends Stack {
     const postgresReadReplicas: RdsDatabaseInstanceReadReplica[] = [];
 
     let count = 1;
-    for (count = 1; count <= POSTGRES_READ_REPLICA_COUNT; count += 1) {
+    for (count = 1; count <= POSTGRES_READ_INSTANCE_COUNT; count += 1) {
       const currentReadReplicaInstance = new RdsDatabaseInstanceReadReplica(this, getCfnResourceName(`PostgresReadReplica-${count}`, this.env), {
         sourceDatabaseInstance: postgresWriteInstance,
         instanceType: PG_READ_INSTANCE_TYPE,
