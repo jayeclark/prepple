@@ -117,9 +117,7 @@ export class BackEndStack extends Stack {
       handler: springApp,
     })
 
-    if (props.deploymentEnvironment.stage === Domain.BETA) {
-      this.createSSMParameters(userPool, userPoolClient, groups, postgresWriteInstance, postgresReadReplicas);
-    }
+    this.createSSMParameters(userPool, userPoolClient, groups, postgresWriteInstance, postgresReadReplicas);
 
     // Backend
     // Requires RDS (postgresql)
