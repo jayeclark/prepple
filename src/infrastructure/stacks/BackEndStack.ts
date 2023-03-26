@@ -15,7 +15,7 @@ import { getCfnResourceName, DeploymentEnvironment, getDomainName } from '../uti
 import { DefaultCustomStackProps } from "../utils/types";
 import { VpcStack } from './VpcStack';
 import path = require('path');
-import { CfnUserPoolClient, CfnUserPoolGroup, UserPool, VerificationEmailStyle } from 'aws-cdk-lib/aws-cognito';
+import { CfnUserPoolClient, CfnUserPoolGroup, UserPool, UserPoolIdentityProvider, UserPoolIdentityProviderGoogle, VerificationEmailStyle } from 'aws-cdk-lib/aws-cognito';
 import { FederatedPrincipal, Role, PolicyStatementProps, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { UserPoolGroupTypes, UserPoolGroupConfig } from '../config/userPoolConfig';
 import { VIDEO_BUCKET_NAME, PHOTO_BUCKET_NAME, TRANSCRIPT_BUCKET_NAME, VIDEO_RESUME_BUCKET_NAME } from '../config/resourceNames';
@@ -310,7 +310,7 @@ export class BackEndStack extends Stack {
       allowedOAuthFlows: ['code'],
       allowedOAuthScopes: ['openid', 'email', 'profile'],
       callbackUrLs: [getDomainName(this.env)],
-      supportedIdentityProviders: ['COGNITO', 'FACEBOOK', 'GOOGLE']
+      supportedIdentityProviders: ['COGNITO']
     })
   }
 
