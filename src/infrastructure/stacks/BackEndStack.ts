@@ -355,8 +355,8 @@ export class BackEndStack extends Stack {
     });
 
     pgReadInstances.forEach((replica, i) => {
-      new StringParameter(this, getCfnResourceName(`pg-read-host-${i}`, this.env), {
-        parameterName: getCfnResourceName(`pg-read-host-${i}`, this.env),
+      new StringParameter(this, getCfnResourceName(`pg-read-host-${i+1}`, this.env), {
+        parameterName: getCfnResourceName(`pg-read-host-${i+1}`, this.env),
         stringValue: pgWriteInstance.dbInstanceEndpointAddress as string,
       });
     })
