@@ -1,12 +1,10 @@
 import { App, CfnOutput, Stack } from 'aws-cdk-lib';
 import { Function, Runtime, Code } from "aws-cdk-lib/aws-lambda";
 import { Bucket } from "aws-cdk-lib/aws-s3";
-import { InstanceType, InstanceSize, InstanceClass, Vpc, IVpc, SubnetType, SecurityGroup } from "aws-cdk-lib/aws-ec2";
+import { Vpc, IVpc, SubnetType, SecurityGroup } from "aws-cdk-lib/aws-ec2";
 import {
   DatabaseInstance as RdsDatabaseInstance,
   DatabaseInstanceReadReplica as RdsDatabaseInstanceReadReplica,
-  DatabaseInstanceEngine,
-  PostgresEngineVersion,
   Credentials,
 } from "aws-cdk-lib/aws-rds";
 import { DatabaseCluster as DocdbDatabaseCluster } from "aws-cdk-lib/aws-docdb";
@@ -17,22 +15,22 @@ import { getCfnResourceName, DeploymentEnvironment, getDomainName } from '../uti
 import { DefaultCustomStackProps } from "../utils/types";
 import { VpcStack } from './VpcStack';
 import path = require('path');
-import { CfnUserPoolClient, CfnUserPoolGroup, UserPool, UserPoolIdentityProvider, UserPoolIdentityProviderOidc, VerificationEmailStyle } from 'aws-cdk-lib/aws-cognito';
+import { CfnUserPoolClient, CfnUserPoolGroup, UserPool, VerificationEmailStyle } from 'aws-cdk-lib/aws-cognito';
 import { FederatedPrincipal, Role, PolicyStatementProps, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { UserPoolGroupTypes, UserPoolGroupConfig } from '../config/userPoolConfig';
 import { VIDEO_BUCKET_NAME, PHOTO_BUCKET_NAME, TRANSCRIPT_BUCKET_NAME, VIDEO_RESUME_BUCKET_NAME } from '../config/resourceNames';
 import { Domain } from '../utils/constants';
+import { PG_ENGINE, PG_WRITE_INSTANCE_TYPE, PG_MAX_ALLOCATED_STORAGE, PG_PORT, PG_DBNAME, PG_READ_INSTANCE_TYPE, DOCDB_INSTANCE_TYPE, DOCDB_READ_INSTANCE_COUNT } from '../config/backendStackConfig';
 
 interface BackEndStackProps extends DefaultCustomStackProps {
   vpcStack: VpcStack;
 }
 
 const POSTGRES_READ_REPLICA_COUNT = 1;
-const DOCDB_READ_REPLICA_COUNT = 1;
 export const POSTGRES_USERNAME = 'postgres';
-export const POSTGRES_DBNAME = 'pg';
+export const POSTGRES_DB_ABBREVIATION = 'pg';
 export const DOCDB_USERNAME = 'mydevinterview';
-export const DOCDB_DBNAME = 'docdb';
+export const DOCDB_DB_ABBREVIATION = 'docdb';
 
 export function getSecretNameExportName(dbName: string) {
   return getExportName('MyDevInterview', dbName, 'secret-name');
@@ -105,13 +103,14 @@ export class BackEndStack extends Stack {
     })
 
     postgresWriteInstance.grantConnect(springApp);
+    postgresReadReplicas.forEach((replica) => replica.grantConnect(springApp));
 
     const restAPI = new LambdaRestApi(this, `Backend-API-${props.deploymentEnvironment.stage}`, {
       handler: springApp,
     })
 
     if (props.deploymentEnvironment.stage === Domain.BETA) {
-      this.createSSMParameters(userPool, userPoolClient, groups);
+      this.createSSMParameters(userPool, userPoolClient, groups, postgresWriteInstance, postgresReadReplicas);
     }
 
     // Backend
@@ -134,15 +133,22 @@ export class BackEndStack extends Stack {
 
   createPostgresDBResources(vpc: Vpc) {  
     const pgCredentials = this.createPostgresDBCredentials();
+    new StringParameter(this, getCfnResourceName('PgCredentialsArn', this.env), {
+      parameterName: `${this.env.stage}-pg-credentials-arn`,
+      stringValue: pgCredentials.secretArn,
+    });
 
     const defaultSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `SG-${this.env.stage}`, vpc.vpcDefaultSecurityGroup);
 
     const postgresWriteInstance: RdsDatabaseInstance = new RdsDatabaseInstance(this, getCfnResourceName('PostgresInstance', this.env), {
-      engine: DatabaseInstanceEngine.postgres({ version: PostgresEngineVersion.VER_14_5 }),
-      instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
+      engine: PG_ENGINE,
+      port: PG_PORT,
+      instanceType: PG_WRITE_INSTANCE_TYPE,
+      databaseName: PG_DBNAME,
       vpc,
       securityGroups: [defaultSecurityGroup],
-      maxAllocatedStorage: 200,
+      maxAllocatedStorage: PG_MAX_ALLOCATED_STORAGE,
+
       credentials: Credentials.fromSecret(pgCredentials),
     });
 
@@ -152,7 +158,7 @@ export class BackEndStack extends Stack {
     for (count = 1; count <= POSTGRES_READ_REPLICA_COUNT; count += 1) {
       const currentReadReplicaInstance = new RdsDatabaseInstanceReadReplica(this, getCfnResourceName(`PostgresReadReplica-${count}`, this.env), {
         sourceDatabaseInstance: postgresWriteInstance,
-        instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
+        instanceType: PG_READ_INSTANCE_TYPE,
         vpc,
       });
       postgresReadReplicas.push(currentReadReplicaInstance);
@@ -167,7 +173,7 @@ export class BackEndStack extends Stack {
 
   createDocDBResources(vpc: IVpc) {
     const docdbCredentials = this.createDocDBCredentials();
-    new StringParameter(this, 'DocdbCredentialsArn', {
+    new StringParameter(this, getCfnResourceName('DocdbCredentialsArn', this.env), {
       parameterName: `${this.env.stage}-pg-credentials-arn`,
       stringValue: docdbCredentials.secretArn,
     });
@@ -177,8 +183,8 @@ export class BackEndStack extends Stack {
         username: docdbCredentials.secretValueFromJson('username').toString(),
         password: docdbCredentials.secretValueFromJson('password'),
       },
-      instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MEDIUM),
-      instances: 1 + DOCDB_READ_REPLICA_COUNT,
+      instanceType: DOCDB_INSTANCE_TYPE,
+      instances: 1 + DOCDB_READ_INSTANCE_COUNT,
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_ISOLATED,
       },
@@ -211,11 +217,11 @@ export class BackEndStack extends Stack {
   }
 
   createPostgresDBCredentials() {
-    return this.createDBCredentials(POSTGRES_USERNAME, POSTGRES_DBNAME);
+    return this.createDBCredentials(POSTGRES_USERNAME, POSTGRES_DB_ABBREVIATION);
   }
 
   createDocDBCredentials() {
-    return this.createDBCredentials(DOCDB_USERNAME, DOCDB_DBNAME);
+    return this.createDBCredentials(DOCDB_USERNAME, DOCDB_DB_ABBREVIATION);
   }
 
   createUserPool(buckets: Record<string, Bucket>) {
@@ -300,7 +306,13 @@ export class BackEndStack extends Stack {
     })
   }
 
-  createSSMParameters(userPool: UserPool, userPoolClient: CfnUserPoolClient, userPoolGroups: Record<string, CfnUserPoolGroup>) {
+  createSSMParameters(
+    userPool: UserPool,
+    userPoolClient: CfnUserPoolClient,
+    userPoolGroups: Record<string, CfnUserPoolGroup>,
+    pgWriteInstance: RdsDatabaseInstance,
+    pgReadInstances: RdsDatabaseInstanceReadReplica[]
+  ) {
     new StringParameter(this, getCfnResourceName('user-pool-id', this.env), {
       parameterName: getCfnResourceName('user-pool-id', this.env),
       stringValue: userPool.userPoolId,
@@ -322,7 +334,7 @@ export class BackEndStack extends Stack {
     });
 
     new StringParameter(this, getCfnResourceName('aws-secret-access-key', this.env), {
-      parameterName: getCfnResourceName('aws-secret-access=key', this.env),
+      parameterName: getCfnResourceName('aws-secret-access-key', this.env),
       stringValue: process.env.AWS_SECRET_ACCESS_KEY as string,
     });
     
@@ -330,5 +342,27 @@ export class BackEndStack extends Stack {
       parameterName: getCfnResourceName('freemium-group', this.env),
       stringValue: userPoolGroups.FREEMIUM.groupName as string,
     });
+
+    new StringParameter(this, getCfnResourceName('pg-write-host', this.env), {
+      parameterName: getCfnResourceName('pg-write-host', this.env),
+      stringValue: pgWriteInstance.dbInstanceEndpointAddress as string,
+    });
+
+    new StringParameter(this, getCfnResourceName('pg-dbname', this.env), {
+      parameterName: getCfnResourceName('pg-dbname', this.env),
+      stringValue: PG_DBNAME,
+    });
+
+    new StringParameter(this, getCfnResourceName('pg-port', this.env), {
+      parameterName: getCfnResourceName('pg-port', this.env),
+      stringValue: pgWriteInstance.dbInstanceEndpointPort as string,
+    });
+
+    pgReadInstances.forEach((replica, i) => {
+      new StringParameter(this, getCfnResourceName(`pg-read-host-${i}`, this.env), {
+        parameterName: getCfnResourceName(`pg-read-host-${i}`, this.env),
+        stringValue: pgWriteInstance.dbInstanceEndpointAddress as string,
+      });
+    })
   }
 }
