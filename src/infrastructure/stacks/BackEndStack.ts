@@ -317,7 +317,7 @@ export class BackEndStack extends Stack {
   createSSMParameters(
     userPool: UserPool,
     userPoolClient: CfnUserPoolClient,
-    userPoolGroups: Record<string, CfnUserPoolGroup>,
+    userPoolGroups: Record<string, {group: CfnUserPoolGroup, role: Role}>,
     pgWriteInstance: RdsDatabaseInstance,
     pgReadInstances: RdsDatabaseInstanceReadReplica[]
   ) {
@@ -335,20 +335,10 @@ export class BackEndStack extends Stack {
       parameterName: getCfnResourceName('region', this.env),
       stringValue: this.env.region,
     });
-
-    new StringParameter(this, getCfnResourceName('aws-access-key-id', this.env), {
-      parameterName: getCfnResourceName('aws-access-key-idgion', this.env),
-      stringValue: process.env.AWS_ACCESS_KEY_ID as string,
-    });
-
-    new StringParameter(this, getCfnResourceName('aws-secret-access-key', this.env), {
-      parameterName: getCfnResourceName('aws-secret-access-key', this.env),
-      stringValue: process.env.AWS_SECRET_ACCESS_KEY as string,
-    });
     
     new StringParameter(this, getCfnResourceName('freemium-group', this.env), {
       parameterName: getCfnResourceName('freemium-group', this.env),
-      stringValue: userPoolGroups.FREEMIUM.groupName as string,
+      stringValue: userPoolGroups.Freemium.group.groupName as string,
     });
 
     new StringParameter(this, getCfnResourceName('pg-write-host', this.env), {
