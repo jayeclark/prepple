@@ -14,5 +14,5 @@ export const PG_DBNAME = "prepple";
 export const DOCDB_USERNAME = 'mydevinterview';
 export const DOCDB_DB_ABBREVIATION = 'docdb';
 export const DOCDB_ENGINE = DatabaseInstanceEngine.postgres({ version: PostgresEngineVersion.VER_14_5 });
-export const DOCDB_INSTANCE_TYPE = InstanceType.of(InstanceClass.T3, InstanceSize.MICRO);
+export const DOCDB_INSTANCE_TYPE = InstanceType.of(InstanceClass.T3, InstanceSize.MEDIUM);
 export const DOCDB_READ_INSTANCE_COUNT = 1;
