@@ -1,5 +1,6 @@
 node_modules
 .env
+env.json
 cdk.out
 build
 !src/backend/.aws-sam/build
