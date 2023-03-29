@@ -6,3 +6,4 @@ build
 !src/backend/.aws-sam/build
 .gradle
 src/backend/target
+.aws-sam

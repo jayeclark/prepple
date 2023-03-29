@@ -4,6 +4,7 @@
   "description": "Remote interview planning, practice & sharing platform",
   "main": "./src/infrastructure/app.ts",
   "scripts": {
+    "prebuild": "./scripts/build.sh",
     "build": "tsc src/infrastructure/*/* --outDir ./build",
     "watch": "tsc -w",
     "test:unit": "echo \"No unit tests specified\"",
