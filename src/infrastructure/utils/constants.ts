@@ -13,6 +13,7 @@ export enum Region {
 export enum Domain {
   ALPHA = "alpha",
   BETA = "beta",
+  HOLDING = "holding",
   GAMMA = "gamma",
   PROD = "prod"
 }

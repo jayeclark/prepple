@@ -10,7 +10,7 @@ export interface PipelineStageConfig {
   featureFlagged?: boolean;
 }
 
-const DEFAULT_ACCOUNT_ID = 123;
+const DEFAULT_ACCOUNT_ID = parseInt(process.env.AWS_ACCOUNT || '0');
 
 const alphaEnvironment: DeploymentEnvironment = {
   accountId: DEFAULT_ACCOUNT_ID,
@@ -21,7 +21,7 @@ const alphaEnvironment: DeploymentEnvironment = {
 }
 
 const betaEnvironment: DeploymentEnvironment = {
-  accountId: 541563788130,
+  accountId: DEFAULT_ACCOUNT_ID,
   realm: Realm.FE,
   region: Region.USWEST2,
   stage: Domain.BETA,
@@ -65,9 +65,13 @@ export const stages: PipelineStageConfig[] = [
   },
   { 
     name: Domain.BETA,
+    environments: [betaEnvironment], // TODO: Add integ & e2e test post deployment steps
+  },
+  { 
+    name: Domain.HOLDING,
     environments: [betaEnvironment],
     postDeploymentApprovalSteps: [
-      new ManualApprovalStep('PromoteToGamma') // TODO: Replace with shell script load tests
+      new ManualApprovalStep('PromoteToGamma')
     ]
   },
   {
