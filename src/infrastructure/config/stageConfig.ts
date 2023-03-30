@@ -10,7 +10,7 @@ export interface PipelineStageConfig {
   featureFlagged?: boolean;
 }
 
-const DEFAULT_ACCOUNT_ID = parseInt(process.env.AWS_ACCOUNT_ID || '0');
+const DEFAULT_ACCOUNT_ID = parseInt(process.env.AWS_ACCOUNT_ID as string);
 
 const alphaEnvironment: DeploymentEnvironment = {
   accountId: DEFAULT_ACCOUNT_ID,
