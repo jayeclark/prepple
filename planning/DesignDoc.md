@@ -1,6 +1,6 @@
-# Prepple
-Interview Prep that Works
+![](../prepple.png)
 
+# Design Doc
 ## 1 Summary
 The purpose of this document is to summarize the design decisions and planned system architecture for Prepple, a behavioral interview prep web application currently in development. 
 
