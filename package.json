@@ -1,7 +1,7 @@
 {
   "name": "prepple",
   "version": "1.0.0",
-  "description": "Remote interview planning, practice & sharing platform",
+  "description": "A platform to plan, practice & share answers to behavioral interview questions",
   "main": "./src/infrastructure/app.ts",
   "scripts": {
     "prebuild": "./scripts/build.sh",
