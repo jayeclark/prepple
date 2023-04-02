@@ -151,7 +151,7 @@ There are a few areas where we need to consider whether bottlenecks will occur a
 We’ll revisit these calculations as development proceeds, but for now, it appears that scalability concerns become a serious issue when approaching the third scenario (as expected.) We’ll design the system so that it can operate at the smaller ‘Niche’ and ‘Side Hustle’ scopes but scale as needed if the platform grows.
 
 **Table 1. Load Estimates**
-
+(Numbers are for peak use unless otherwise indicated)
 <table>
   <thead>
     <tr>
@@ -173,16 +173,16 @@ We’ll revisit these calculations as development proceeds, but for now, it appe
     <tr>
       <td>Auth Api</td>
       <td>Will be used as frequently as the Core API to confirm auth status of user tokens, plus additional use for registration and password resets (+5% of core API usage), however there will also be a DDB cache for authed users which can reduce the load by ~95%.</td>
-      <td><em>Peak:</em><br>&lt;1&nbsp;TPS</td>
-      <td><em>Peak:</em><br>5-8&nbsp;TPS</td>
-      <td><em>Peak:</em><br>500-750&nbsp;TPS</td>
+      <td>&lt;1&nbsp;TPS</td>
+      <td>5-8&nbsp;TPS</td>
+      <td>500-750&nbsp;TPS</td>
     </tr>
     <tr>
       <td>Billing API</td>
       <td>Used infrequently, max 5% of visits</td>
-      <td><em>Peak:</em><br>&lt;1&nbsp;TPS</td>
-      <td><em>Peak:</em><br>&lt;1&nbsp;TPS</td>
-      <td><em>Peak:</em><br>5-8&nbsp;TPS</td>
+      <td>&lt;1&nbsp;TPS</td>
+      <td>&lt;1&nbsp;TPS</td>
+      <td>5-8&nbsp;TPS</td>
     </tr>
     <tr>
       <td>Relational DB I/O</td>
@@ -194,24 +194,24 @@ We’ll revisit these calculations as development proceeds, but for now, it appe
     <tr>
       <td>Document DB I/O</td>
       <td>Planning involves 4-5 transactions per minute. Assume (⅓ * 90%) of users are planning.</td>
-      <td><em>Peak:</em><br>&lt;1&nbsp;TPS</td>
-      <td><em>Peak:</em><br>20-40&nbsp;TPS</td>
-      <td><em>Peak:</em><br>2K-4K&nbsp;TPS</td>
+      <td>&lt;1&nbsp;TPS</td>
+      <td>20-40&nbsp;TPS</td>
+      <td>2K-4K&nbsp;TPS</td>
     </tr>
     <tr>
       <td>Video Ingest & Processing API</td>
       <td>20 minutes of video per 30-minute session. For 1080p/60FPS this would be 900 MB per session or around 0.75 MB per second. Assume (⅔ * 90%)of job seekers are practicing with videos.</td>
-      <td><em>Peak:</em><br>0.1-0.3&nbsp;MBPS</td>
-      <td><em>Peak:</em><br>4-5&nbsp;MBPS</td>
-      <td><em>Peak:</em><br>300-400&nbsp;MBPS</td>
+      <td>0.1-0.3&nbsp;MBPS</td>
+      <td>4-5&nbsp;MBPS</td>
+      <td>300-400&nbsp;MBPS</td>
     </tr>
     <tr>
       <td>Event Persistence Layer</td>
       <td>Assume that all I/O events are sent to the platform, plus 1 event per 10 seconds per user session.
 </td>
-      <td><em>Peak:</em><br>2-3&nbsp;per&nbsp;sec</td>
-      <td><em>Peak:</em><br>150-200&nbsp;per&nbsp;sec</td>
-      <td><em>Peak:</em><br>15-20K&nbsp;per&nbsp;sec</td>
+      <td>2-3&nbsp;per&nbsp;sec</td>
+      <td>150-200&nbsp;per&nbsp;sec</td>
+      <td>15-20K&nbsp;per&nbsp;sec</td>
     </tr>
     <tr>
       <td>Video Storage<br>(Per Month)</td>
