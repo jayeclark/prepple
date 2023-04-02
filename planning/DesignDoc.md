@@ -118,22 +118,22 @@ As a customer service representative on the platform, I want to…
 - assist customers with account recovery issues
 - escalate tickets to GitHub issues as needed
 
-### Guiding Principles
+### 2.3 Guiding Principles
 
 Guiding principles can help with decisionmaking by providing a reference point to evaluate different options. I like to include a few to remind the team of the driving philosophy that should be behind the design. (Here there's no team yet, but I'm including them for my own reference to keep me on track. Working on a project while job hunting, it's tempting to try to 'show off' and add unnecessary complexity to a project, so most of my guiding principles here are focused on keeping me focused on the goal: turning my earlier proof-of-concept into a platform that provides value to fellow job seekers.)
 
-#### Plan Big, Start Small
+#### 2.3.1 Plan Big, Start Small
 
 Plan for scalability and a plan to scale, but start with a system sized to the expected initial user base. Add convenient configuration options that allow for assorted configuration options to automatically be 'turned on' if/as needed. Develop through small, immediately-testable iterations behind feature flags.  Create contingency plans to address known and unknown obstacles based on observed solutions and solution times to past challenges.
 
-#### Simplify the Wheel, Don't Reinvent It
+#### 2.3.2 Simplify the Wheel, Don't Reinvent It
 
 It's easy to get caught up in trying to create everything from scratch or demonstrate a new approach to an old problem, especially on personal projects where one has carte blanche on design decisions. This approach can lead to wasted time and resources, as well as potential security vulnerabilities. Design decisions for Prepple should be focused mainly on simplifying tried-and-true architecture configurations, design patterns, and frameworks - not attempting to create new ones.
 
-#### Prioritize Customer Value over Income
+#### 2.3.3 Prioritize Customer Value over Income
 
 The costs for running Prepple are anticipated to be relatively low. Design decisions should prioritize the experience of the primary customers of Prepple (non-subscribing users.) Efforts to improve monetization, such as through machine learning analysis of conversion behaviors, should take a back seat to efforts that improve the overall experience and value of the platform.
 
-#### Make Architecture Decisions Based on Data
+#### 2.3.4 Make Architecture Decisions Based on Data
 
 At this stage, most of the load and latency calculations are hypothetical and highly contingent. The design for Prepple should establish a procedure for setting and monitoring metrics that will enable data-driven decisions on when to make scalability, reliability, or availability upgrades to the existing architecture. Known potential bottlenecks, as well as areas assumed *not* to be bottlenecks, should be tracked and validated through load testing in advance of deployment to production.
