@@ -156,7 +156,7 @@ We’ll revisit these calculations as development proceeds, but for now, it appe
   <thead>
     <tr>
       <td><strong>Area</strong></td>
-      <td><strong>Assumptions</strong></td>
+      <td style="max-width: 33%"><strong>Assumptions</strong></td>
       <td><strong>Niche</strong></td>
       <td><strong>Side Hustle</strong></td>
       <td><strong>Viral Success</strong></td>
