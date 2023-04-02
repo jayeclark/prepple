@@ -153,24 +153,35 @@ We’ll revisit these calculations as development proceeds, but for now, it appe
 **Table 1. Load Estimates**
 
 <table>
-  <tr>
-    <td><strong>Area</strong></td>
-    <td><strong>Assumptions</strong></td>
-    <td><strong>Niche</strong></td>
-    <td><strong>Side Hustle</strong></td>
-    <td><strong>Viral Success</strong></td>
-  </tr>
-  <tr>
-    <td>Core Api</td>
-    <td>Planning & practicing involves 20-30 API calls per minute due to video ingest & telemetry (though the I/O for them will be split among Postgres, DocumentDB, S3, and DynamoDB.) Some of these, especially events, could be moved to take place through a websocket connection, but let’s leave them in this calculation for now.</td>
-    <td>Peak:<br>1-2 TPS<br><br>Average: &lt;1 TPS</td>
-    <td>Peak:<br>100-150 TPS<br><br>Average: &lt;6-10 TPS</td>
-    <td>Peak:<br>10K-15K TPS<br><br>Average: &lt;600-1K TPS</td>
-  </tr>
+  <thead>
+    <tr>
+      <td><strong>Area</strong></td>
+      <td><strong>Assumptions</strong></td>
+      <td><strong>Niche</strong></td>
+      <td><strong>Side Hustle</strong></td>
+      <td><strong>Viral Success</strong></td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Core Api</td>
+      <td>Planning & practicing involves 20-30 API calls per minute due to video ingest & telemetry (though the I/O for them will be split among Postgres, DocumentDB, S3, and DynamoDB.) Some of these, especially events, could be moved to take place through a websocket connection, but let’s leave them in this calculation for now.</td>
+      <td>Peak:<br>1-2 TPS<br><br>Average: &lt;1 TPS</td>
+      <td>Peak:<br>100-150 TPS<br><br>Average: &lt;6-10 TPS</td>
+      <td>Peak:<br>10K-15K TPS<br><br>Average: &lt;600-1K TPS</td>
+    </tr>
+    <tr>
+      <td>Auth Api</td>
+      <td>Will be used as frequently as the Core API to confirm auth status of user tokens, plus additional use for registration and password resets (+5% of core API usage), however there will also be a DDB cache for authed users which can reduce the load by ~95%.</td>
+      <td>Peak:<br>&lt;1 TPS</td>
+      <td>Peak:<br>5-8 TPS</td>
+      <td>Peak:<br>500-750 TPS</td>
+    </tr>
+  </tbody>
 </table>
 
 |Auth API
-|Will be used as frequently as the Core API to confirm auth status of user tokens, plus additional use for registration and password resets (+5% of core API usage), however there will also be a DDB cache for authed users which can reduce the load by ~95%.
+|
 |Peak:
 <1 TPS
 |Peak:
