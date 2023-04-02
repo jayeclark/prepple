@@ -137,3 +137,139 @@ The costs for running Prepple are anticipated to be relatively low. Design decis
 #### 2.3.4 Make Architecture Decisions Based on Data
 
 At this stage, most of the load and latency calculations are hypothetical and highly contingent. The design for Prepple should establish a procedure for setting and monitoring metrics that will enable data-driven decisions on when to make scalability, reliability, or availability upgrades to the existing architecture. Known potential bottlenecks, as well as areas assumed *not* to be bottlenecks, should be tracked and validated through load testing in advance of deployment to production.
+
+### 2.4 Load Calculations and Potential Bottlenecks
+
+One of the biggest concerns in designing a platform like this is not just ‘will it scale’, but ‘what might it have to scale to?’ and ‘what will it cost me to run the project at X scale?’  Since this project is in part about keeping my enterprise-level system design skills sharp while job hunting, let’s run our calculations on three scenarios: 
+
+- **Niche:** Prepple stays a hobby project but attracts a small group of regular users. In this scenario, we have 500 registered users, 2,000 app sessions per month, and max 25 concurrent users.
+- **Side Hustle:** a moderate success story where Prepple becomes a reasonable side business with tens of thousands of registered users. Expect 50,000 registered users, 200,000 app sessions per month, and a max of 2,500 concurrent users.
+- **Viral Success:** a blue sky scenario where Prepple catches on like wildfire and becomes the LeetCode of behavioral interview preparation. This would equate to 5M registered users, 20M app sessions per month, and a whopping 250,000 peak concurrent users.
+
+There are a few areas where we need to consider whether bottlenecks will occur at scale. Running load and TPS calculations for each of these can be helpful in understanding when scalability begins to be an issue. In addition, since the architecture for Prepple is all Cloud-based (where costs are notorious for creeping up) this process can help forecast costs and make sure they’re in line with expectations. 
+
+We’ll revisit these calculations as development proceeds, but for now, it appears that scalability concerns become a serious issue when approaching the third scenario (as expected.) We’ll design the system so that it can operate at the smaller ‘Niche’ and ‘Side Hustle’ scopes but scale as needed if the platform grows.
+
+**Table 1. Load Estimates**
+
+|Area|Assumptions|Niche|Side Hustle|Viral Success|
+|----|-----------|-----|-----------|-------------|
+|Core API
+|Planning & practicing involves 20-30 API calls per minute due to video ingest & telemetry (though the I/O for them will be split among Postgres, DocumentDB, S3, and DynamoDB.) Some of these, especially events, could be moved to take place through a websocket connection, but let’s leave them in this calculation for now.
+|Peak:
+1-2  TPS
+
+Average: <1 TPS
+|Peak:
+100 - 150 TPS
+
+Average:
+6 - 10 TPS
+|Peak:
+10k - 15K TPS
+
+Average:
+600 - 1000 TPS|
+|Auth API
+|Will be used as frequently as the Core API to confirm auth status of user tokens, plus additional use for registration and password resets (+5% of core API usage), however there will also be a DDB cache for authed users which can reduce the load by ~95%.
+|Peak:
+<1 TPS
+|Peak:
+5-8 TPS
+|Peak:
+500 - 750 TPS |
+|Billing API
+|Used infrequently, max 5% of visits
+|Peak:
+<1 TPS
+|Peak:
+<1 TPS
+|Peak:
+5-8 TPS |
+|Relational DB I/O
+|Planning & practicing both involve 2-3 transactions per minute since most of the work happens on the client side. Rating & recruiting involves 10-20. We assume 90% of the app volume is practice & planning.
+|Peak:
+<1 TPS
+
+Average:
+<1 TPM
+|Peak:
+13-23 TPS
+
+Average:
+1 - 2 TPS
+|Peak:
+1.5K - 2.3K TPS
+
+Average:
+80 - 150 TPS|
+|Document DB
+|Planning involves 4-5 transactions per minute. Assume (⅓ * 90%) of users are planning. 
+|Peak:
+<1 TPS
+|Peak:
+20 - 40 TPS
+|Peak:
+2k - 4k TPS|
+|Video Ingest API
+|20 minutes of video per 30-minute session. For 1080p/60FPS this would be 900 MB per session or around 0.75 MB per second. Assume ⅔ * 90% of job seekers are practicing with videos.
+|Peak:
+0.125 - 0.25 MBPS
+|Peak:
+4-5 MBPS
+|Peak:
+300 - 400 MBPS
+|Event Platform
+|Assume that all I/O events are sent to the platform, plus 1 event per 10 seconds per user session.
+|Peak:
+2-3 per sec
+|Peak:
+85 - 120 per sec
+|Peak:
+10-15K per sec|
+|Video Storage
+(Per Month)
+|No limits on storage. ⅔ * 90% of visitors * 20 minutes recording * ⅔ saved
+|Raw: 
+20-27 GB/mo
+
+Compressed: 
+2 - 3 MB/mo
+|Raw:
+2-3 TB/mo
+
+Compressed:
+200-300 GB/mo 
+|Raw:
+200-270 TB/mo
+
+Compressed:
+20-27 TB/mo|
+|Video Storage
+(Total Year 1)
+|Assume worst case scenario (steady growth month over month and no deletion of old videos)
+|Raw:
+$33 - $45
+
+Compressed:
+$3 - $4?
+|Raw: 
+$3,400 - $4,500
+
+Compressed:
+$340 - $450
+|Raw: 
+$343K - $463K
+
+Compressed:
+$34K - $46K|
+
+#### 2.4.1 Notes on Bottlenecks
+
+We can see a few areas of concern from this chart, mostly in ‘Viral Success’ scenario. Core API calls are fairly high, meaning that an application load balance and multiple instances of the API server will likely be needed. Document database and relational database transactions are both fairly high, indicating a need for read replicas or clustering. (At the point that a single database instance is handling 5M registered users, sharding & partitioning becomes an important consideration too.)
+
+Video storage costs are significant at higher levels of usage, as is ingest bandwidth. We’ll need to do further calculations and design work to determine what kinds of trade-offs are acceptable here in terms of when, where & how video footage is compressed for storage.
+
+#### 2.4.2. Calculations to Revisit
+
+For now, these calculations are sufficient to highlight the areas where scalability may become an issue, and the areas it will likely not. We’ll revisit some of these calculations in the future. The one that seems the most potentially off is the event platform message rate. Assumptions about just how many events may be generated from user activity on the platform may  (SQS queues are limited to 3,000 messages processed per second.)
