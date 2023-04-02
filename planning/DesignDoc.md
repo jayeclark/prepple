@@ -156,7 +156,7 @@ We’ll revisit these calculations as development proceeds, but for now, it appe
   <thead>
     <tr>
       <td><strong>Area</strong></td>
-      <td style="max-width: 33%"><strong>Assumptions</strong></td>
+      <td><strong>Assumptions</strong></td>
       <td><strong>Niche</strong></td>
       <td><strong>Side Hustle</strong></td>
       <td><strong>Viral Success</strong></td>
@@ -166,113 +166,70 @@ We’ll revisit these calculations as development proceeds, but for now, it appe
     <tr>
       <td>Core Api</td>
       <td>Planning & practicing involves 20-30 API calls per minute due to video ingest & telemetry (though the I/O for them will be split among Postgres, DocumentDB, S3, and DynamoDB.) Some of these, especially events, could be moved to take place through a websocket connection, but let’s leave them in this calculation for now.</td>
-      <td>Peak:<br>1-2 TPS<br><br>Average: &lt;1 TPS</td>
-      <td>Peak:<br>100-150 TPS<br><br>Average: &lt;6-10 TPS</td>
-      <td>Peak:<br>10K-15K TPS<br><br>Average: &lt;600-1K TPS</td>
+      <td>Peak: 1-2 TPS<br><br>Average: &lt;1 TPS</td>
+      <td>Peak: 100-150 TPS<br><br>Average: &lt;6-10 TPS</td>
+      <td>Peak: 10K-15K TPS<br><br>Average: &lt;600-1K TPS</td>
     </tr>
     <tr>
       <td>Auth Api</td>
       <td>Will be used as frequently as the Core API to confirm auth status of user tokens, plus additional use for registration and password resets (+5% of core API usage), however there will also be a DDB cache for authed users which can reduce the load by ~95%.</td>
-      <td>Peak:<br>&lt;1 TPS</td>
-      <td>Peak:<br>5-8 TPS</td>
-      <td>Peak:<br>500-750 TPS</td>
+      <td>Peak: &lt;1 TPS</td>
+      <td>Peak: 5-8 TPS</td>
+      <td>Peak: 500-750 TPS</td>
+    </tr>
+    <tr>
+      <td>Billing API</td>
+      <td>Used infrequently, max 5% of visits</td>
+      <td>Peak: &lt;1 TPS</td>
+      <td>Peak: &lt;1 TPS</td>
+      <td>Peak: 5-8 TPS</td>
+    </tr>
+    <tr>
+      <td>Relational DB I/O</td>
+      <td>Planning & practicing both involve 2-3 transactions per minute since most of the work happens on the client side. Rating & recruiting involves 10-20. We assume 90% of the app volume is practice & planning.</td>
+      <td>Peak: &lt;1 TPS<br><br>Average: &lt;1 TPM</td>
+      <td>Peak: 1-23 TPS<br><br>Average: 1-2 TPS</td>
+      <td>Peak: 1.5K-2.3K TPS<br><br>Average: 80-150 TPS</td>
+    </tr>
+    <tr>
+      <td>Document DB I/O</td>
+      <td>Planning involves 4-5 transactions per minute. Assume (⅓ * 90%) of users are planning.</td>
+      <td>Peak: &lt;1 TPS</td>
+      <td>Peak: 20-40 TPS</td>
+      <td>Peak: 2K-4K TPS</td>
+    </tr>
+    <tr>
+      <td>Video Ingest & Processing API</td>
+      <td>20 minutes of video per 30-minute session. For 1080p/60FPS this would be 900 MB per session or around 0.75 MB per second. Assume (⅔ * 90%)of job seekers are practicing with videos.</td>
+      <td>Peak: 0.125 - 0.25 MBPS</td>
+      <td>Peak: 4-5 MBPS</td>
+      <td>Peak: 300 - 400 MBPS</td>
+    </tr>
+    <tr>
+      <td>Event Persistence Layer</td>
+      <td>Assume that all I/O events are sent to the platform, plus 1 event per 10 seconds per user session.
+</td>
+      <td>Peak: 2-3 per sec</td>
+      <td>Peak: 150 - 200 per sec</td>
+      <td>Peak: 15-20K per sec</td>
+    </tr>
+    <tr>
+      <td>Video Storage<br>(Per Month)</td>
+      <td>No limits on storage per user. ⅔ * 90% of visitors * 20 minutes recording * ⅔ saved.
+</td>
+      <td>Raw: 20-27 GB/mo<br><br>Compressed: 2-3 GB/mo</td>
+      <td>Raw: 2-3 TB/mo<br><br>Compressed: 200-300 GB/mo</td>
+      <td>Raw: 200-270 TB/mo<br><br>Compressed: 20 - 27 TB/mo</td>
+    </tr>
+    <tr>
+      <td>Video Storage<br>(Total Year 1)</td>
+      <td>Assume worst case scenario (steady growth month over month and no deletion of old videos)</td>
+      <td>Raw: $33-45<br><br>Compressed: $3-$4</td>
+      <td>Raw: $3.4K-$4.5K<br><br>Compressed: $340-$450</td>
+      <td>Raw: $343K - $463K<br><br>Compressed: $34K - $46K</td>
     </tr>
   </tbody>
 </table>
-
-|Auth API
-|
-|Peak:
-<1 TPS
-|Peak:
-5-8 TPS
-|Peak:
-500 - 750 TPS |
-|Billing API
-|Used infrequently, max 5% of visits
-|Peak:
-<1 TPS
-|Peak:
-<1 TPS
-|Peak:
-5-8 TPS |
-|Relational DB I/O
-|Planning & practicing both involve 2-3 transactions per minute since most of the work happens on the client side. Rating & recruiting involves 10-20. We assume 90% of the app volume is practice & planning.
-|Peak:
-<1 TPS
-
-Average:
-<1 TPM
-|Peak:
-13-23 TPS
-
-Average:
-1 - 2 TPS
-|Peak:
-1.5K - 2.3K TPS
-
-Average:
-80 - 150 TPS|
-|Document DB
-|Planning involves 4-5 transactions per minute. Assume (⅓ * 90%) of users are planning. 
-|Peak:
-<1 TPS
-|Peak:
-20 - 40 TPS
-|Peak:
-2k - 4k TPS|
-|Video Ingest API
-|20 minutes of video per 30-minute session. For 1080p/60FPS this would be 900 MB per session or around 0.75 MB per second. Assume ⅔ * 90% of job seekers are practicing with videos.
-|Peak:
-0.125 - 0.25 MBPS
-|Peak:
-4-5 MBPS
-|Peak:
-300 - 400 MBPS
-|Event Platform
-|Assume that all I/O events are sent to the platform, plus 1 event per 10 seconds per user session.
-|Peak:
-2-3 per sec
-|Peak:
-85 - 120 per sec
-|Peak:
-10-15K per sec|
-|Video Storage
-(Per Month)
-|No limits on storage. ⅔ * 90% of visitors * 20 minutes recording * ⅔ saved
-|Raw: 
-20-27 GB/mo
-
-Compressed: 
-2 - 3 MB/mo
-|Raw:
-2-3 TB/mo
-
-Compressed:
-200-300 GB/mo 
-|Raw:
-200-270 TB/mo
-
-Compressed:
-20-27 TB/mo|
-|Video Storage
-(Total Year 1)
-|Assume worst case scenario (steady growth month over month and no deletion of old videos)
-|Raw:
-$33 - $45
-
-Compressed:
-$3 - $4?
-|Raw: 
-$3,400 - $4,500
-
-Compressed:
-$340 - $450
-|Raw: 
-$343K - $463K
-
-Compressed:
-$34K - $46K|
 
 #### 2.4.1 Notes on Bottlenecks
 
