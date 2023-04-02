@@ -140,7 +140,7 @@ At this stage, most of the load and latency calculations are hypothetical and hi
 
 ### 2.4 Load Calculations and Potential Bottlenecks
 
-One of the biggest concerns in designing a platform like this is not just ‘will it scale’, but ‘what might it have to scale to?’ and ‘what will it cost me to run the project at X scale?’  Since this project is in part about keeping my enterprise-level system design skills sharp while job hunting, let’s run our calculations on three scenarios: 
+One of the biggest concerns in designing a platform like this is not just ‘will it scale’, but ‘what might it have to scale to?’ and ‘what will it cost me to run the project at X scale?’  Let’s run sample calculations on three scenarios:
 
 - **Niche:** Prepple stays a hobby project but attracts a small group of regular users. In this scenario, we have 500 registered users, 2,000 app sessions per month, and max 25 concurrent users.
 - **Side Hustle:** a moderate success story where Prepple becomes a reasonable side business with tens of thousands of registered users. Expect 50,000 registered users, 200,000 app sessions per month, and a max of 2,500 concurrent users.
@@ -150,7 +150,7 @@ There are a few areas where we need to consider whether bottlenecks will occur a
 
 We’ll revisit these calculations as development proceeds, but for now, it appears that scalability concerns become a serious issue when approaching the third scenario (as expected.) We’ll design the system so that it can operate at the smaller ‘Niche’ and ‘Side Hustle’ scopes but scale as needed if the platform grows.
 
-**Table 1. Load Estimates**
+**Table 1. Load Estimates**   
 (Numbers are for peak use unless otherwise indicated)
 <table>
   <thead>
@@ -201,9 +201,9 @@ We’ll revisit these calculations as development proceeds, but for now, it appe
     <tr>
       <td>Video Ingest & Processing API</td>
       <td>20 minutes of video per 30-minute session. For 1080p/60FPS this would be 900 MB per session or around 0.75 MB per second. Assume (⅔ * 90%)of job seekers are practicing with videos.</td>
-      <td>0.1-0.3&nbsp;MBPS</td>
-      <td>4-5&nbsp;MBPS</td>
-      <td>300-400&nbsp;MBPS</td>
+      <td>0.1-0.3&nbsp;MB/s</td>
+      <td>4-5&nbsp;MB/s</td>
+      <td>300-400&nbsp;MB/s</td>
     </tr>
     <tr>
       <td>Event Persistence Layer</td>
