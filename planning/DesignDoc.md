@@ -152,24 +152,23 @@ We’ll revisit these calculations as development proceeds, but for now, it appe
 
 **Table 1. Load Estimates**
 
-|Area|Assumptions|Niche|Side Hustle|Viral Success|
-|----|-----------|-----|-----------|-------------|
-|Core API
-|Planning & practicing involves 20-30 API calls per minute due to video ingest & telemetry (though the I/O for them will be split among Postgres, DocumentDB, S3, and DynamoDB.) Some of these, especially events, could be moved to take place through a websocket connection, but let’s leave them in this calculation for now.
-|Peak:
-1-2  TPS
+<table>
+  <tr>
+    <td><strong>Area</strong></td>
+    <td><strong>Assumptions</strong></td>
+    <td><strong>Niche</strong></td>
+    <td><strong>Side Hustle</strong></td>
+    <td><strong>Viral Success</strong></td>
+  </tr>
+  <tr>
+    <td>Core Api</td>
+    <td>Planning & practicing involves 20-30 API calls per minute due to video ingest & telemetry (though the I/O for them will be split among Postgres, DocumentDB, S3, and DynamoDB.) Some of these, especially events, could be moved to take place through a websocket connection, but let’s leave them in this calculation for now.</td>
+    <td>Peak:<br>1-2 TPS<br><br>Average: &lt;1 TPS</td>
+    <td>Peak:<br>100-150 TPS<br><br>Average: &lt;6-10 TPS</td>
+    <td>Peak:<br>10K-15K TPS<br><br>Average: &lt;600-1K TPS</td>
+  </tr>
+</table>
 
-Average: <1 TPS
-|Peak:
-100 - 150 TPS
-
-Average:
-6 - 10 TPS
-|Peak:
-10k - 15K TPS
-
-Average:
-600 - 1000 TPS|
 |Auth API
 |Will be used as frequently as the Core API to confirm auth status of user tokens, plus additional use for registration and password resets (+5% of core API usage), however there will also be a DDB cache for authed users which can reduce the load by ~95%.
 |Peak:
