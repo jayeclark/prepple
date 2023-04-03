@@ -235,8 +235,24 @@ We’ll revisit these calculations as development proceeds, but for now, it appe
 
 We can see a few areas of concern from this chart, mostly in ‘Viral Success’ scenario. Core API calls are fairly high, meaning that an application load balance and multiple instances of the API server will likely be needed. Document database and relational database transactions are both fairly high, indicating a need for read replicas or clustering. (At the point that a single database instance is handling 5M registered users, sharding & partitioning becomes an important consideration too.)
 
-Video storage costs are significant at higher levels of usage, as is ingest bandwidth. We’ll need to do further calculations and design work to determine what kinds of trade-offs are acceptable here in terms of when, where & how video footage is compressed for storage.
+Video storage costs are significant at higher levels of usage, as is ingest bandwidth. We’ll need to do further calculations and design work to determine what kinds of trade-offs are acceptable here in terms of when, where & how video footage is compressed for transmission & storage.
 
 #### 2.4.2. Calculations to Revisit
 
 For now, these calculations are sufficient to highlight the areas where scalability may become an issue, and the areas it will likely not. We’ll revisit some of these calculations in the future. The one that seems the most potentially off is the event platform message rate. Assumptions about just how many events may be generated from user activity on the platform may  (SQS queues are limited to 3,000 messages processed per second.)
+
+### 2.5 Planned System Design
+
+#### High-Level Overview
+
+The current working plan is to organize the platform architecture into four groups of resources:
+
+1. a core web app consisting of a front end, a backend middleware layer, a persistence layer, and monitoring stack
+2. an administrative web app for customer service, user safety, and content moderation
+3. an event platform (event bus + event store) that can help the core web app scale by decoupling follow-on actions from the API events that trigger them.
+4. a machine learning application consisting of a model training stack that interacts with the event platform, persistence layer & monitoring stacks (to trigger alarms related to model drift), and an administrative/debugging UI.
+
+The middleware layer will be organized into four services: a core API handling standard CRUD transactions for the persistence layer, auth API, billing API, and a video ingest API that processes practice videos for storage and analysis. 
+
+![High Level Design Diagram](./Prepple-HighLevel-Transparent-Screenshot.png)
+
