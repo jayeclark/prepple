@@ -252,7 +252,7 @@ The current working plan is to organize the platform architecture into four grou
 3. an event platform (event bus + event store) that can help the core web app scale by decoupling follow-on actions from the API events that trigger them.
 4. a machine learning application consisting of a model training stack that interacts with the event platform, persistence layer & monitoring stacks (to trigger alarms related to model drift), and an administrative/debugging UI.
 
-The middleware layer will be organized into four services: a core API handling standard CRUD transactions for the persistence layer, auth API, billing API, and a video ingest API that processes practice videos for storage and analysis. 
+The middleware layer is organized into four services: a core API handling standard CRUD transactions for the persistence layer, auth API, billing API, and a video ingest API that processes practice videos for storage and analysis. 
 
 ![High Level Design Diagram](./Prepple-HighLevel-Transparent-Screenshot.png)
 
