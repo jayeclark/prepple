@@ -21,6 +21,7 @@ In the wake of thousands of layoffs in the tech industry, behavioral interview q
 There are many online resources related to behavioral interview questions. Dozens of websites provide sample behavioral interview questions and advice on how to answer them. Some also identify which questions are used most frequently by specific companies.
 
 However, few of these offer interactive tools for planning and practicing responses. LinkedIn has a feature where candidates can practice responding to prompts and get AI and network feedback on their delivery, but there are no interactive planning tools, no way to track progress over time or compare different versions of an answer, and no way to connect with specific feedback providers for paid micro-mentoring.  Standout provides options to practice and receive AI feedback but doesn’t include productivity tools for planning answers, or the ability to share responses with friends and mentors for human feedback, and costs $29/month for job seekers. Companies like Interview Kickstart offer some amount of planning support, and live feedback through mock interviews, but don’t provide resources for candidates to track their progress, review past answers, or get feedback from sources outside the program. Not everyone can afford to commit $5K, either!
+However, few of these offer interactive tools for planning and practicing responses. LinkedIn has a feature where candidates can practice responding to prompts and get AI and network feedback on their delivery, but there are no interactive planning tools, no way to track progress over time or compare different versions of an answer, and no way to connect with specific feedback providers for paid micro-mentoring.  Standout provides options to practice and receive AI feedback but doesn’t include productivity tools for planning answers, or the ability to share responses with friends and mentors for human feedback, and costs $29/month for job seekers. Companies like Interview Kickstart offer some amount of planning support, and live feedback through mock interviews, but don’t provide resources for candidates to track their progress, review past answers, or get feedback from sources outside the program. Not everyone can afford to commit $5K, either!
 
 As a job seeker, I could plan using the tools available to me on my laptop, storing answers in a Google Doc, and I could practice by recording videos locally with my camera, but this basic approach doesn't provide me with immediate feedback on tone and content. It also adds additional work - I need to find my own questions and plan my own practice runs. And I don’t have an easy way to share videos with friends or potential employers.
 
@@ -243,7 +244,7 @@ For now, these calculations are sufficient to highlight the areas where scalabil
 
 ### 2.5 Planned System Design
 
-#### High-Level Overview
+#### 2.5.1 High-Level Overview
 
 The current working plan is to organize the platform architecture into four groups of resources:
 
