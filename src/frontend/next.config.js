@@ -6,6 +6,9 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const nextConfig = {
   reactStrictMode: true,
+  swcMinify: true,
+  output: 'standalone',
+  compress: false,
   env: {
     AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_ID,
     AWS_SECRET_ACESS_KEY: process.env.AWS_SECRET_KEY,
