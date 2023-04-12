@@ -4,23 +4,23 @@ export const theme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#0a66c2",
+      main: "#b5cc5e",
       contrastText: "#fff",
     },
     common: {
       black: "#030027",
     },
     secondary: {
-      main: "#19647e",
+      main: "#009EB0",
       contrastText: "#fff",
     },
     info: {
       main: "#fff",
-      contrastText: "#0a66c2",
+      contrastText: "#003B53",
     },
     background: {
-      paper: "#fff",
-      default: "#f3f2ef",
+      paper: "#b5cc5e",
+      default: "#fdfff6",
     }
   },
   components: {
