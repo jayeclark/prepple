@@ -102,7 +102,7 @@ export default function NewsAndInfo() {
         padding: 20px 40px;
       }
       .info {
-        background-color: ${theme.palette.background.paper};
+        background-color: ${theme.palette.background.default};
         margin-bottom: -16px;
       }
       .news-items {
@@ -149,7 +149,7 @@ export default function NewsAndInfo() {
         flex-shrink: 1;
         border-radius: 10px;
         padding: ${theme.spacing(2)};
-        border: 1px solid ${theme.palette.background.default}
+        border: 1px solid ${theme.palette.primary.main}
       }
       @media only screen and (max-width: 700px) {
         .news-items,

@@ -63,9 +63,7 @@ export default function LandingPage() {
       <div className="hero">
         <div className="hero-img">
           <Image
-            width="1100"
-            height="600"
-            layout="responsive"
+            fill
             src={hero}
             alt="video interview"
           />
@@ -218,7 +216,7 @@ export default function LandingPage() {
         border-radius: 50vw;
         top: -25vw;
         left: -15vw;
-        background-color: ${theme.palette.primary.main}
+        background-color: ${theme.palette.secondary.main}
       }
       .mobile {
         display: none
@@ -232,7 +230,7 @@ export default function LandingPage() {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        color: #fff;
+        color: ${theme.palette.info.main};
       }
       .steps {
         display: flex;
