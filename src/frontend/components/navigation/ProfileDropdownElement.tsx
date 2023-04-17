@@ -14,7 +14,7 @@ interface ProfileDropDownElementProps {
 }
 
 export const ProfileDropDownElement = ({ user, logout }: ProfileDropDownElementProps) => {
-  return user.jwt === '' ? null : (
+  return user?.jwt === undefined ? null : (
     <div className={`${styles.navItem} ${styles.profileOption}`}>
       <div className={`${styles.navLink} ${styles.profileImgContainer}`}>
         <div onClick={logout}>
