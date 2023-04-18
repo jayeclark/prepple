@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
 import plan from "../../assets/list-check.svg"
+
 import { useCallback } from "react";
 
 export function PlanNavElement({ path, user, setActivePage }: NavElementWrapperProps) {
