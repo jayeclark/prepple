@@ -2,6 +2,7 @@ import { Button, useTheme } from "@mui/material";
 import { APP_NAME } from "../../constants/app";
 import ArrowIcon from "../svgs/ArrowIcon";
 import SvgIcon from "../svgs/SvgIcon";
+import { useCallback } from "react";
 
 const plan = (
   <svg
@@ -52,6 +53,7 @@ interface HowItWorksProps {
 export function HowItWorks({ setShowSignIn }: HowItWorksProps) {
 
   const theme = useTheme();
+  const handleSetShowSignin = useCallback(() => setShowSignIn(true), [setShowSignIn]);
 
   return (
     <>
@@ -84,7 +86,7 @@ export function HowItWorks({ setShowSignIn }: HowItWorksProps) {
         </div>
         <div className="steps-cta">
           <Button
-            onClick={() => setShowSignIn(true)}
+            onClick={handleSetShowSignin}
             size="large"
             sx={{
               width: "30vw",

@@ -2,7 +2,6 @@ import { useState, useContext, useEffect, useMemo, useRef, MutableRefObject } fr
 import { useRouter } from "next/router"
 import Image from "next/image"
 import axios from 'axios'
-import jwtDecode from 'jwt-decode'
 import { useTheme } from "@mui/material"
 import Dialog from "@mui/material/Dialog"
 import Box from "@mui/material/Box"

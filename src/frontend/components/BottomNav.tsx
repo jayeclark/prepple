@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { useTheme } from "@mui/material"
 import SignInForm from "./SignInForm"
-import { UserContext } from "../scripts/context"
+import { User, UserContext } from "../scripts/context"
 import mdi from "../assets/mdi.png"
 import profile from "../assets/profile_small.jpg"
 import practice from "../assets/camera-video-fill.svg"
@@ -30,7 +30,7 @@ function BottomNav({ currentActivePage }: {currentActivePage: string}) {
     handleSetUser({
       email: '',
       jwt: ''
-    })
+    } as User)
     router.push("/");
   }
 

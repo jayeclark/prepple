@@ -1,17 +1,18 @@
 import { Button, useTheme } from "@mui/material";
 import { subscriptionPlans } from "../../constants/subscriptions";
-import { useState } from "react";
 import CheckIcon from "../svgs/CheckIcon";
 import SvgIcon from "../svgs/SvgIcon";
+import { useCallback } from "react";
 
 interface PlansProps {
   setShowSignIn: (b: boolean, s?: boolean) => void;
 }
+const CURRENTLY_FOCUSED_PLAN: number = 1;
 
 export function Plans({ setShowSignIn }: PlansProps) {
 
   const theme = useTheme();
-  const [currentlyFocusedPlan, setCurrentlyFocusedPlan] = useState(1);
+  const handleSetShowSignIn = useCallback(() => setShowSignIn(true), [setShowSignIn]);
 
   return (
     <>
@@ -20,9 +21,9 @@ export function Plans({ setShowSignIn }: PlansProps) {
           Available Subscription Plans
         </h2>
         <div className="plans">
-          <FreePlan isCurrentlyFocusedPlan={currentlyFocusedPlan === 0} setShowSignIn={setShowSignIn} />
-          <BasicPlan isCurrentlyFocusedPlan={currentlyFocusedPlan === 1} setShowSignIn={setShowSignIn} />
-          <PremiumPlan isCurrentlyFocusedPlan={currentlyFocusedPlan === 2} setShowSignIn={setShowSignIn} />
+          <FreePlan isCurrentlyFocusedPlan={CURRENTLY_FOCUSED_PLAN === 0} setShowSignIn={handleSetShowSignIn} />
+          <BasicPlan isCurrentlyFocusedPlan={CURRENTLY_FOCUSED_PLAN === 1} setShowSignIn={handleSetShowSignIn} />
+          <PremiumPlan isCurrentlyFocusedPlan={CURRENTLY_FOCUSED_PLAN === 2} setShowSignIn={handleSetShowSignIn} />
         </div>
       </div>
       <style jsx>{`
@@ -159,6 +160,8 @@ function SubscriptionPlan({
   const dollars = (monthlyPriceInCents - cents) / 100;
 
   const theme = useTheme();
+  const handleSetShowSignIn = useCallback(() => setShowSignIn(true), [setShowSignIn]);
+
 
   return (
     <>
@@ -173,7 +176,7 @@ function SubscriptionPlan({
         </div>
         <div className="plan-cta">
           <Button
-            onClick={() => setShowSignIn(true)}
+            onClick={handleSetShowSignIn}
             size="large"
             sx={{
               width: "30vw",

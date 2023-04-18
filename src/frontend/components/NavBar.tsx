@@ -1,4 +1,4 @@
-import { useState, useContext } from "react"
+import { useState, useContext, useCallback } from "react"
 import Image from "next/image"
 import { useRouter } from "next/router"
 import { useTheme } from "@mui/material"
@@ -20,19 +20,19 @@ function NavBar({ currentActivePage }: {currentActivePage: string}) {
   const router = useRouter();
   const { handleSetUser, user } = useContext(UserContext);
   const [showSignIn, setShowSignIn] = useState(false);
-  const [signUpMode, setSignUpMode] = useState(false);
-  const [activePage, setActivePage] = useState(currentActivePage)
+  const [_, setSignUpMode] = useState(false);
+  const [__, setActivePage] = useState(currentActivePage)
 
-  const handleSetShowSignIn = (visible: boolean, signUp: boolean = false) => {
+  const handleSetShowSignIn = useCallback((visible: boolean, signUp = false) => {
     setShowSignIn(visible);
     setSignUpMode(signUp);
-  }
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem(SESSION_TOKEN_KEY)
     handleSetUser({} as User)
     router.push("/");
-  }
+  }, [handleSetUser, router]);
   console.log(user);
 
   return (

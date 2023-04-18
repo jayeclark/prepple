@@ -1,5 +1,6 @@
 import { Button, useTheme } from "@mui/material";
 import { useRouter } from "next/router";
+import { useCallback } from "react";
 
 interface HeroProps {
   setShowSignIn: (b: boolean) => void;
@@ -8,6 +9,9 @@ interface HeroProps {
 export function Hero({ setShowSignIn }: HeroProps) {
   const router = useRouter();
   const theme = useTheme();
+
+  const handleSetShowSignIn = useCallback(() => setShowSignIn(true), [setShowSignIn]);
+  const handleNavigateToPracticePage = useCallback(() => router.push("/practice"), [router]);
 
   return (
     <>
@@ -24,13 +28,13 @@ export function Hero({ setShowSignIn }: HeroProps) {
               variant="contained"
               color="secondary"
               sx={{ fontSize: "16px", mx: 1, mb: 1, borderRadius: "50px" }}
-              onClick={() => setShowSignIn(true)}
+              onClick={handleSetShowSignIn}
             >
               Get Started
             </Button>
             <Button
               size="large"
-              onClick={() => router.push("/practice")}
+              onClick={handleNavigateToPracticePage}
               variant="outlined"
               color="secondary"
               sx={{ fontSize: "16px", mx: 1, mb: 1, borderRadius: "50px", borderWidth: "2px", "&:hover": { borderWidth: "2px" } }}

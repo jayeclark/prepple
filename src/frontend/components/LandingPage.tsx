@@ -1,11 +1,7 @@
-import { useState } from "react";
-import Image from "next/image";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/router";
-import { Button, useTheme } from "@mui/material";
-import arrow from "../assets/arrow-right-short.svg";
-import video from "../assets/video.png";
+import { useTheme } from "@mui/material";
 import SignInForm from "./SignInForm";
-import { APP_NAME } from "../constants/app";
 import { Hero } from "./landing/Hero";
 import { HowItWorks } from "./landing/HowItWorks";
 import { Features } from "./landing/Features";
@@ -58,9 +54,9 @@ export default function LandingPage() {
   const router = useRouter();
 
   const [showSignIn, setShowSignIn] = useState(false);
-  const handleShowSignin = (bool: boolean) => {
+  const handleShowSignin = useCallback((bool: boolean) => {
     setShowSignIn(bool);
-  };
+  }, [])
 
   return (
     <>
