@@ -2,10 +2,14 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { Button, useTheme } from "@mui/material";
-import hero from "../assets/interview.jpg";
 import arrow from "../assets/arrow-right-short.svg";
 import video from "../assets/video.png";
 import SignInForm from "./SignInForm";
+import { APP_NAME } from "../constants/app";
+import { Hero } from "./landing/Hero";
+import { HowItWorks } from "./landing/HowItWorks";
+import { Features } from "./landing/Features";
+import { Plans } from "./landing/Plans";
 
 const plan = (
   <svg
@@ -60,119 +64,10 @@ export default function LandingPage() {
 
   return (
     <>
-      <div className="hero">
-        <div className="hero-img">
-          <Image
-            fill
-            src={hero}
-            alt="video interview"
-          />
-        </div>
-        <div className="landing"></div>
-        <div className="cta">
-          <h1>Ace the virtual interview</h1>
-          <p className="cta-details">
-            Plan, practice and get feedback on your answers to video interview
-            questions.
-          </p>
-          <div>
-            <Button
-              size="large"
-              variant="contained"
-              color="info"
-              sx={{ mx: 1, mb: 1, borderRadius: "50px" }}
-              onClick={() => setShowSignIn(true)}
-            >
-              Get Started
-            </Button>
-            <Button
-              size="large"
-              onClick={() => router.push("/practice")}
-              variant="outlined"
-              color="info"
-              sx={{ mx: 1, mb: 1, borderRadius: "50px" }}
-            >
-              Try it Out
-            </Button>
-          </div>
-        </div>
-      </div>
-      <div>
-        <h1 className="steps-title">
-          How <span className="desktop">MyDevInterview</span>
-          <span className="mobile">it</span> Works
-        </h1>
-        <div className="steps">
-          <div className="step">
-            <div className="icon">{plan}</div>
-            <h3>Plan answers</h3>
-          </div>
-          <div className="arrow">
-            <Image src={arrow} width={40} height={40} alt="right arrow" />
-            <h3>
-              &nbsp;
-              <span className="mobile">
-                <br />
-                &nbsp;
-              </span>
-            </h3>
-          </div>
-          <div className="step">
-            <div className="icon">{record}</div>
-            <h3>Record videos</h3>
-          </div>
-          <div className="arrow">
-            <Image src={arrow} width={40} height={40} alt="right arrow" />
-            <h3>
-              &nbsp;
-              <span className="mobile">
-                <br />
-                &nbsp;
-              </span>
-            </h3>
-          </div>
-          <div className="step">
-            <div className="icon">{share}</div>
-            <h3>Share for feedback</h3>
-          </div>
-        </div>
-        <div className="steps-cta">
-          <Button
-            onClick={() => setShowSignIn(true)}
-            size="large"
-            sx={{
-              width: "30vw",
-              minWidth: "280px",
-              borderRadius: "50px",
-            }}
-            variant="contained"
-            color="primary"
-          >
-            Get Started
-          </Button>
-        </div>
-      </div>
-      <div className="features">
-        <div>
-          <Image src={video} alt="video call" width={540} height={360} />
-        </div>
-        <div className="features-text">
-          <h2>Features</h2>
-          <div className="features-list">
-            <ul>
-              <li>Search &amp; filter hundreds of questions</li>
-              <li>Plan STAR, CARL &amp; SOAR responses</li>
-              <li>Practice, rate and save video responses</li>
-              <li>Share responses with friends and mentors</li>
-              <li>
-                <span className="desktop">Use social feedback to</span>
-                <span className="mobile">Get feedback &amp;</span> improve your
-                performance
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      <Hero setShowSignIn={handleShowSignin} />
+      <HowItWorks setShowSignIn={handleShowSignin} />
+      <Features />
+      <Plans setShowSignIn={handleShowSignin} />
       <SignInForm
         signUpMode={true}
         showSignIn={showSignIn}
@@ -193,7 +88,7 @@ export default function LandingPage() {
       }
       .cta h1 {
         margin-bottom: ${theme.spacing(1)}
-        text-align: left;
+        text-align: center;
       }
       p {
         margin-top: 0;
@@ -203,34 +98,26 @@ export default function LandingPage() {
         margin: -20px -3rem 20px -3rem;
         position: relative;
         overflow: hidden;
-        height: 60vw;
+        height: calc(100vh - 57px);
       }
       .hero-img {
-        height: 60vw;
+        height: calc(100vh - 57px);
         width: 100vw;
-      }
-      .landing {
-        position: absolute;
-        width: 75vw;
-        height: 75vw;
-        border-radius: 50vw;
-        top: -25vw;
-        left: -15vw;
-        background-color: ${theme.palette.secondary.main}
+        opacity: 0.2;
       }
       .mobile {
         display: none
       }
       .cta {
-        position: absolute;
+        width: 100vw;
+        height: calc(100vh - 57px);
+        text-align: center;
         top: 0;
         padding: 40px;
-        height: 45vw;
-        width: 55vw;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        color: ${theme.palette.info.main};
+        color: ${theme.palette.info.contrastText};
       }
       .steps {
         display: flex;
@@ -287,41 +174,28 @@ export default function LandingPage() {
           margin: -20px -3rem 20px -3rem;
           position: relative;
           overflow: hidden;
-          height: 54vw;
-          min-height: calc(max(264px, 54vw));
+          height: 100vh;
           width: 100vw;
+          min-height: calc(max(264px, 100vh));
         }
         .hero-img {
           position: relative;
           overflow-x: hidden;
-          height: 54vw;
-          width: 100vw;
+          height: 100vh;
           left: unset;
           right: 0px;
           margin: 0;
-          min-height: 264px;
-          min-width: 484px;
+          width: 200vw;
           filter: color()
-        }
-        .landing {
-          border-radius: 0;
-          left: unset;
-          top: unset;
-          top: 0px;
-          width: 100vw;
-          opacity: 0.85;
-          height: 54vw;
-          min-height: 264px;
-          overflow-x: hidden;
         }
         .cta {
           width: 100vw;
           padding: 25px;
           left: unset;
           right: 0;
-          height: 60vw;
-          min-height: 264px;
+          height: calc(100vh - 114px);
           text-align: center;
+          justify-content: center;
         }
         .cta-details {
           display: inline-block;

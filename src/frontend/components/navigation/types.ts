@@ -3,7 +3,7 @@ import { JSXElementConstructor } from "react";
 export interface NavElementWrapperProps {
   path: string;
   setActivePage: (path: string) => void;
-  user?: {
+  user: {
     username: string;
     id: string;
     jwt: string;

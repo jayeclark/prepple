@@ -3,7 +3,7 @@ import Image from "next/image"
 import { useRouter } from "next/router"
 import { useTheme } from "@mui/material"
 import SignInForm from "./SignInForm"
-import { UserContext } from "../scripts/context"
+import { User, UserContext } from "../scripts/context"
 import logo from "../assets/preppletransparent.png"
 import { SESSION_TOKEN_KEY } from "../constants/localStorage"
 import { HomeNavElement } from "./navigation/HomeNavElement"
@@ -13,40 +13,42 @@ import { ReviewNavElement } from "./navigation/ReviewNavElement"
 import { ShareNavElement } from "./navigation/ShareNavElement"
 import { SignInElement } from "./navigation/SignInElement"
 import { ProfileDropDownElement } from "./navigation/ProfileDropdownElement"
+import { SignUpElement } from "./navigation/SignUpElement"
 
 function NavBar({ currentActivePage }: {currentActivePage: string}) {
   const theme = useTheme();
   const router = useRouter();
   const { handleSetUser, user } = useContext(UserContext);
   const [showSignIn, setShowSignIn] = useState(false);
+  const [signUpMode, setSignUpMode] = useState(false);
   const [activePage, setActivePage] = useState(currentActivePage)
 
-  const handleSetShowSignIn = (visible: boolean) => {
+  const handleSetShowSignIn = (visible: boolean, signUp: boolean = false) => {
     setShowSignIn(visible);
+    setSignUpMode(signUp);
   }
 
   const logout = () => {
     localStorage.removeItem(SESSION_TOKEN_KEY)
-    handleSetUser({
-      email: '',
-      jwt: ''
-    })
+    handleSetUser({} as User)
     router.push("/");
   }
+  console.log(user);
 
   return (
     <>
       <nav className="navigation">
         <div className="brand">
-          <Image height="41" alt="logo" src={logo} />
+          <Image height="55" alt="logo" src={logo} />
         </div>
         <div className="menu-options">
-          <HomeNavElement path="/" setActivePage={setActivePage} />
+          <HomeNavElement path="/" user={user} setActivePage={setActivePage} />
           <PlanNavElement path="/plan" user={user} setActivePage={setActivePage} />
-          <PracticeNavElement path="/practice" setActivePage={setActivePage} />
+          <PracticeNavElement path="/practice" user={user} setActivePage={setActivePage} />
           <ReviewNavElement path="/review" user={user} setActivePage={setActivePage} />
-          <ShareNavElement path="/share" user={user}  setActivePage={setActivePage} />
-          <SignInElement user={user} setShowSignIn={setShowSignIn} />
+          <ShareNavElement path="/share" user={user} setActivePage={setActivePage} />
+          <SignInElement user={user} setShowSignIn={handleSetShowSignIn} />
+          <SignUpElement user={user} setShowSignIn={handleSetShowSignIn} />
           <ProfileDropDownElement user={user} logout={logout} />
         </div>
       </nav>
@@ -54,15 +56,15 @@ function NavBar({ currentActivePage }: {currentActivePage: string}) {
       <style jsx>{`
         .navigation {
           width: 100vw;
-          height: 70px;
+          height: 80px;
           min-height: 45px;
-          max-height: 70px;
+          max-height: 80px;
           padding: 8px 16px;
           position: fixed;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          box-shadow: 0px 1px 1px ${theme.palette.background.paper};
+          box-shadow: 0px -2px 8px ${theme.palette.info.main};
           top: 0;
           left: 0;
           color: ${theme.palette.background.default};
