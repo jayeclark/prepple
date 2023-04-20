@@ -22,4 +22,8 @@ export const FrontEnd = {
   DOCKER_IMAGE_ASSET_DIRECTORY: "./src/frontend"
 }
 
+export const BackendLinkAPI = {
+  DOCKER_IMAGE_ASSET_DIRECTORY: './src/backend-links'
+}
+
 export const DOMAIN_NAME = "prepple.com";
