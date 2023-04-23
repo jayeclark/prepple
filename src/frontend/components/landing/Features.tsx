@@ -17,7 +17,7 @@ export function Features() {
           <h2>Features</h2>
           <div className="features-list">
             <ul>
-              <li>Search &amp; filter hundreds of interview questions</li>
+              <li>Search &amp; filter hundreds of questions</li>
               <li>Plan STAR, CARL &amp; SOAR responses to behavioral interview questions</li>
               <li>Practice, rate and save video responses</li>
               <li>Define goals and track progress over time</li>
