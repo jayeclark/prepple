@@ -2,7 +2,6 @@ import { useState, useContext, useEffect, useMemo, useRef, MutableRefObject } fr
 import { useRouter } from "next/router"
 import Image from "next/image"
 import axios from 'axios'
-import jwtDecode from 'jwt-decode'
 import { useTheme } from "@mui/material"
 import Dialog from "@mui/material/Dialog"
 import Box from "@mui/material/Box"
@@ -109,17 +108,20 @@ function SignInForm({ showSignIn, setShowSignIn, signUpMode }: SignInFormProps) 
   const retrieveUserData = async () => {
     const jwt = localStorage.getItem("mdi-session-access-token")
     if (jwt) {
-      const decoded = jwtDecode(jwt)
-      const response = await axios.get(`${API_URL}/api/users/me`, { headers: { Authorization: `Bearer ${jwt}`}})
-      const data = await response.data
-      handleSetUser({
-        email: data.email,
-        jwt: jwt,
-        username: data.username,
-        id: data.id
-      })
-      setShowGoogle(false)
-      setShowSignIn(false)
+      try {
+        const response = await axios.get(`${API_URL}/api/users/me`, { headers: { Authorization: `Bearer ${jwt}`}})
+        const data = await response.data
+        handleSetUser({
+          email: data.email,
+          jwt: jwt,
+          username: data.username,
+          id: data.id
+        })
+        setShowGoogle(false)
+        setShowSignIn(false)
+      } catch (e) {
+        console.warn(e);
+      }
     }
   }
 

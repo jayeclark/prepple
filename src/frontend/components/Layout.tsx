@@ -4,17 +4,17 @@ import { useRouter } from "next/router"
 import Head from "next/head";
 import { useTheme } from "@mui/material";
 import { Box } from "@mui/material";
-import { UserContext } from "../scripts/context";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
 import BottomNav from "./BottomNav";
+import { User, UserContext } from "../scripts/context";
 
 const Layout = (props: any) => {
   const theme = useTheme();
   const router = useRouter();
   const activePage = router.pathname;
 
-  const [user, setuser] = useState({ username: '', id: '', email: '', jwt: '' })
+  const [user, setuser] = useState({} as User);
 
   const handleSetUser = (user: any) => {
     localStorage.setItem("mdi-session-access-token", user.jwt);
@@ -41,7 +41,7 @@ const Layout = (props: any) => {
           crossOrigin="true"
         />
         <link
-          href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+          href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700&display=swap"
           rel="stylesheet"
           crossOrigin="anonymous"
         />

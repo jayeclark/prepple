@@ -1,6 +1,6 @@
 import { useTheme } from "@mui/material";
 import styles from "../../styles/Nav.module.css";
-import { SIGN_IN, isUserLoggedIn } from "../../constants/app";
+import { SIGN_UP, isUserLoggedIn } from "../../constants/app";
 
 interface SignInElementProps {
   user: {
@@ -9,24 +9,25 @@ interface SignInElementProps {
     jwt: string;
     email: string;
   }
-  setShowSignIn: (b: boolean) => void;
+  setShowSignIn: (show: boolean, signUp: boolean) => void;
 }
 
-export const SignInElement = ({ user, setShowSignIn }: SignInElementProps) => {
+export const SignUpElement = ({ user, setShowSignIn }: SignInElementProps) => {
   const theme = useTheme();
 
   return !isUserLoggedIn(user) ? null : (
     <>
-      <div className={styles.signInOption} onClick={() => setShowSignIn(true)}>
-        <div className="sign-in">
-          <span className="sign-in-text">{SIGN_IN}</span>
-        </div>
+      <div className={styles.signInOption} onClick={() => setShowSignIn(true, true)}>
+      <div className="sign-up">
+          <span className="sign-up-text">{SIGN_UP}</span>
       </div>
+    </div>
     <style jsx>{`
-        .sign-in {
+        .sign-up {
           cursor: pointer;
           margin: auto 0px; 
-          color: ${theme.palette.info.main}!important; 
+          color: ${theme.palette.primary.main}!important; 
+          background-color: ${theme.palette.info.main};
           border: 1.5px solid ${theme.palette.info.main};
           padding: 8px 16px; 
           border-radius: 50px;

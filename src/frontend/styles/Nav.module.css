@@ -2,8 +2,8 @@
   padding: 0px 8px 0px 8px;
   text-align: center;
   font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.75px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
   height: 100%;
 }
 
@@ -11,8 +11,8 @@
   cursor: pointer;
   font-weight: 500;
   font-size: 1rem;
-  margin-left: 12px;
-  margin-right: 12px;
+  margin-left: 8px;
+  margin-right: 8px;
   opacity: 0.8;
   height: calc(100% + 2px);
   border-bottom: 2px solid transparent;
@@ -22,16 +22,8 @@
 
 .navItemActive,
 .navItem:hover {
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 0.8rem;
-  margin-left: 12px;
-  margin-right: 12px;
   opacity: 1;
-  height: calc(100% + 2px);
   border-bottom: 2px solid;
-  display: flex;
-  align-items: center;
 }
 
 .navItemContainer {
@@ -53,6 +45,14 @@
 }
 
 .signInOption {
+  display: flex;
+  align-items: center;
+  opacity: 0.85;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.signInOption:hover, .signInOption:active {
   display: flex;
   align-items: center;
   opacity: 1;

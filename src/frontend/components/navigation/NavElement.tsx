@@ -5,24 +5,28 @@ import SvgIcon from "../svgs/SvgIcon";
 import { NavElementProps } from "./types";
 import styles from "../../styles/Nav.module.css";
 
+import { useCallback } from "react";
 
-export function NavElement({path, setActivePage, name, Icon}: NavElementProps) {
+
+export function NavElement({path, setActivePage, name, Icon, user}: NavElementProps) {
   const theme = useTheme();
   const router = useRouter();
+  console.log(user?.jwt);
+  const handleSetActivePage = useCallback(() => setActivePage(path), [setActivePage, path]);
 
   return (
-    <div className={router.pathname == path ? styles.navItemActive : styles.navItem} onClick={() => setActivePage(path)}>
+    <div className={router.pathname == path ? styles.navItemActive : styles.navItem} onClick={handleSetActivePage}>
       <div className={styles.navItemContainer}>
           <Link href={path} passHref>
             <div className={styles.navLink}>
-              <div className={styles.optionIcon}> 
-                  <SvgIcon
-                    Icon={Icon!}
-                    width={22}
-                    height={22}
-                    fillColor={theme.palette.background.default}
-                  />
-              </div>
+            {user?.jwt == undefined ? null : (<div className={styles.optionIcon}>
+              <SvgIcon
+                Icon={Icon!}
+                width={22}
+                height={22}
+                fillColor={theme.palette.background.default}
+              />
+            </div>)}
             <div className={styles.optionLabel}>{name}</div>
             </div>
         </Link>
