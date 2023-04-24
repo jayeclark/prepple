@@ -13,7 +13,7 @@ const VideoPreview = ({ stream }: { stream: MediaStream | null }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (stream && stream.active) {
+    if (stream?.active) {
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         setLoading(false)
@@ -203,14 +203,14 @@ const RecordView = ({ questionId, handleNextQuestion, title="", answerId="" }: {
       <section id="record-answer" className="answer-container">
         <div className="video-screen">
           {recording && showPreview && (<VideoPreview stream={previewStream} />)}
-          {recording && !showPreview && (<div className="fake-person"><Image layout="responsive" width={400} height={400} style={imageStyle} alt="fake person" src="https://fakeface.rest/face/view?minimum_age=24&maximum_age=50" /></div>)}
+          {recording && !showPreview && (<div className="fake-person"><Image width={400} height={400} alt="fake person" src="https://fakeface.rest/face/view?minimum_age=24&maximum_age=50" /></div>)}
           {!recording && (<video ref={activeVideoPlayer} src={mediaBlobUrl || ''} controls autoPlay={playing ? true : false} />)}
           <div className={!playing && !recording ? "overlay" : "overlay-hidden"} >
           { !recording && (
             <>
             {hasRecorded && hasSaved && (<>
-                  <Card variant="outlined" style={cardStyle}>
-                    <Image width={20} height={20} src={cloudCheck} alt="checkmark" style={{ transform: 'translateY(3px)'}} />&nbsp;&nbsp;Your video has been saved!
+                  <Card variant="outlined" sx={cardStyle}>
+                    <Image width={20} height={20} src={cloudCheck} alt="checkmark" />&nbsp;&nbsp;Your video has been saved!
                   </Card><div className="flex-line-break"></div>
                   {handleNextQuestion && (
                     <Button sx={{...buttonStyle}} size="large" variant="contained" onClick={handleNextQuestion}><b>Next Question</b></Button>
@@ -293,7 +293,7 @@ const RecordView = ({ questionId, handleNextQuestion, title="", answerId="" }: {
                     ]}
                   />
                    <div className="txt-right">
-                    <Button style={{ marginLeft: 'auto' }}  onClick={() => setShowSave(false)} disabled={saving}>Cancel</Button>
+                    <Button sx={{ marginLeft: 'auto' }}  onClick={() => setShowSave(false)} disabled={saving}>Cancel</Button>
                     <Button type="submit" variant="contained" disabled={saving}>{saving ? "Saving - Please Wait" : "Save Answer"}</Button>
                   </div>
                 </form>

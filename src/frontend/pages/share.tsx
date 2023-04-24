@@ -11,7 +11,7 @@ import { UserContext } from '../scripts/context'
 import styles from '../styles/Home.module.css'
 import close from '../assets/x-lg.svg'
 import { API_URL } from '.'
-import { VideoCatalogEntry } from './plan';
+import { PlanCatalogEntry, VideoCatalogEntry } from './plan';
 import FeedbackSingle from '../../../build/frontend/components/FeedbackSingle';
 
 export default function Share() {
@@ -49,7 +49,7 @@ export default function Share() {
     const key = records?.find((x: GraphQLQueryResponseData) => x.id == id)?.attributes.s3key
     return key;
   }
-  const handleSetCatalog = (newCatalog: Array<VideoCatalogEntry>) => {
+  const handleSetVideoCatalog = (newCatalog: Array<VideoCatalogEntry>) => {
     setCatalog(newCatalog);
   }
 
@@ -178,8 +178,8 @@ export default function Share() {
           {catalog?.length > 0 ? (
             <QuestionList
               catalog={catalog}
-              setCatalog={handleSetCatalog}
-              style="videos"
+              setCatalog={handleSetVideoCatalog as ((c: PlanCatalogEntry[] | VideoCatalogEntry[]) => void)}
+              listStyle="videos"
               activeRecords={activeRecords}
               setActiveRecords={handleSetActiveRecords}
             />
@@ -239,7 +239,7 @@ export default function Share() {
             <div className="p-div">
               <Button variant="contained" sx={{ width: "100%"  }} onClick={() => {
                 if (typeof window !== 'undefined') {
-                  const text = `${window ? window.location.hostname : ""}${window && window.location.port ? `:${window.location.port}` : ""}/social/${lastLink}`
+                  const text = `${window ? window.location.hostname : ""}${window?.location.port ? `:${window.location.port}` : ""}/social/${lastLink}`
                   navigator.clipboard.writeText(text).then(() => {
                     setConfirmCopy(true)
                   })

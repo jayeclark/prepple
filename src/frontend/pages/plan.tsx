@@ -398,7 +398,7 @@ export default function Plans() {
           {catalog?.length > 0 ? (
             <QuestionList
               catalog={catalog}
-              style="plans"
+              listStyle="plans"
               activeRecords={activeRecords}
               setActiveRecords={handleSetActiveRecords}
               setCatalog={handleSetCatalog}
@@ -445,7 +445,7 @@ export default function Plans() {
                   <form className="title" onSubmit={handleSubmitEditTitle}>
                     <TextField
                       name="title"
-                      style={titleEditStyle}
+                      sx={titleEditStyle}
                       defaultValue={currentPlan.attributes.title}
                     />
                     <Button sx={{ mt: 1 }} onClick={handleCancelEditTitle} type="button" variant="outlined">Cancel</Button>
@@ -468,11 +468,11 @@ export default function Plans() {
                       <MdEditor
                         view={{ menu: true, md: true, html: false }}
                         canView={{ both: false, menu: true, md: true, html: true, fullScreen: false, hideMenu: true }}
-                      name="planned_answer"
-                      defaultValue={currentPlan.attributes.planned_answer || ""}
-                      style={mdEditorStyle}
-                      renderHTML={(text) => <ReactMarkdown>{text || ""}</ReactMarkdown>}
-                    />
+                        name="planned_answer"
+                        defaultValue={currentPlan.attributes.planned_answer || ""}
+                        style={mdEditorStyle} // skipcq JS-0394
+                        renderHTML={(text) => <ReactMarkdown>{text || ""}</ReactMarkdown>}
+                      />
                     <Button sx={{ mt: 1 }} onClick={handleCancelEditPlan} type="button" variant="outlined">Cancel</Button>
                     <Button sx={{ mt: 1, ml: 1 }} type="submit" variant="contained">Save</Button>
                   </form>

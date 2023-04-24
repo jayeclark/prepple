@@ -9,10 +9,10 @@ import { GraphQLQueryResponseData } from '../scripts/queries';
 import { PlanCatalogEntry, VideoCatalogEntry } from '../pages/plan';
 interface QuestionsProps {
   catalog: PlanCatalogEntry[] | VideoCatalogEntry[];
-  style: "plans" | "videos";
+  listStyle: "plans" | "videos";
   activeRecords: GraphQLQueryResponseData[];
-  setActiveRecords: Function;
-  setCatalog: Function;
+  setActiveRecords: (s: string) => void;
+  setCatalog: (c: VideoCatalogEntry[] | PlanCatalogEntry[]) => void;
   planHandlers?: {
     setEditTitle: (b: boolean) => void;
     setEditPlan: (b: boolean) => void;
@@ -21,12 +21,12 @@ interface QuestionsProps {
   };
 }
 
-function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords, planHandlers }: QuestionsProps) {
+function Questions({ catalog, setCatalog, listStyle, activeRecords, setActiveRecords, planHandlers }: QuestionsProps) {
   const { user } = useContext(UserContext)
   const theme = useTheme()
   const [filterBy, setFilterBy] = useState('')
   const [modalMode, setModalMode] = useState("delete")
-  const [currentModalID, setCurrentModalID] = useState(-1)
+  const [currentModalID, setCurrentModalID] = useState("")
   const [currentS3Key, setCurrentS3Key] = useState("")
   const [showModal, setShowModal] = useState(false)
   
@@ -36,7 +36,7 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
     setModalMode(mode);
   }
 
-  const handleSetCurrentModalID = (id: number) => {
+  const handleSetCurrentModalID = (id: string) => {
     setCurrentModalID(id);
   }
 
@@ -68,9 +68,9 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
         }
         return false;
       });
-    setCatalog(newCatalog); 
+    setCatalog('plans' in newCatalog[0] ? newCatalog as PlanCatalogEntry[] : newCatalog as VideoCatalogEntry[]); 
     if (activeRecords[0].id == id) {
-      setActiveRecords('')
+      setActiveRecords("");
     }
   }
   
@@ -87,7 +87,7 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
     axios.put(`${API_URL}/api/videos/${currentModalID}`, body, {headers}).then(() => {
       removeFromCatalog(currentModalID.toString());
       setShowModal(false);
-      setCurrentModalID(-1);
+      setCurrentModalID("");
     })
   }
 
@@ -104,7 +104,7 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
     axios.put(`${API_URL}/api/answers/${currentModalID}`, body, {headers}).then(() => {
       removeFromCatalog(currentModalID.toString());
       setShowModal(false);
-      setCurrentModalID(-1);
+      setCurrentModalID("");
     })
   }
 
@@ -119,7 +119,7 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
       })
       removeFromCatalog(currentModalID.toString());
       setShowModal(false);
-      setCurrentModalID(-1);
+      setCurrentModalID("");
       setCurrentS3Key("");
     })
   }
@@ -131,7 +131,7 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
     axios.delete(`${API_URL}/api/answers/${currentModalID}`, { headers }).then(async () => {
       removeFromCatalog(currentModalID.toString());
       setShowModal(false);
-      setCurrentModalID(-1);
+      setCurrentModalID("");
     })
   }
 
@@ -151,7 +151,7 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
             if ('plans' in q) {
               records = q.plans;
             } 
-            return (question && question.toLowerCase().match(filterBy)) || records.some((v: GraphQLQueryResponseData) => v.attributes.title?.toLowerCase().match(filterBy))
+            return (question?.toLowerCase().match(filterBy)) || records.some((v: GraphQLQueryResponseData) => v.attributes.title?.toLowerCase().match(filterBy))
           }).map((q: PlanCatalogEntry) => (
             <Card sx={{ p: 1, mb: 2 }} key={q.qid}>
               <div className="question"><b>{q.question.question}</b></div>
@@ -179,7 +179,7 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
           if ('videos' in q) {
             records = q.videos;
           } 
-          return (question && question.toLowerCase().match(filterBy)) || records.some((v: GraphQLQueryResponseData) => v.attributes.title?.toLowerCase().match(filterBy))
+          return (question?.toLowerCase().match(filterBy)) || records.some((v: GraphQLQueryResponseData) => v.attributes.title?.toLowerCase().match(filterBy))
         }).map((q: VideoCatalogEntry) => (
           <Card sx={{ p: 1, mb: 2 }} key={q.qid}>
             <div className="question"><b>{q.question.question}</b></div>
@@ -200,15 +200,15 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
       </div>
       <Dialog open={showModal}>
         <Card sx={{ p: 4 }}>
-          <div className="delete-confirm">Are you sure you want to {modalMode} this {style == "videos" ? "video" : "answer plan"}?</div>
+          <div className="delete-confirm">Are you sure you want to {modalMode} this {listStyle == "videos" ? "video" : "answer plan"}?</div>
           <div>
             <Button sx={{ width: 'calc(50% - 4px)', mr: 1 }} variant="outlined" onClick={() => {
-              setCurrentModalID(-1);
+              setCurrentModalID("");
               setCurrentS3Key("");
               setShowModal(false);
             }}>Cancel</Button>
-            {style == "videos" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={() => modalMode == "archive" ? handleArchiveVideo() : handleDeleteVideo()}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
-            {style == "plans" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={() => modalMode == "archive" ? handleArchivePlan() : handleDeletePlan()}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
+            {listStyle == "videos" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={() => modalMode == "archive" ? handleArchiveVideo() : handleDeleteVideo()}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
+            {listStyle == "plans" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={() => modalMode == "archive" ? handleArchivePlan() : handleDeletePlan()}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
           </div>
         </Card>
       </Dialog>

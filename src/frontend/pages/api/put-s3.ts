@@ -17,7 +17,7 @@ export default async function handler(
   const data: { err: Error, fields: formidable.Fields, files: formidable.Files} = await new Promise((resolve, reject) => {
     const form = formidable({ multiples: true });
     form.parse(req, (err, fields, files) => {
-      if (err) reject({ err })
+      if (err) reject(err)
       resolve({ err, fields, files })
     })
   })

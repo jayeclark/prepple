@@ -117,7 +117,7 @@ const Home: NextPage = () => {
       };
   }
 
-  const handleNext = async () => {
+  const handleNext = () => {
     const newAsked = [...asked];
     newAsked.push(question.id);
     setAsked(newAsked);
@@ -160,9 +160,9 @@ const Home: NextPage = () => {
         <section className="options">
           <span className="options-title"><b>Filter&nbsp;by<span className="mobile"> type of question</span>:</b></span>
           <Chip color={filters.includes("Behavioral") ? "primary" : "default"} onClick={() => toggleFilter("Behavioral")} clickable sx={{ m: 0.5, px: 1 }} label="Behavioral" />
-          <Chip color={filters.includes("Communication") ? "primary" : "default"} onClick={() => toggleFilter("Communication")} clickable sx={{ m: 0.5, px: 2 }} className="option-chip" label="Communication" />
-          <Chip color={filters.includes("Opinion") ? "primary" : "default"} onClick={() => toggleFilter("Opinion")} clickable sx={{ m: 0.5, px: 2 }} className="option-chip" label="Opinion" />
-          <Chip color={filters.includes("Technical") ? "primary" : "default"} onClick={() => toggleFilter("Technical")} clickable sx={{ m: 0.5, px: 2 }} className="option-chip" label="Technical" />
+          <Chip color={filters.includes("Communication") ? "primary" : "default"} onClick={() => toggleFilter("Communication")} clickable sx={{ m: 0.5, px: 2 }} label="Communication" /> 
+          <Chip color={filters.includes("Opinion") ? "primary" : "default"} onClick={() => toggleFilter("Opinion")} clickable sx={{ m: 0.5, px: 2 }} label="Opinion" />
+          <Chip color={filters.includes("Technical") ? "primary" : "default"} onClick={() => toggleFilter("Technical")} clickable sx={{ m: 0.5, px: 2 }} label="Technical" /> 
         </section>
         <section className="question">
           <Card variant="outlined" sx={{ mb: theme.spacing(2), p: theme.spacing(3), display: 'flex', width: '100%', height: '10vw', minHeight: '100px', alignItems: 'center', justifyContent: 'center' }}>

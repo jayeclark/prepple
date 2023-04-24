@@ -6,7 +6,7 @@ import { getVideos, GraphQLQueryResponseData, QuestionAttributes } from '../scri
 import { UserContext } from '../scripts/context'
 import styles from '../styles/Home.module.css'
 import { API_URL } from '.'
-import { PlanCatalogEntry } from './plan';
+import { PlanCatalogEntry, VideoCatalogEntry } from './plan';
 
 export default function Videos() {
 
@@ -120,8 +120,8 @@ export default function Videos() {
           {catalog?.length > 0 ? (
             <QuestionList
               catalog={catalog}
-              setCatalog={handleSetCatalog}
-              style="videos"
+              setCatalog={handleSetCatalog as ((c: PlanCatalogEntry[] | VideoCatalogEntry[]) => void)}
+              listStyle="videos"
               activeRecords={activeRecords}
               setActiveRecords={handleSetActiveRecords}
             />
