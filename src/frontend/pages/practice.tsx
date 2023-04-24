@@ -21,7 +21,6 @@ export const API_URL = process.env.API_URL || url
 
 const Home: NextPage = () => {
   const theme = useTheme();
-  const { user } = useContext(UserContext);
   const askedArray: Array<string> = []
   const filterArray: Array<string> = []
   const [question, setQuestion] = useState({id: '', content: '', category: ''});

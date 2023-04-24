@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useRef } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import Head from 'next/head'
 import Image from 'next/image'
 import Router from 'next/router'
@@ -153,7 +153,7 @@ export default function Share() {
     const headers = {
       Authorization: `Bearer ${user.jwt}`
     }
-    await axios.post(`${API_URL}/api/links`, { data }, { headers }).then((res) => {
+    await axios.post(`${API_URL}/api/links`, { data }, { headers }).then(() => {
       setLastLink(slug);
       setShowConfirmation(true);
     })

@@ -10,7 +10,7 @@ import { useTheme } from '@mui/material/'
 import FeedbackSingle from '../../components/FeedbackSingle'
 import FeedbackDouble from '../../components/FeedbackDouble'
 import { API_URL } from "..";
-import { GraphQLQueryResponse, GraphQLQueryResponseData, getLink } from '../../scripts/queries';
+import { GraphQLQueryResponseData, getLink } from '../../scripts/queries';
 
 export default function Link() {
   const router = useRouter()

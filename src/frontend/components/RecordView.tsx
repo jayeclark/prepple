@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, useContext, SyntheticEvent, FormEvent } from "react";
+import { useEffect, useRef, useState, useContext, SyntheticEvent } from "react";
 import axios from "axios";
 import Image from "next/image";
 import { useReactMediaRecorder } from "react-media-recorder";
 import { UserContext } from "../scripts/context";
-import { FormGroup, FormControlLabel, Switch, useTheme } from "@mui/material";
+import { FormGroup, FormControlLabel, Switch } from "@mui/material";
 import { Dialog, Button, Card, CardContent, TextField, Slider } from "@mui/material";
 import cloudCheck from "../assets/cloud-check.svg";
 import { API_URL } from "../pages";
@@ -72,7 +72,6 @@ interface RecordSaveForm extends EventTarget {
 
 const RecordView = ({ questionId, handleNextQuestion, title="", answerId="" }: { questionId: string, handleNextQuestion?: (e?: SyntheticEvent) => void, title?: string, answerId?: string }) => {
   const { user } = useContext(UserContext);
-  const theme = useTheme();
   const [recording, setRecording] = useState(false);
   const [displayRecording, setDisplayRecording] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -131,7 +130,7 @@ const RecordView = ({ questionId, handleNextQuestion, title="", answerId="" }: {
       }
     }
 
-    axios.post(`${API_URL}/api/videos`, videoBody, { headers }).then(res => {
+    axios.post(`${API_URL}/api/videos`, videoBody, { headers }).then(() => {
       setSaving(false);
       setShowSave(false);
       setHasSaved(true);

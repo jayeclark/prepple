@@ -1,6 +1,6 @@
 import { useTheme } from '@mui/material'
 import { formattedDate } from '../scripts/formatting'
-import { GraphQLQueryResponse, GraphQLQueryResponseData } from '../scripts/queries';
+import { GraphQLQueryResponseData } from '../scripts/queries';
 interface PlansProps {
   allRecords: GraphQLQueryResponseData[];
   activeRecords: GraphQLQueryResponseData[];

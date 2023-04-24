@@ -1,5 +1,5 @@
-import React, { MutableRefObject, SyntheticEvent } from 'react'
-import { useState, useContext, useEffect, useRef } from 'react'
+import React, { SyntheticEvent } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { useRouter } from 'next/router';
 import dynamic from "next/dynamic";
 import ReactMarkdown from "react-markdown";
@@ -7,10 +7,10 @@ import "react-markdown-editor-lite/lib/index.css";
 import Head from 'next/head'
 import axios from 'axios'
 import RecordView from '../components/RecordView'
-import { Card, TextField, Button, FormHelperTextTypeMap, FormGroup } from '@mui/material';
+import { Card, TextField, Button } from '@mui/material';
 import { useTheme } from "@mui/material"
 import Markdown from 'markdown-to-jsx';
-import { GraphQLQueryResponseData, PlanAttributes, QuestionAttributes, getPlans, getQuestions } from '../scripts/queries';
+import { GraphQLQueryResponseData, QuestionAttributes, getPlans, getQuestions } from '../scripts/queries';
 import QuestionList from "../components/QuestionList"
 import { UserContext } from '../scripts/context'
 import { redirectIfUnauthed } from '../scripts/auth'
@@ -38,7 +38,7 @@ const plus = (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fil
   <path fillRule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
 </svg>)
 
-export default function Plans({ id }: { id: number}) {
+export default function Plans() {
 
   const { user } = useContext(UserContext);
   const router = useRouter();

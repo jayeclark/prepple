@@ -1,4 +1,3 @@
-import { JSXElementConstructor } from "react";
 import { SvgElementProps } from "../svgs/SvgIcon";
 
 export interface NavElementWrapperProps {

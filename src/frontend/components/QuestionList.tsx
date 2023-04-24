@@ -84,7 +84,7 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
       Authorization: `Bearer ${user.jwt}`,
       'Content-Type': 'application/json'
     }
-    axios.put(`${API_URL}/api/videos/${currentModalID}`, body, {headers}).then(res => {
+    axios.put(`${API_URL}/api/videos/${currentModalID}`, body, {headers}).then(() => {
       removeFromCatalog(currentModalID.toString());
       setShowModal(false);
       setCurrentModalID(-1);
@@ -101,7 +101,7 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
       Authorization: `Bearer ${user.jwt}`,
       'Content-Type': 'application/json'
     }
-    axios.put(`${API_URL}/api/answers/${currentModalID}`, body, {headers}).then(res => {
+    axios.put(`${API_URL}/api/answers/${currentModalID}`, body, {headers}).then(() => {
       removeFromCatalog(currentModalID.toString());
       setShowModal(false);
       setCurrentModalID(-1);
@@ -112,8 +112,8 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
     const headers = {
       Authorization: `Bearer ${user.jwt}`
     }
-    axios.delete(`${API_URL}/api/videos/${currentModalID}`, { headers }).then(async (res) => {
-      const response = await fetch(`/api/delete-s3?key=${currentS3Key}`, {
+    axios.delete(`${API_URL}/api/videos/${currentModalID}`, { headers }).then(async () => {
+      await fetch(`/api/delete-s3?key=${currentS3Key}`, {
         method: "POST",
         headers
       })
@@ -128,14 +128,12 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
     const headers = {
       Authorization: `Bearer ${user.jwt}`
     }
-    axios.delete(`${API_URL}/api/answers/${currentModalID}`, { headers }).then(async (res) => {
+    axios.delete(`${API_URL}/api/answers/${currentModalID}`, { headers }).then(async () => {
       removeFromCatalog(currentModalID.toString());
       setShowModal(false);
       setCurrentModalID(-1);
     })
   }
-
-  const filterInputStyle = { backgroundColor: theme.palette.background.paper,  width: "100%", marginBottom: 16 }
 
   return (
     <>

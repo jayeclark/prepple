@@ -8,7 +8,7 @@ import styles from '../styles/Home.module.css'
 import { API_URL } from '.'
 import { PlanCatalogEntry } from './plan';
 
-export default function Videos({ id }: { id: number}) {
+export default function Videos() {
 
   const { user } = useContext(UserContext);
   const initialCatalog: Array<PlanCatalogEntry> = [];

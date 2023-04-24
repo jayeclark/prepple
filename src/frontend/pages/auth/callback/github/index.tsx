@@ -1,15 +1,13 @@
-import { useState, useEffect, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { useRouter } from 'next/router'
 import type { NextPage } from 'next'
 import axios from 'axios'
 import Head from 'next/head'
-import { useTheme } from '@mui/material/'
 import styles from '../../../../styles/Home.module.css'
 import { API_URL } from '../../..'
 import { UserContext } from "../../../../scripts/context"
 
 const Authed: NextPage = () => {
-  const theme = useTheme();
   const router = useRouter();
   const { handleSetUser } = useContext(UserContext);
 
