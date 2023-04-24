@@ -22,9 +22,9 @@ export const API_URL = process.env.API_URL || url
 const Home: NextPage = () => {
   const theme = useTheme();
   const { user } = useContext(UserContext);
-  const askedArray: Array<number> = []
+  const askedArray: Array<string> = []
   const filterArray: Array<string> = []
-  const [question, setQuestion] = useState({id: -1, content: '', category: ''});
+  const [question, setQuestion] = useState({id: '', content: '', category: ''});
   const [count, setCount] = useState(0);
   const [asked, setAsked] = useState(askedArray);
   const [filters, setFilters] = useState(filterArray);
@@ -65,7 +65,7 @@ const Home: NextPage = () => {
     return totalCount;
   }
 
-  const fetchQuestion = async (idToFetch: number) => {
+  const fetchQuestion = async (idToFetch: string) => {
     const response = await fetch(`${API_URL}/graphql`, {
       method: 'POST',
       headers: {
@@ -84,7 +84,7 @@ const Home: NextPage = () => {
     return fetchedQuestion;
   }
 
-  const getPreviousQuestion = async (idToFetch: number) => {
+  const getPreviousQuestion = async (idToFetch: string) => {
     const prevQuestion = await fetchQuestion(idToFetch)
     return {
       id: idToFetch,
@@ -97,11 +97,11 @@ const Home: NextPage = () => {
     let idToFetch = -1;
     while (idToFetch < 0) {
       const randomID = parseInt((Math.random() * (length - 1)).toFixed(0));
-      if (asked.includes(randomID + 1) === false || (asked.length >= 30 && asked.slice(asked.length - 15).includes(randomID + 1) === false)) {
+      if (asked.includes((randomID + 1).toString()) === false || (asked.length >= 30 && asked.slice(asked.length - 15).includes((randomID + 1).toString()) === false)) {
         idToFetch = randomID + 1;
       }
     }
-    const randomQuestion = await fetchQuestion(idToFetch);
+    const randomQuestion = await fetchQuestion(idToFetch.toString());
     return randomQuestion;
   }
 

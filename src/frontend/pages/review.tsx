@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useRef } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import Head from 'next/head'
 import Router from 'next/router'
 import QuestionList from "../components/QuestionList"
@@ -16,13 +16,13 @@ export default function Videos({ id }: { id: number}) {
   const [activeRecords, setActiveRecords] = useState([{} as GraphQLQueryResponseData]);
 
   const handleSetActiveRecords = (id: string) => {
-    const question = catalog.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id == id))?.question as GraphQLQueryResponseData;
+    const question = catalog?.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id == id))?.question as GraphQLQueryResponseData;
     setActiveRecords([question]);
   }
   
   const getS3Key = (id: string) => {
-    const plans = catalog.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id == id))?.plans as GraphQLQueryResponseData[];
-    const key = plans.find((x: GraphQLQueryResponseData) => x.id == id)?.attributes.s3key;
+    const plans = catalog?.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id == id))?.plans as GraphQLQueryResponseData[];
+    const key = plans?.find((x: GraphQLQueryResponseData) => x.id == id)?.attributes?.s3key || "key";
     return key;
   }
   const handleSetCatalog = (newCatalog: Array<PlanCatalogEntry>) => {
@@ -129,7 +129,7 @@ export default function Videos({ id }: { id: number}) {
         </section>
         <section className="viewer">
           <h1>&nbsp;</h1>
-          <video src={activeRecords[0] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${getS3Key(activeRecords[0].attributes.s3key || "")}` : ''} controls autoPlay />
+          <video src={activeRecords[0] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${getS3Key(activeRecords[0]?.attributes?.s3key || "key")}` : ''} controls autoPlay />
         </section>
       </main>
       <style jsx>{`

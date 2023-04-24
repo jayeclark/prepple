@@ -9,7 +9,7 @@ import Footer from "./Footer";
 import BottomNav from "./BottomNav";
 import { User, UserContext } from "../scripts/context";
 
-const Layout = (props: { children: ReactChild[]}) => {
+const Layout = (props: { children: ReactChild[] | ReactChild}) => {
   const theme = useTheme();
   const router = useRouter();
   const activePage = router.pathname;
