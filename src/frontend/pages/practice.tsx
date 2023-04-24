@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import RecordView from '../components/RecordView'
@@ -27,24 +27,10 @@ const Home: NextPage = () => {
   const [asked, setAsked] = useState(askedArray);
   const [filters, setFilters] = useState(filterArray);
 
-  useEffect(() => {
-    getQuestionCount().then(async (res) => {
-        setCount(res);
-        const newQuestion = await getNextQuestion(res);
-        setQuestion(newQuestion);
-      })
-  }, [])
-
-  useEffect(() => {
-    if (filters.length > 0 && !filters.includes(question.category.split("_")[0])) {
-      getNextQuestion().then((res) => setQuestion(res));
-    }
-  }, [filters])
-
   const getQuestionCount = async () => {
     let currentCount = 1000;
     let totalCount = 0;
-    while (currentCount == 1000) {
+    while (currentCount === 1000) {
       const response = await fetch(`${API_URL}/graphql`, {
         method: 'POST',
         headers: {
@@ -91,7 +77,7 @@ const Home: NextPage = () => {
       };
   }
 
-  const getRandomQuestion = async (length: number) => {
+  const getRandomQuestion = useCallback(async (length: number) => {
     let idToFetch = -1;
     while (idToFetch < 0) {
       const randomID = parseInt((Math.random() * (length - 1)).toFixed(0));
@@ -101,9 +87,9 @@ const Home: NextPage = () => {
     }
     const randomQuestion = await fetchQuestion(idToFetch.toString());
     return randomQuestion;
-  }
+  }, [asked])
 
-  const getNextQuestion = async (length = count) => {
+  const getNextQuestion = useCallback(async (length = count) => {
     let nextQuestion = await getRandomQuestion(length);
     while (filters.length > 0 && !filters.includes(nextQuestion.data.attributes.category.split("_")[0])) {
       nextQuestion = await getRandomQuestion(length);
@@ -114,7 +100,22 @@ const Home: NextPage = () => {
       content: nextQuestion.data.attributes.question,
       category: nextQuestion.data.attributes.category
       };
-  }
+  }, [count, filters, getRandomQuestion])
+
+  useEffect(() => {
+    getQuestionCount().then(async (res) => {
+        setCount(res);
+        const newQuestion = await getNextQuestion(res);
+        setQuestion(newQuestion);
+      })
+  }, [getNextQuestion])
+
+  useEffect(() => {
+    if (filters.length > 0 && !filters.includes(question.category.split("_")[0])) {
+      getNextQuestion().then((res) => setQuestion(res));
+    }
+  }, [filters, getNextQuestion, question.category])
+
 
   const handleNext = () => {
     const newAsked = [...asked];
@@ -126,13 +127,13 @@ const Home: NextPage = () => {
   }
 
   const handleSkip = async () => {
-    getNextQuestion(count).then((res) => {
+    await getNextQuestion(count).then((res) => {
       setQuestion(res);
     })
   }
 
   const handlePrevious = async () => {
-    getPreviousQuestion(asked[asked.length - 1]).then((res) => {
+    await getPreviousQuestion(asked[asked.length - 1]).then((res) => {
       setQuestion(res);
     })
   }

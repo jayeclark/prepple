@@ -5,8 +5,8 @@ import QuestionList from "../components/QuestionList"
 import { getVideos, GraphQLQueryResponseData, QuestionAttributes } from '../scripts/queries';
 import { UserContext } from '../scripts/context'
 import styles from '../styles/Home.module.css'
-import { API_URL } from '.'
-import { PlanCatalogEntry, VideoCatalogEntry } from './plan';
+import { API_URL } from '../constants/app'
+import { PlanCatalogEntry, VideoCatalogEntry } from '../types/records';
 
 export default function Videos() {
 
@@ -16,13 +16,13 @@ export default function Videos() {
   const [activeRecords, setActiveRecords] = useState([{} as GraphQLQueryResponseData]);
 
   const handleSetActiveRecords = (id: string) => {
-    const question = catalog?.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id == id))?.question as GraphQLQueryResponseData;
+    const question = catalog?.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id === id))?.question as GraphQLQueryResponseData;
     setActiveRecords([question]);
   }
   
   const getS3Key = (id: string) => {
-    const plans = catalog?.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id == id))?.plans as GraphQLQueryResponseData[];
-    const key = plans?.find((x: GraphQLQueryResponseData) => x.id == id)?.attributes?.s3key || "key";
+    const plans = catalog?.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id === id))?.plans as GraphQLQueryResponseData[];
+    const key = plans?.find((x: GraphQLQueryResponseData) => x.id === id)?.attributes?.s3key || "key";
     return key;
   }
   const handleSetCatalog = (newCatalog: Array<PlanCatalogEntry>) => {
@@ -55,7 +55,7 @@ export default function Videos() {
       Router.push("/");
     }
   
-    if (catalog.length == 0) {
+    if (catalog.length === 0) {
       handleGetVideos(user.id).then((res) => {
         if (res.length > 0) {  
           const sorted = res.sort((a: GraphQLQueryResponseData, b: GraphQLQueryResponseData) => {
@@ -70,7 +70,7 @@ export default function Videos() {
             return 0
           });
           const reduced = sorted.reduce((coll: PlanCatalogEntry[], item: GraphQLQueryResponseData) => {
-            const index = coll.findIndex((x: PlanCatalogEntry) => x.qid == (item.attributes.question?.data as GraphQLQueryResponseData).id);
+            const index = coll.findIndex((x: PlanCatalogEntry) => x.qid === (item.attributes.question?.data as GraphQLQueryResponseData).id);
             const videos = (item.attributes.videos?.data as GraphQLQueryResponseData[])
             const title = item.attributes.title
             const question = item.attributes.question
@@ -129,7 +129,7 @@ export default function Videos() {
         </section>
         <section className="viewer">
           <h1>&nbsp;</h1>
-          <video src={activeRecords[0] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${getS3Key(activeRecords[0]?.attributes?.s3key || "key")}` : ''} controls autoPlay />
+          <video src={activeRecords[0] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${getS3Key(activeRecords[0]?.attributes?.s3key || "key")}` : ''} controls autoPlay><track kind="captions" /></video>
         </section>
       </main>
       <style jsx>{`

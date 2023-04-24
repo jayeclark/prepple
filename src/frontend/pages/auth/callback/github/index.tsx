@@ -4,7 +4,7 @@ import type { NextPage } from 'next'
 import axios from 'axios'
 import Head from 'next/head'
 import styles from '../../../../styles/Home.module.css'
-import { API_URL } from '../../..'
+import { API_URL } from '../../../../constants/app'
 import { UserContext } from "../../../../scripts/context"
 
 const Authed: NextPage = () => {

@@ -9,7 +9,7 @@ export const formattedDate = (timestamp: number) => {
     const dd = new Date(timestamp).getDate();
     const yyyy = new Date(timestamp).getFullYear();
     const currentYear = new Date(Date.now()).getFullYear();
-    return currentYear == yyyy ? `${months[mm]} ${dd}` : `${months[mm]} ${dd}, ${yyyy}`
+    return currentYear === yyyy ? `${months[mm]} ${dd}` : `${months[mm]} ${dd}, ${yyyy}`
   }
 
   export const formattedRating = (rating: number) => {
@@ -21,7 +21,7 @@ export const formattedDate = (timestamp: number) => {
       <span style={{ color: "#666!important" }}>
         {slots.map((s,i) => {
           if (rating >= s) { return <Full key={`full-${i.toString()}`} />; }
-          if (rating == s - 1) { return <Half key={`half-${i.toString()}`} />;}
+          if (rating === s - 1) { return <Half key={`half-${i.toString()}`} />;}
           return <Empty key={`empty-${i.toString()}`} />;
         })}
       </span>

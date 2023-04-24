@@ -25,7 +25,7 @@ export default async function handler(
   const file = await data.files.file;
   const { id } = req.query;
   const timestamp = new Date(Date.now()).getTime();
-  const key = id + "-" + timestamp + ".mp4";
+  const key = `${id}-${timestamp}.mp4`;
 
   try {
     const response = await s3.putObject({ 

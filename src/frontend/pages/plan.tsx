@@ -1,5 +1,4 @@
-import React, { SyntheticEvent, useCallback } from 'react'
-import { useState, useContext, useEffect } from 'react'
+import React, { SyntheticEvent, useCallback, useState, useContext, useEffect } from 'react'
 import { useRouter } from 'next/router';
 import dynamic from "next/dynamic";
 import ReactMarkdown from "react-markdown";
@@ -7,28 +6,15 @@ import "react-markdown-editor-lite/lib/index.css";
 import Head from 'next/head'
 import axios from 'axios'
 import RecordView from '../components/RecordView'
-import { Card, TextField, Button } from '@mui/material';
-import { useTheme } from "@mui/material"
+import { Card, TextField, Button, useTheme } from '@mui/material';
 import Markdown from 'markdown-to-jsx';
 import { GraphQLQueryResponseData, QuestionAttributes, getPlans, getQuestions } from '../scripts/queries';
 import QuestionList from "../components/QuestionList"
 import { UserContext } from '../scripts/context'
 import { redirectIfUnauthed } from '../scripts/auth'
 import styles from '../styles/Home.module.css'
-import { API_URL } from '.';
-
-export interface CatalogEntry {
-  qid: string;
-  question: QuestionAttributes;
-}
-
-export interface PlanCatalogEntry extends CatalogEntry {
-  plans: GraphQLQueryResponseData[];
-}
-
-export interface VideoCatalogEntry extends CatalogEntry {
-  videos: GraphQLQueryResponseData[];
-}
+import { API_URL } from '../constants/app';
+import { PlanCatalogEntry, VideoCatalogEntry } from '../types/records';
 
 const MdEditor = dynamic(() => import("react-markdown-editor-lite"), {
   ssr: false
@@ -64,8 +50,8 @@ export default function Plans() {
   }
 
   const handleSetActiveRecords = (id: string) => {
-    const plans = catalog.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id == id))?.plans
-    const plan = plans?.find((x: GraphQLQueryResponseData) => x.id == id)
+    const plans = catalog.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id === id))?.plans
+    const plan = plans?.find((x: GraphQLQueryResponseData) => x.id === id)
     setActiveRecords([plan as GraphQLQueryResponseData]);
     setCurrentPlan(plan as GraphQLQueryResponseData);
   }
@@ -114,7 +100,7 @@ export default function Plans() {
         const questionsSortedByCategory = res.sort((a: GraphQLQueryResponseData, b: GraphQLQueryResponseData) =>
           ((a.attributes.question?.data as GraphQLQueryResponseData).attributes.category || 0) - ((b.attributes.question?.data as GraphQLQueryResponseData).attributes.category || 0));
         const reduced = questionsSortedByCategory.reduce((collector: PlanCatalogEntry[], item: GraphQLQueryResponseData) => {
-          const index = collector.findIndex((x: PlanCatalogEntry) => x.qid == (item.attributes.question?.data as GraphQLQueryResponseData).id);
+          const index = collector.findIndex((x: PlanCatalogEntry) => x.qid === (item.attributes.question?.data as GraphQLQueryResponseData).id);
           if (index >= 0 && item.attributes.datetime_planned && item.attributes.datetime_planned > 0) {
             collector[index].plans.push(item)
           } else if (item.attributes.datetime_planned && item.attributes.datetime_planned > 0) {
@@ -137,7 +123,7 @@ export default function Plans() {
       Authorization: `Bearer ${user.jwt}`,
       'Content-Type': 'application/json'
     }
-    if (planMode == "edit") {
+    if (planMode === "edit") {
       const body = {
         data: { ...payload }
       }
@@ -145,9 +131,9 @@ export default function Plans() {
         const newPlan = { ...currentPlan };
         newPlan.attributes = { ...newPlan.attributes, ...payload };
 
-        const qIndex = catalog.findIndex((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id == currentPlan.id))
+        const qIndex = catalog.findIndex((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id === currentPlan.id))
         const newQ = { ...catalog[qIndex] };
-        const pIndex = newQ.plans.findIndex((p: GraphQLQueryResponseData) => p.id == currentPlan.id)
+        const pIndex = newQ.plans.findIndex((p: GraphQLQueryResponseData) => p.id === currentPlan.id)
         const newPlans = [...newQ.plans];
         newPlans[pIndex] = newPlan;
         newQ.plans = newPlans;
@@ -229,16 +215,16 @@ export default function Plans() {
           data: {
             id: qid.toString(),
             attributes: {
-              question: question
+              question
             }
           }
         }
       }
     };
     // Add in a check -- don't add the question to the catalog if already there
-    const existing = catalog.filter(q => q.question == question)
-    if (existing.length == 0) {
-      const newPlanCatalog = [...catalog, { qid: qid, question: question, records: [] }];
+    const existing = catalog.filter(q => q.question === question)
+    if (existing.length === 0) {
+      const newPlanCatalog = [...catalog, { qid, question, records: [] }];
       setCatalog(newPlanCatalog as PlanCatalogEntry[]);
     }
     setPlanMode("create");
@@ -265,12 +251,12 @@ export default function Plans() {
                 <div><b>{q.question.question}</b>&nbsp;&nbsp;&nbsp;</div>
               </div>
               <div className="row">
-                <abbr className="icon" title="Add New Answer" id={q.qid} onClick={handleCreateAnswer}>
+                <div role="button" className="icon" title="Add New Answer" id={q.qid} onClick={handleCreateAnswer}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
                     <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
                   </svg>
-                </abbr>
+                </div>
                 <div>&nbsp;&nbsp;&nbsp;Plan an answer to this question</div>
               </div>
               <style jsx>{`
@@ -390,7 +376,7 @@ export default function Plans() {
 
       <main className={styles.main}>
         <section className="videos">
-          <h1>Plan a New Answer <span onClick={handleCollapseNewAnswerSection} className={`mobile ${collapseNew ? "collapsed-icon" : "expanded-icon"}`}>{plus}</span></h1>
+          <h1>Plan a New Answer <span role="button" onClick={handleCollapseNewAnswerSection} className={`mobile ${collapseNew ? "collapsed-icon" : "expanded-icon"}`}>{plus}</span></h1>
           <div className={`collabsible ${collapseNew ? "collapsed" : "expanded"}`}>
           <form onSubmit={handleSearch}>
             <TextField 
@@ -407,7 +393,7 @@ export default function Plans() {
           </form>
             {searchResults?.length > 0 ? renderResults() : searched === false ? "" : "No questions match that search." }
           </div>
-          <h1>My Planned Answers <span onClick={handleExpandCollapseExistingAnswers}  className={`mobile ${collapseExisting ? "collapsed-icon" : "expanded-icon"}`}>{plus}</span></h1>
+          <h1>My Planned Answers <span role="button" onClick={handleExpandCollapseExistingAnswers}  className={`mobile ${collapseExisting ? "collapsed-icon" : "expanded-icon"}`}>{plus}</span></h1>
           <div className={`collabsible ${collapseExisting ? "collapsed" : "expanded"}`}>
           {catalog?.length > 0 ? (
             <QuestionList
@@ -428,11 +414,11 @@ export default function Plans() {
         </section>
         <section className="viewer">
           <h1 className="desktop">&nbsp;</h1>
-          {(Number(currentPlan.id) > 0 || planMode == "create") && (<>
+          {(Number(currentPlan.id) > 0 || planMode === "create") && (<>
             <Card variant="outlined" sx={{ mb: theme.spacing(2), p: theme.spacing(2), display: 'flex', width: '100%', height: '10vh', minHeight: '80px', alignItems: 'center', justifyContent: 'center' }}>
               <div><b>{(currentPlan.attributes.question?.data as GraphQLQueryResponseData).attributes.question}</b></div>
             </Card>
-                      {Number(currentPlan.id) > 0 && planMode == "record" && (
+                      {Number(currentPlan.id) > 0 && planMode === "record" && (
             <>
               <RecordView
                 questionId={(currentPlan.attributes.question?.data as GraphQLQueryResponseData).id}
@@ -446,13 +432,13 @@ export default function Plans() {
               <>
                 <h3 className="mb-0">
                   Story Title&nbsp;&nbsp;
-                  {editTitle == false && (
+                  {editTitle === false && (
                     <svg className="clickable" onClick={handleInitiateEditTitle} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                   </svg>
                   )}
                 </h3>
-                {editTitle == false && (
+                {editTitle === false && (
                   <p className="mb-4">{currentPlan.attributes.title}</p>
                 )}
                 {editTitle && (
@@ -510,7 +496,7 @@ export default function Plans() {
                   <MdEditor
                     name="prompts"
                     defaultValue={currentPlan.attributes.prompts || ""}
-                    style={mdEditorStyle}
+                    style={mdEditorStyle} // skipcq JS-0394
                     renderHTML={(text) => <ReactMarkdown>{text || ""}</ReactMarkdown>}
                   />
                   <Button sx={{ mt: 1 }} onClick={handleCancelEditPrompts} type="button" variant="outlined">Cancel</Button>
@@ -617,8 +603,8 @@ export default function Plans() {
             width: 100%;
             margin-right: 0;
             padding: 8px 16px 8px 16px;
-            min-height: ${currentPlan.id == "0" ? "calc(100vh - 148px)" : ""};
-            max-height: ${currentPlan.id == "0" ? "100%" : "calc(50vh - 92px)"};
+            min-height: ${currentPlan.id === "0" ? "calc(100vh - 148px)" : ""};
+            max-height: ${currentPlan.id === "0" ? "100%" : "calc(50vh - 92px)"};
             overflow: scroll;
             vertical-align: bottom;
             box-shadow: 0px -3px 3px rgb(0,0,0,0.3);

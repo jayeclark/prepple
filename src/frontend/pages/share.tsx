@@ -10,8 +10,8 @@ import { getVideos, GraphQLQueryResponseData, QuestionAttributes } from '../scri
 import { UserContext } from '../scripts/context'
 import styles from '../styles/Home.module.css'
 import close from '../assets/x-lg.svg'
-import { API_URL } from '.'
-import { PlanCatalogEntry, VideoCatalogEntry } from './plan';
+import { API_URL } from '../constants/app'
+import { PlanCatalogEntry, VideoCatalogEntry } from '../types/records';
 
 export default function Share() {
 
@@ -31,12 +31,12 @@ export default function Share() {
     const videos = catalog.find((x: VideoCatalogEntry) => x.videos.some((v: GraphQLQueryResponseData) => v.id === id))?.videos;
     const video = videos?.filter((x: GraphQLQueryResponseData) => x.id === id)[0];
       
-    if (shareMode == "single" || activeRecords[0].id == undefined) {
+    if (shareMode === "single" || activeRecords[0].id === undefined) {
       setActiveRecords([video as GraphQLQueryResponseData])
     } else if (activeRecords.some((x: GraphQLQueryResponseData) => x.id === id)) {
       const newRecords = activeRecords.filter((x: GraphQLQueryResponseData) => x.id !== id)
-      setActiveRecords(newRecords.length == 1 ? newRecords : [{} as GraphQLQueryResponseData])
-    } else if (activeRecords.length == 2) {
+      setActiveRecords(newRecords.length === 1 ? newRecords : [{} as GraphQLQueryResponseData])
+    } else if (activeRecords.length === 2) {
       setActiveRecords([activeRecords[1], video as GraphQLQueryResponseData])
     } else {
       setActiveRecords([activeRecords[0], video as GraphQLQueryResponseData])
@@ -44,8 +44,8 @@ export default function Share() {
   }
   
   const getS3Key = (id: string) => {
-    const records = catalog.find((q: VideoCatalogEntry) => q.videos.some((x: GraphQLQueryResponseData) => x.id == id))?.videos;
-    const key = records?.find((x: GraphQLQueryResponseData) => x.id == id)?.attributes.s3key
+    const records = catalog.find((q: VideoCatalogEntry) => q.videos.some((x: GraphQLQueryResponseData) => x.id === id))?.videos;
+    const key = records?.find((x: GraphQLQueryResponseData) => x.id === id)?.attributes.s3key
     return key;
   }
   const handleSetVideoCatalog = (newCatalog: Array<VideoCatalogEntry>) => {
@@ -78,7 +78,7 @@ export default function Share() {
       Router.push("/");
     }
   
-    if (catalog.length == 0) {
+    if (catalog.length === 0) {
       handleGetVideos(user.id).then((res) => {
         if (res.length > 0) {
           const sorted = res.sort((a: GraphQLQueryResponseData, b: GraphQLQueryResponseData) => {
@@ -93,7 +93,7 @@ export default function Share() {
             return 0
           });
           const reduced = sorted.reduce((coll: VideoCatalogEntry[], item: GraphQLQueryResponseData) => {
-            const index = coll.findIndex((x: VideoCatalogEntry) => x.qid == (item.attributes.question?.data as GraphQLQueryResponseData).id);
+            const index = coll.findIndex((x: VideoCatalogEntry) => x.qid === (item.attributes.question?.data as GraphQLQueryResponseData).id);
             const videos = item?.attributes?.videos?.data
             const title = item.attributes.title
             const question = item.attributes.question
@@ -136,7 +136,7 @@ export default function Share() {
   const handleShareChange = function(e: React.MouseEvent<HTMLElement>) {
     const element: HTMLInputElement = e.target as HTMLInputElement
     setShareMode(element.value);
-    if (element.value == "single" && activeRecords.length == 2) {
+    if (element.value === "single" && activeRecords.length === 2) {
       setActiveRecords([activeRecords[0]])
     }
   }
@@ -184,7 +184,7 @@ export default function Share() {
             />
           ) : "You have not recorded any videos yet. Once you record your first video answer, it will appear here for you to review & manage."}
         </section>
-        <section className={shareMode == "single" ? "viewer" : "viewer-double"}>
+        <section className={shareMode === "single" ? "viewer" : "viewer-double"}>
           <h1>Create a Video Share Link</h1>
           <div className="toggle-buttons">
             <ToggleButtonGroup
@@ -202,25 +202,25 @@ export default function Share() {
             </FormGroup>
           </div>
 
-          <video src={activeRecords[0] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${getS3Key(activeRecords[0].id)}` : ''} controls autoPlay />
-          {shareMode == "side-by-side" && <video className="ml-2" src={activeRecords[1] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${getS3Key(activeRecords[1].id)}` : ''} controls autoPlay />}
-          { ((shareMode == "single" && activeRecords[0]?.id == undefined) || (shareMode == "side-by-side" && activeRecords.length < 2)) &&
+          <video src={activeRecords[0] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${getS3Key(activeRecords[0].id)}` : ''} controls autoPlay ><track kind="captions" /></video>
+          {shareMode === "side-by-side" && <video className="ml-2" src={activeRecords[1] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${getS3Key(activeRecords[1].id)}` : ''} controls autoPlay ><track kind="captions" /></video>}
+          { ((shareMode === "single" && activeRecords[0]?.id === undefined) || (shareMode === "side-by-side" && activeRecords.length < 2)) &&
             <span className="txt-small">
-              <p>Please select {(shareMode == "side-by-side" && activeRecords[0]?.id == undefined) ? "two videos" : "a video"} from the left column to continue.</p>
+              <p>Please select {(shareMode === "side-by-side" && activeRecords[0]?.id === undefined) ? "two videos" : "a video"} from the left column to continue.</p>
             </span>
           }
-          {((shareMode == "single" && activeRecords[0].id !== undefined) || (shareMode == "side-by-side" && activeRecords.length == 2)) &&
+          {((shareMode === "single" && activeRecords[0].id !== undefined) || (shareMode === "side-by-side" && activeRecords.length === 2)) &&
             <span className="txt-small">
-            <p>Clicking &quot;share&quot; will create a public link to {shareMode == "single" ? "this video" : "these videos"}. You can find or delete a link at any time in account settings.</p>
+            <p>Clicking &quot;share&quot; will create a public link to {shareMode === "single" ? "this video" : "these videos"}. You can find or delete a link at any time in account settings.</p>
             <p>{requestFeedback ? "People who visit the link will be able to rate your video answer and provide feedback (click Preview to see what they'll see). If you wish to disable this feature, toggle the \"request feedback\" button above." : "People who visit the link will not be able to provide feedback on your video answer. If you wish to enable this feature, toggle the \"request feedback\" button above."}</p>
           </span>
           }
-          <Button disabled={shareMode == "single" ? activeRecords[0].id == undefined : activeRecords.length < 2} sx={{ width: "calc(50% - 8px)", mt: 1 }} variant="outlined" onClick={handleShowPreview}>Preview</Button>
-          <Button disabled={shareMode == "single" ? activeRecords[0].id == undefined : activeRecords.length < 2} sx={{ width: "calc(50% - 8px)", mt: 1, ml: 2 }} variant="contained" onClick={createLink}>Share</Button>
+          <Button disabled={shareMode === "single" ? activeRecords[0].id === undefined : activeRecords.length < 2} sx={{ width: "calc(50% - 8px)", mt: 1 }} variant="outlined" onClick={handleShowPreview}>Preview</Button>
+          <Button disabled={shareMode === "single" ? activeRecords[0].id === undefined : activeRecords.length < 2} sx={{ width: "calc(50% - 8px)", mt: 1, ml: 2 }} variant="contained" onClick={createLink}>Share</Button>
         </section>
         <Dialog open={showPreview}>
           <div className="preview-pane">
-            <div className="close-icon" onClick={handleHidePreview}>
+            <div role="button" className="close-icon" onClick={handleHidePreview}>
               <Image src={close} width={18} height={18} alt="close" />
             </div>
             <div><h1 className="mt-0">Share Link Preview</h1></div>
@@ -229,8 +229,8 @@ export default function Share() {
         </Dialog>
         <Dialog open={showConfirmation}>
           <div className="confirmation-pane">
-            <div className="close-icon" onClick={handleCloseConfirmationDialog}><Image src={close} width={18} height={18} alt="close" /></div>
-            <div><h1 className="mt-0"></h1></div>
+            <div role="button" className="close-icon" onClick={handleCloseConfirmationDialog}><Image src={close} width={18} height={18} alt="close" /></div>
+            <div>&nbsp;<br/>&nbsp;</div>
             <div className="p-div">Your share link has been created!</div>
             <div className="p-div">
               <a style={{ color: theme.palette.primary.main }} href={`/social/${lastLink}`} target="_blank" rel="noreferrer">{typeof window  !== 'undefined' ? window.location.hostname : ""}{typeof window !== 'undefined' && window.location.port ? `:${window.location.port}` : ""}/social/{lastLink}</a>

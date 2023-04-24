@@ -4,9 +4,9 @@ import axios from 'axios'
 import Videos from './Videos'
 import Plans from './Plans'
 import { UserContext } from '../scripts/context'
-import { API_URL } from '../pages'
+import { API_URL } from '../constants/app'
 import { GraphQLQueryResponseData } from '../scripts/queries';
-import { PlanCatalogEntry, VideoCatalogEntry } from '../pages/plan';
+import { PlanCatalogEntry, VideoCatalogEntry } from '../types/records';
 interface QuestionsProps {
   catalog: PlanCatalogEntry[] | VideoCatalogEntry[];
   listStyle: "plans" | "videos";
@@ -69,22 +69,18 @@ function Questions({ catalog, setCatalog, listStyle, activeRecords, setActiveRec
         return false;
       });
     setCatalog('plans' in newCatalog[0] ? newCatalog as PlanCatalogEntry[] : newCatalog as VideoCatalogEntry[]);
-    if (activeRecords[0].id == id) {
+    if (activeRecords[0].id === id) {
       setActiveRecords("");
     }
   }, [activeRecords, catalog, setActiveRecords, setCatalog]);
   
-
-
-
-
   const handleArchiveOrDeleteVideo = useCallback(
     () => {
       const handleDeleteVideo = async () => {
         const headers = {
           Authorization: `Bearer ${user.jwt}`
         }
-        axios.delete(`${API_URL}/api/videos/${currentModalID}`, { headers }).then(async () => {
+        await axios.delete(`${API_URL}/api/videos/${currentModalID}`, { headers }).then(async () => {
           await fetch(`/api/delete-s3?key=${currentS3Key}`, {
             method: "POST",
             headers
@@ -112,7 +108,7 @@ function Questions({ catalog, setCatalog, listStyle, activeRecords, setActiveRec
           setCurrentModalID("");
         })
       }
-      return modalMode == "archive" ? handleArchiveVideo() : handleDeleteVideo()
+      return modalMode === "archive" ? handleArchiveVideo() : handleDeleteVideo()
     },
     [modalMode, currentModalID, user.jwt, currentS3Key, removeFromCatalog]
   ); 
@@ -140,13 +136,13 @@ function Questions({ catalog, setCatalog, listStyle, activeRecords, setActiveRec
           const headers = {
             Authorization: `Bearer ${user.jwt}`
           }
-          axios.delete(`${API_URL}/api/answers/${currentModalID}`, { headers }).then(async () => {
+          await axios.delete(`${API_URL}/api/answers/${currentModalID}`, { headers }).then(() => {
             removeFromCatalog(currentModalID.toString());
             setShowModal(false);
             setCurrentModalID("");
           })
         }
-      return modalMode == "archive" ? handleArchivePlan() : handleDeletePlan()
+      return modalMode === "archive" ? handleArchivePlan() : handleDeletePlan()
     },
     [modalMode, currentModalID, user.jwt, removeFromCatalog])
 
@@ -215,15 +211,15 @@ function Questions({ catalog, setCatalog, listStyle, activeRecords, setActiveRec
       </div>
       <Dialog open={showModal}>
         <Card sx={{ p: 4 }}>
-          <div className="delete-confirm">Are you sure you want to {modalMode} this {listStyle == "videos" ? "video" : "answer plan"}?</div>
+          <div className="delete-confirm">Are you sure you want to {modalMode} this {listStyle === "videos" ? "video" : "answer plan"}?</div>
           <div>
             <Button sx={{ width: 'calc(50% - 4px)', mr: 1 }} variant="outlined" onClick={() => {
               setCurrentModalID("");
               setCurrentS3Key("");
               setShowModal(false);
             }}>Cancel</Button>
-            {listStyle == "videos" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={handleArchiveOrDeleteVideo}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
-            {listStyle == "plans" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={handleArchiveOrDeletePlan}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
+            {listStyle === "videos" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={handleArchiveOrDeleteVideo}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
+            {listStyle === "plans" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={handleArchiveOrDeletePlan}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
           </div>
         </Card>
       </Dialog>

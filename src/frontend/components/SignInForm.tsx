@@ -12,7 +12,7 @@ import Github from "../assets/github.png"
 import EyeFill from "../assets/eye-fill.svg"
 import EyeFillSlash from "../assets/eye-slash-fill.svg"
 import Close from "../assets/x-lg.svg"
-import { API_URL } from "../pages/index"
+import { API_URL } from "../constants/app"
 import { authorizationUrl } from "../scripts/config"
 import { UserContext } from "../scripts/context"
 
@@ -84,7 +84,7 @@ function SignInForm({ showSignIn, setShowSignIn, signUpMode }: SignInFormProps) 
           setShowSignIn(false);
           setSignup(false);
         } 
-        if (response.status == 400) {
+        if (response.status === 400) {
             setSubmitError("Incorrect username or password.")
         } 
       }).catch((_: Error) => {

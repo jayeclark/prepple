@@ -1,29 +1,13 @@
-import { useState, useEffect, useContext } from 'react'
+import { useContext } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import RecordView from '../components/RecordView'
-import { getQuestionIDs, getQuestion } from '../scripts/queries'
-import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import Chip from '@mui/material/Chip'
-import { useTheme } from '@mui/material/'
 import LandingPage from "../components/LandingPage"
 import NewsAndInfo from "../components/NewsAndInfo"
 import Welcome from "../components/Welcome"
 import { UserContext } from '../scripts/context'
 import styles from '../styles/Home.module.css'
 
-let url = 'http://localhost:1337'
-if (typeof window !== "undefined") {
-  if (window.location.href.includes("herokuapp") || window.location.href.includes("mydevinterview")) {
-    url = "https://backend-sheltered-shelf-66946.herokuapp.com";
-  }
-} 
-
-export const API_URL = process.env.API_URL || url
-
 const Home: NextPage = () => {
-  const theme = useTheme();
   const { user } = useContext(UserContext);
 
   return (

@@ -9,7 +9,7 @@ import Skeleton from '@mui/material/Skeleton'
 import { useTheme } from '@mui/material/'
 import FeedbackSingle from '../../components/FeedbackSingle'
 import FeedbackDouble from '../../components/FeedbackDouble'
-import { API_URL } from "..";
+import { API_URL } from "../../constants/app";
 import { GraphQLQueryResponseData, getLink } from '../../scripts/queries';
 
 export default function Link() {
@@ -27,8 +27,8 @@ export default function Link() {
   const [loading, setLoading] = useState(true);
 
   const getLinkDetails = async () => {
-    let videos: {id: string, s3key: string, title: string}[] = []
-    let questions: Array<GraphQLQueryResponseData> = []
+    const videos: {id: string, s3key: string, title: string}[] = []
+    const questions: Array<GraphQLQueryResponseData> = []
     const linkSlug: string = router.query.link as string
     const response = await fetch(`${API_URL}/graphql`, {
         method: 'POST',
@@ -62,7 +62,7 @@ export default function Link() {
   }
 
   useEffect(() => {
-    if (displayVideos.length == 0) {
+    if (displayVideos.length === 0) {
       getLinkDetails().then(res => {
         setDisplayVideos([...res.videos]);
         setQuestions([...res.questions]);
@@ -78,25 +78,25 @@ export default function Link() {
       link: router.query.link as string,
       video: displayVideos[0].id,
       date_rated: Date.now(),
-      confident: formData["confident"].value,
-      articulate: formData["articulate"].value,
-      positive: formData["positive"].value,
-      relatable: formData["relatable"].value,
-      focused: formData["focused"].value,
-      capable: formData["capable"].value,
-      experienced: formData["experienced"].value,
-      insightful: formData["insightful"].value,
+      confident: formData.confident.value,
+      articulate: formData.articulate.value,
+      positive: formData.positive.value,
+      relatable: formData.relatable.value,
+      focused: formData.focused.value,
+      capable: formData.capable.value,
+      experienced: formData.experienced.value,
+      insightful: formData.insightful.value,
     }
     let error = false
     await axios.post(`${API_URL}/api/ratings`, { data }).then(res => {
-      if (res.status == 200) {
+      if (res.status === 200) {
         setShowSuccessSnackbar(true);
       } else {
         setShowErrorSnackbar(true);
         error = true;
       }
     })
-    if (error == false) {
+    if (!error) {
       setShowFeedback(false);
       setFeedbackSent(true);
     }
@@ -133,7 +133,7 @@ export default function Link() {
     }
     let error = false
     await axios.post(`${API_URL}/api/ratings`, { data: data1 }).then(res => {
-      if (res.status == 200) {
+      if (res.status === 200) {
         setShowSuccessSnackbar(true);
       } else {
         setShowErrorSnackbar(true);
@@ -141,14 +141,14 @@ export default function Link() {
       }
     })
     await axios.post(`${API_URL}/api/ratings`, { data: data2 }).then(res => {
-      if (res.status == 200) {
+      if (res.status === 200) {
         setShowSuccessSnackbar(true);
       } else {
         setShowErrorSnackbar(true);
         error = true
       }
     })
-    if (error == false) {
+    if (!error) {
       setShowFeedback(false);
       setFeedbackSent(true);
     }
@@ -158,15 +158,15 @@ export default function Link() {
     <div>
       <main className={styles.main}>
         {loading ? <Skeleton variant="text" sx={{ width: "calc(min(72vw, 72vh))", height: "37px", my: 3 }}/> : showFeedback ? (<h1>Rate My Response</h1>) : (<h1>Sample Interview Answer</h1>)}
-        {loading == false ? ( 
+        {loading === false ? ( 
           <>
-        <section title="question" className={displayVideos.length == 2 ? "questions" : "question"}>
-          {(displayVideos.length == 1 || (displayVideos.length == 2 && questions[0] == questions[1])) && (
+        <section title="question" className={displayVideos.length === 2 ? "questions" : "question"}>
+          {(displayVideos.length === 1 || (displayVideos.length === 2 && questions[0] === questions[1])) && (
             <Card variant="outlined" sx={{ mb: theme.spacing(2), p: theme.spacing(3), display: 'flex', width: '100%', maxHeight: "100%", height: 'fit-content', minHeight: '55px', alignItems: 'center', justifyContent: 'center' }}>
               <div><b>{questions[0].attributes.question}</b></div>
             </Card>
           )}
-          {displayVideos.length == 2 && questions[0] !== questions[1] && (
+          {displayVideos.length === 2 && questions[0] !== questions[1] && (
                 <div className={styles.questions}>
               <Card variant="outlined" sx={{ mb: theme.spacing(2), p: theme.spacing(3), display: 'flex', width: 'calc(50% - 8px)', mr: 2, maxHeight: "max-content", height: 'calc(max(fit-content, 100%))', minHeight: '55px', alignItems: 'center', justifyContent: 'center' }}>
                 <div><b>{questions[0].attributes.question}</b></div>
@@ -178,10 +178,10 @@ export default function Link() {
           )}
 
         </section>
-          {displayVideos.length == 1 && (
+          {displayVideos.length === 1 && (
             <>
               <section title="video" className="video">
-                  <video src={displayVideos[0] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${displayVideos[0].s3key}` : ''} controls />
+                  <video src={displayVideos[0] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${displayVideos[0].s3key}` : ''} controls ><track kind="captions" /></video>
               </section>
             <section title="feedback" className="feedback">
               {!showFeedback && feedbackSent && (
@@ -203,10 +203,10 @@ export default function Link() {
             <>
               <section title="videos" className="videos">
                 <div className="video-comp mr-2">
-                  <video src={displayVideos[0] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${displayVideos[0].s3key}` : ''} controls />
+                  <video src={displayVideos[0] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${displayVideos[0].s3key}` : ''} controls ><track kind="captions" /></video>
                 </div>
                 <div className="video-comp">
-                  <video src={displayVideos[1] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${displayVideos[1].s3key}` : ''} controls />
+                  <video src={displayVideos[1] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${displayVideos[1].s3key}` : ''} controls ><track kind="captions" /></video>
                 </div>
               </section>
             <section title="feedback" className="feedback-double">

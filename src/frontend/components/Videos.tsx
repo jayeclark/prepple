@@ -1,12 +1,12 @@
 import { useTheme } from "@mui/material"
 import { formattedDate, formattedRating } from "../scripts/formatting"
 import { GraphQLQueryResponseData } from '../scripts/queries';
-import { ReactElement, ReactNode, SVGProps, SyntheticEvent, useCallback } from "react";
+import { SVGProps, SyntheticEvent, useCallback } from "react";
 
 interface VideosProps {
   allRecords: Array<GraphQLQueryResponseData>;
   activeRecords: Array<GraphQLQueryResponseData>;
-  setActiveRecords: Function;
+  setActiveRecords: (s: string) => void;
   filterBy: string;
   handlers: {
     setModalMode: (s: string) => void;
@@ -57,6 +57,7 @@ function Videos({ allRecords, activeRecords, setActiveRecords, filterBy, handler
         
         return (
           <div
+            role="button"
             key={v.attributes.s3key}
             id={v.id}
             className={activeRecords.map((a: GraphQLQueryResponseData) => a.id).includes(v.id.toString()) ? "video-active" : "video"}

@@ -11,7 +11,6 @@ import { useCallback } from "react";
 export function NavElement({path, setActivePage, name, Icon, user}: NavElementProps) {
   const theme = useTheme();
   const router = useRouter();
-  process.env.NODE_ENV == "development" && console.log(user?.jwt);
   const handleSetActivePage = useCallback(() => setActivePage(path), [setActivePage, path]);
 
   return (

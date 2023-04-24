@@ -3,10 +3,19 @@ import axios from "axios";
 import Image from "next/image";
 import { useReactMediaRecorder } from "react-media-recorder";
 import { UserContext } from "../scripts/context";
-import { FormGroup, FormControlLabel, Switch } from "@mui/material";
-import { Dialog, Button, Card, CardContent, TextField, Slider } from "@mui/material";
+import {
+  FormGroup,
+  FormControlLabel,
+  Switch,
+  Dialog,
+  Button,
+  Card,
+  CardContent,
+  TextField,
+  Slider
+} from "@mui/material";
 import cloudCheck from "../assets/cloud-check.svg";
-import { API_URL } from "../pages";
+import { API_URL } from "../constants/app";
 
 const VideoPreview = ({ stream }: { stream: MediaStream | null }) => {
   const [loading, setLoading] = useState(true);
@@ -24,7 +33,7 @@ const VideoPreview = ({ stream }: { stream: MediaStream | null }) => {
   return (<>
           <div id="video-container" className="video-container">
             Loading, please wait...
-            <video ref={videoRef} autoPlay />
+            <video ref={videoRef} autoPlay><track kind="captions" /></video>
           </div>
           <style jsx>{`
             .video-container {
@@ -88,7 +97,7 @@ const RecordView = ({ questionId, handleNextQuestion, title="", answerId="" }: {
     setSaving(true);
     const mediaBlob: Blob = await fetch(mediaBlobUrl as string).then (res => res.blob());
     const dateStamp: number = new Date(Date.now()).getTime();
-    const fileName = user.id + "-" + dateStamp;
+    const fileName = `${user.id}-${dateStamp}`;
     const file = new File([mediaBlob], `${fileName}.mp4`, { type: 'video/mp4' });
 
     const formData = new FormData();
@@ -200,7 +209,7 @@ const RecordView = ({ questionId, handleNextQuestion, title="", answerId="" }: {
         <div className="video-screen">
           {recording && showPreview && (<VideoPreview stream={previewStream} />)}
           {recording && !showPreview && (<div className="fake-person"><Image width={400} height={400} alt="fake person" src="https://fakeface.rest/face/view?minimum_age=24&maximum_age=50" /></div>)}
-          {!recording && (<video ref={activeVideoPlayer} src={mediaBlobUrl || ''} controls autoPlay={playing ? true : false} />)}
+          {!recording && (<video ref={activeVideoPlayer} src={mediaBlobUrl || ''} controls autoPlay={playing ? true : false}><track kind="captions" /></video>)}
           <div className={!playing && !recording ? "overlay" : "overlay-hidden"} >
           { !recording && (
             <>
