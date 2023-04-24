@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useContext, SyntheticEvent } from "react";
+import { useEffect, useRef, useState, useContext, SyntheticEvent, useCallback } from "react";
 import axios from "axios";
 import Image from "next/image";
 import { useReactMediaRecorder } from "react-media-recorder";
@@ -183,12 +183,6 @@ const RecordView = ({ questionId, handleNextQuestion, title="", answerId="" }: {
     setShowPreview(!showPreview);
   }
 
-  const imageStyle = {
-    maxWidth: "calc(min(60vh, 60vw))",
-    maxHeight: "calc(min(60vh, 60vw))",
-    overflow: "hidden"
-  }
-
   const cardStyle = {
     width: 'calc(100% - 32px)',
     padding: 24,
@@ -197,6 +191,8 @@ const RecordView = ({ questionId, handleNextQuestion, title="", answerId="" }: {
     borderRadius: "6px",
     fontWeight: 500
   }
+
+  const handleHideSave = useCallback(() => setShowSave(false), [setShowSave]);
 
   return (
     <>
@@ -293,7 +289,7 @@ const RecordView = ({ questionId, handleNextQuestion, title="", answerId="" }: {
                     ]}
                   />
                    <div className="txt-right">
-                    <Button sx={{ marginLeft: 'auto' }}  onClick={() => setShowSave(false)} disabled={saving}>Cancel</Button>
+                    <Button sx={{ marginLeft: 'auto' }}  onClick={handleHideSave} disabled={saving}>Cancel</Button>
                     <Button type="submit" variant="contained" disabled={saving}>{saving ? "Saving - Please Wait" : "Save Answer"}</Button>
                   </div>
                 </form>

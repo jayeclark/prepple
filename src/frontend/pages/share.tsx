@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext, useEffect, useCallback } from 'react'
 import Head from 'next/head'
 import Image from 'next/image'
 import Router from 'next/router'
@@ -12,7 +12,6 @@ import styles from '../styles/Home.module.css'
 import close from '../assets/x-lg.svg'
 import { API_URL } from '.'
 import { PlanCatalogEntry, VideoCatalogEntry } from './plan';
-import FeedbackSingle from '../../../build/frontend/components/FeedbackSingle';
 
 export default function Share() {
 
@@ -53,7 +52,7 @@ export default function Share() {
     setCatalog(newCatalog);
   }
 
-  const handleGetVideos = async (userId: string) => {
+  const handleGetVideos = useCallback(async (userId: string) => {
     const request = {
         query: getVideos,
         variables: {
@@ -72,7 +71,7 @@ export default function Share() {
     const parsed = await result.json()
     const answers = await parsed.data.answers
     return answers.data;
-  }
+  }, [user.jwt])
 
   useEffect(() => {
     if (user.jwt === '') {
@@ -128,13 +127,13 @@ export default function Share() {
       })
     }
 
-  }, [])
+  }, [catalog.length, user.id, handleGetVideos, user.jwt])
 
-  const handleChange = () => {
+  const handleChange = useCallback(() => {
     setRequestFeedback(!requestFeedback);
-  }
+  }, [requestFeedback])
 
-  const handleShareChange = (e: React.MouseEvent<HTMLElement>) => {
+  const handleShareChange = function(e: React.MouseEvent<HTMLElement>) {
     const element: HTMLInputElement = e.target as HTMLInputElement
     setShareMode(element.value);
     if (element.value == "single" && activeRecords.length == 2) {
@@ -142,7 +141,7 @@ export default function Share() {
     }
   }
 
-  const createLink = async() => {
+  const createLink = useCallback(async () => {
     const slug = nanoid(8)
     const data = {
       slug,
@@ -158,11 +157,11 @@ export default function Share() {
       setLastLink(slug);
       setShowConfirmation(true);
     })
-  }
+  }, [activeRecords, user.id, user.jwt, requestFeedback])
 
-  const handleCloseConfirmationDialog = () => { setShowConfirmation(false); setActiveRecords([{} as GraphQLQueryResponseData]); }
-  const handleShowPreview = () => setShowPreview(true);
-  const handleHidePreview = () => setShowPreview(false);
+  const handleCloseConfirmationDialog = useCallback(() => { setShowConfirmation(false); setActiveRecords([{} as GraphQLQueryResponseData]); }, []);
+  const handleShowPreview = useCallback(() => { setShowPreview(true) }, []);
+  const handleHidePreview = useCallback(() => { setShowPreview(false) }, []);
 
   return (
     <div className={styles.container}>

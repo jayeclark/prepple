@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import RecordView from '../components/RecordView'
@@ -7,7 +7,6 @@ import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import Chip from '@mui/material/Chip'
 import { useTheme } from '@mui/material/'
-import { UserContext } from '../scripts/context'
 import styles from '../styles/Home.module.css'
 
 let url = 'http://localhost:1337'

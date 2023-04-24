@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from 'react'
+import React, { SyntheticEvent, useCallback } from 'react'
 import { useState, useContext, useEffect } from 'react'
 import { useRouter } from 'next/router';
 import dynamic from "next/dynamic";
@@ -86,13 +86,13 @@ export default function Plans() {
     setPlanMode(str);
   }
 
-  const handleGetPlans = async (userId: string) => {
+  const handleGetPlans = useCallback(async (userId: string) => {
     const request = {
-        query: getPlans,
-        variables: {
-          id: userId
-        }
+      query: getPlans,
+      variables: {
+        id: userId
       }
+    }
     const result = await fetch(`${API_URL}/graphql`, {
       headers: {
         Authorization: `Bearer ${user.jwt}`,
@@ -104,7 +104,7 @@ export default function Plans() {
     const parsed = await result.json()
     const answers = await parsed.data.answers
     return answers.data;
-  }
+  }, [user.jwt])
 
   useEffect(() => {
     redirectIfUnauthed(user.jwt, router);
@@ -122,16 +122,16 @@ export default function Plans() {
               qid: (item.attributes.question?.data as GraphQLQueryResponseData).id,
               question: (item.attributes.question?.data as GraphQLQueryResponseData).attributes.question as QuestionAttributes,
               plans: [item]
-            }) 
+            })
           }
           return collector;
         }, [])
         setCatalog(reduced);
       })
     }
-  }, [])
+  }, [handleGetPlans, router, user.id, user.jwt])
 
-  const handleUpdate = async (e: SyntheticEvent, payload: object) => {
+  const handleUpdate = useCallback(async (e: SyntheticEvent, payload: object) => {
     e.preventDefault();
     const headers = {
       Authorization: `Bearer ${user.jwt}`,
@@ -139,7 +139,7 @@ export default function Plans() {
     }
     if (planMode == "edit") {
       const body = {
-        data: { ...payload}
+        data: { ...payload }
       }
       await axios.put(`${API_URL}/api/answers/${currentPlan.id}`, body, { headers }).then(() => {
         const newPlan = { ...currentPlan };
@@ -151,7 +151,7 @@ export default function Plans() {
         const newPlans = [...newQ.plans];
         newPlans[pIndex] = newPlan;
         newQ.plans = newPlans;
-        const newCatalog = [ ...catalog ];
+        const newCatalog = [...catalog];
         newCatalog[qIndex] = newQ;
         const key = Object.keys(payload)[0]
         if (key === "title") {
@@ -198,7 +198,7 @@ export default function Plans() {
         };
         newQ.plans = newQ.plans.length ? newQ.plans.filter((x: GraphQLQueryResponseData) => x.id !== '0') : []
         newQ.plans.push(plan);
-        const newCatalog = [ ...catalog ];
+        const newCatalog = [...catalog];
         newCatalog[qIndex] = newQ;
         const key = Object.keys(payload)[0]
         if (key === "title") {
@@ -216,10 +216,9 @@ export default function Plans() {
         setPlanMode("edit");
       })
     }
+  }, [catalog, currentPlan, planMode, user.id, user.jwt])
 
-  }
-
-  const createNewAnswer = (qid: string, question: string) => {
+  const createNewAnswer = useCallback((qid: string, question: string) => {
     const newPlan = {
       id: '0',
       attributes: {
@@ -234,42 +233,47 @@ export default function Plans() {
             }
           }
         }
-      } 
+      }
     };
     // Add in a check -- don't add the question to the catalog if already there
     const existing = catalog.filter(q => q.question == question)
     if (existing.length == 0) {
       const newPlanCatalog = [...catalog, { qid: qid, question: question, records: [] }];
       setCatalog(newPlanCatalog as PlanCatalogEntry[]);
-    } 
-      setPlanMode("create");
-      setCurrentPlan(newPlan as GraphQLQueryResponseData);
-      setEditTitle(true);
-      setEditPlan(true);
-      setEditPrompts(true);
-  }
+    }
+    setPlanMode("create");
+    setCurrentPlan(newPlan as GraphQLQueryResponseData);
+    setEditTitle(true);
+    setEditPlan(true);
+    setEditPrompts(true);
+  }, [catalog])
+
+  const handleCreateAnswer = useCallback((e: SyntheticEvent) => {
+    const id = (e.target as HTMLElement).id;
+    const question = catalog.filter((q: PlanCatalogEntry | VideoCatalogEntry) => q.qid === id)[0].question.question;
+    createNewAnswer(id, question || "");
+  }, [createNewAnswer, catalog])
   
   const renderResults = () => {
     return (
       <>
         {searchResults.map((q: PlanCatalogEntry) => {
-          const handleCreateAnswer = () => createNewAnswer(q.qid, q.question.question || "");
 
           return (
-          <Card sx={{ p: 1, mb: 2 }} key={q.qid}>
-            <div className="row">
-              <div><b>{q.question.question}</b>&nbsp;&nbsp;&nbsp;</div>
-            </div>
-            <div className="row">
-              <abbr className="icon" title="Add New Answer" onClick={handleCreateAnswer}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
-                  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
-                </svg>
-              </abbr>
-              <div>&nbsp;&nbsp;&nbsp;Plan an answer to this question</div>
-            </div>
-            <style jsx>{`
+            <Card sx={{ p: 1, mb: 2 }} key={q.qid}>
+              <div className="row">
+                <div><b>{q.question.question}</b>&nbsp;&nbsp;&nbsp;</div>
+              </div>
+              <div className="row">
+                <abbr className="icon" title="Add New Answer" id={q.qid} onClick={handleCreateAnswer}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
+                  </svg>
+                </abbr>
+                <div>&nbsp;&nbsp;&nbsp;Plan an answer to this question</div>
+              </div>
+              <style jsx>{`
             .row {
               padding: 8px;
               display: flex;
@@ -281,10 +285,12 @@ export default function Plans() {
               cursor: pointer;
             }
           `}</style>
-          </Card>
-        )})}
+            </Card>
+          )
+        })}
       </>
-    )}
+    )
+  }
   
   interface SearchForm extends EventTarget {
     search: HTMLInputElement;
@@ -299,12 +305,12 @@ export default function Plans() {
   const handleSearch = async (e: SyntheticEvent) => {
     e.preventDefault();
     if (searchFor.length > 0) {
-        const request = {
-          query: getQuestions,
-          variables: {
-            search: (e.target as SearchForm).search.value,
-          }
+      const request = {
+        query: getQuestions,
+        variables: {
+          search: (e.target as SearchForm).search.value,
         }
+      }
       const result = await fetch(`${API_URL}/graphql`, {
         headers: {
           Authorization: `Bearer ${user.jwt}`,
@@ -324,47 +330,55 @@ export default function Plans() {
     }
   }
 
-  const titleEditStyle = { flexGrow: 1, width: "100%", backgroundColor: theme.palette.background.paper,}
+  const titleEditStyle = { flexGrow: 1, width: "100%", backgroundColor: theme.palette.background.paper, }
 
   const mdEditorStyle = { minHeight: 300, height: "auto", width: "100%" };
 
   const calcMaxHeight = () => {
-      if (collapseNew && collapseExisting) {
-        return "calc(100vh - 146px - 114px)"
-      }
-      if (collapseNew && !collapseExisting) {
-        return "calc(100vh - 446px)"
-      }
-      if (!collapseNew && collapseExisting) {
-        return "calc(50vh - 14px)"
-      }
-      if (!collapseNew && !collapseExisting) {
-        return "calc(50vh - 14px)"
-      }
+    if (collapseNew && collapseExisting) {
+      return "calc(100vh - 146px - 114px)"
+    }
+    if (collapseNew && !collapseExisting) {
+      return "calc(100vh - 446px)"
+    }
+    if (!collapseNew && collapseExisting) {
+      return "calc(50vh - 14px)"
+    }
+    if (!collapseNew && !collapseExisting) {
+      return "calc(50vh - 14px)"
+    }
     return "calc(110vh - 114px)"
   }
 
-  const handleInitiateEditTitle = () => setEditTitle(true);
-  const handleSubmitEditTitle = (e: SyntheticEvent) => handleUpdate(e, { title: (e.target as PlanForm).title.value });
-  const handleCancelEditTitle = () => setEditTitle(false);
+  const handleInitiateEditTitle = useCallback(() => setEditTitle(true), []);
+  const handleSubmitEditTitle = useCallback(
+    (e: SyntheticEvent) => { handleUpdate(e, { title: (e.target as PlanForm).title.value }) },
+    [handleUpdate]);
+  const handleCancelEditTitle = useCallback(() => setEditTitle(false), []);
 
-  const handleInitiateEditPlan = () => setEditPlan(true);
-  const handleSubmitEditPlan = (e: SyntheticEvent) => handleUpdate(e, { planned_answer: (e.target as PlanForm).planned_answer.value });
-  const handleCancelEditPlan = () => setEditPlan(false);
+  const handleInitiateEditPlan =  useCallback(() => setEditPlan(true), []);
+  const handleSubmitEditPlan = useCallback(
+    (e: SyntheticEvent) => { handleUpdate(e, { planned_answer: (e.target as PlanForm).planned_answer.value }) },
+    [handleUpdate]);
+  const handleCancelEditPlan = useCallback(() => setEditPlan(false), []);
 
-  const handleInitiateEditPrompts = () => setEditPrompts(true);
-  const handleSubmitEditPrompts = (e: SyntheticEvent) => handleUpdate(e, { prompts: (e.target as PlanForm).prompts.value })
-  const handleCancelEditPrompts = () => setEditPrompts(false);
+  const handleInitiateEditPrompts = useCallback(() => setEditPrompts(true), []);
+  const handleSubmitEditPrompts = useCallback(
+    (e: SyntheticEvent) => { handleUpdate(e, { prompts: (e.target as PlanForm).prompts.value }) },
+    [handleUpdate]);
+  const handleCancelEditPrompts = useCallback(() => setEditPrompts(false), []);
 
-  const handleSetPlanModeToEdit = () => setPlanMode('edit');
-  const handleExpandCollapseExistingAnswers = () => setCollapseExisting(!collapseExisting);
-  const handleClearSearch = () => {
+  const handleSetPlanModeToEdit = useCallback(() => setPlanMode('edit'), []);
+  const handleExpandCollapseExistingAnswers = useCallback(() => setCollapseExisting(!collapseExisting), [collapseExisting]);
+  const handleClearSearch = useCallback(() => {
     setSearchResults([]);
     setSearchFor("");
     setSearched(false);
-  }
-  const handleSearchInputChange = (e: SyntheticEvent) => { setSearchFor((e.target as HTMLInputElement).value); if (searched) { setSearched(false) } };
-  const handleCollapseNewAnswerSection = () => setCollapseNew(!collapseNew);
+  }, []);
+  const handleSearchInputChange = useCallback((e: SyntheticEvent) => { setSearchFor((e.target as HTMLInputElement).value); if (searched) { setSearched(false) } }, [searched]);
+  const handleCollapseNewAnswerSection = useCallback(() => setCollapseNew(!collapseNew), [collapseNew]);
+
+  const handleRenderHTML = useCallback((text: string) => (<ReactMarkdown>{text || ""}</ReactMarkdown>), [])
 
   return (
     <div className={styles.container}>
@@ -471,7 +485,7 @@ export default function Plans() {
                         name="planned_answer"
                         defaultValue={currentPlan.attributes.planned_answer || ""}
                         style={mdEditorStyle} // skipcq JS-0394
-                        renderHTML={(text) => <ReactMarkdown>{text || ""}</ReactMarkdown>}
+                        renderHTML={handleRenderHTML}
                       />
                     <Button sx={{ mt: 1 }} onClick={handleCancelEditPlan} type="button" variant="outlined">Cancel</Button>
                     <Button sx={{ mt: 1, ml: 1 }} type="submit" variant="contained">Save</Button>

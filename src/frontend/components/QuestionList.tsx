@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useCallback } from 'react'
 import { TextField, Card, Dialog, Button, useTheme } from '@mui/material'
 import axios from 'axios'
 import Videos from './Videos'
@@ -49,16 +49,16 @@ function Questions({ catalog, setCatalog, listStyle, activeRecords, setActiveRec
   }
 
 
-  const removeFromCatalog = (id: string) => {
+  const removeFromCatalog = useCallback((id: string) => {
     const newCatalog = catalog.map((question: PlanCatalogEntry | VideoCatalogEntry) => {
-          if ('plans' in question) {
-            question.plans = question.plans.filter(x => x.id !== id)
-          }
-          if ('videos' in question) {
-            question.videos = question.videos.filter(x => x.id !== id)
-          }
-          return question;
-      })
+      if ('plans' in question) {
+        question.plans = question.plans.filter(x => x.id !== id)
+      }
+      if ('videos' in question) {
+        question.videos = question.videos.filter(x => x.id !== id)
+      }
+      return question;
+    })
       .filter((q) => {
         if ('plans' in q) {
           return q.plans.length > 0;
@@ -68,72 +68,87 @@ function Questions({ catalog, setCatalog, listStyle, activeRecords, setActiveRec
         }
         return false;
       });
-    setCatalog('plans' in newCatalog[0] ? newCatalog as PlanCatalogEntry[] : newCatalog as VideoCatalogEntry[]); 
+    setCatalog('plans' in newCatalog[0] ? newCatalog as PlanCatalogEntry[] : newCatalog as VideoCatalogEntry[]);
     if (activeRecords[0].id == id) {
       setActiveRecords("");
     }
-  }
+  }, [activeRecords, catalog, setActiveRecords, setCatalog]);
   
-  const handleArchiveVideo = () => {
-    const body = {
-      data: {
-          archive: true
-      }
-    }
-    const headers = {
-      Authorization: `Bearer ${user.jwt}`,
-      'Content-Type': 'application/json'
-    }
-    axios.put(`${API_URL}/api/videos/${currentModalID}`, body, {headers}).then(() => {
-      removeFromCatalog(currentModalID.toString());
-      setShowModal(false);
-      setCurrentModalID("");
-    })
-  }
 
-  const handleArchivePlan = () => {
-    const body = {
-      data: {
-          archive: true
-      }
-    }
-    const headers = {
-      Authorization: `Bearer ${user.jwt}`,
-      'Content-Type': 'application/json'
-    }
-    axios.put(`${API_URL}/api/answers/${currentModalID}`, body, {headers}).then(() => {
-      removeFromCatalog(currentModalID.toString());
-      setShowModal(false);
-      setCurrentModalID("");
-    })
-  }
 
-  const handleDeleteVideo = async () => {
-    const headers = {
-      Authorization: `Bearer ${user.jwt}`
-    }
-    axios.delete(`${API_URL}/api/videos/${currentModalID}`, { headers }).then(async () => {
-      await fetch(`/api/delete-s3?key=${currentS3Key}`, {
-        method: "POST",
-        headers
-      })
-      removeFromCatalog(currentModalID.toString());
-      setShowModal(false);
-      setCurrentModalID("");
-      setCurrentS3Key("");
-    })
-  }
-  
-  const handleDeletePlan = async () => {
-    const headers = {
-      Authorization: `Bearer ${user.jwt}`
-    }
-    axios.delete(`${API_URL}/api/answers/${currentModalID}`, { headers }).then(async () => {
-      removeFromCatalog(currentModalID.toString());
-      setShowModal(false);
-      setCurrentModalID("");
-    })
-  }
+
+
+  const handleArchiveOrDeleteVideo = useCallback(
+    () => {
+      const handleDeleteVideo = async () => {
+        const headers = {
+          Authorization: `Bearer ${user.jwt}`
+        }
+        axios.delete(`${API_URL}/api/videos/${currentModalID}`, { headers }).then(async () => {
+          await fetch(`/api/delete-s3?key=${currentS3Key}`, {
+            method: "POST",
+            headers
+          })
+          removeFromCatalog(currentModalID.toString());
+          setShowModal(false);
+          setCurrentModalID("");
+          setCurrentS3Key("");
+        })
+      }
+
+      const handleArchiveVideo = () => {
+        const body = {
+          data: {
+              archive: true
+          }
+        }
+        const headers = {
+          Authorization: `Bearer ${user.jwt}`,
+          'Content-Type': 'application/json'
+        }
+        axios.put(`${API_URL}/api/videos/${currentModalID}`, body, {headers}).then(() => {
+          removeFromCatalog(currentModalID.toString());
+          setShowModal(false);
+          setCurrentModalID("");
+        })
+      }
+      return modalMode == "archive" ? handleArchiveVideo() : handleDeleteVideo()
+    },
+    [modalMode, currentModalID, user.jwt, currentS3Key, removeFromCatalog]
+  ); 
+
+  const handleArchiveOrDeletePlan = useCallback(
+    () => {
+      const handleArchivePlan = () => {
+        const body = {
+          data: {
+              archive: true
+          }
+        }
+        const headers = {
+          Authorization: `Bearer ${user.jwt}`,
+          'Content-Type': 'application/json'
+        }
+        axios.put(`${API_URL}/api/answers/${currentModalID}`, body, {headers}).then(() => {
+          removeFromCatalog(currentModalID.toString());
+          setShowModal(false);
+          setCurrentModalID("");
+        })
+      }
+
+      const handleDeletePlan = async () => {
+          const headers = {
+            Authorization: `Bearer ${user.jwt}`
+          }
+          axios.delete(`${API_URL}/api/answers/${currentModalID}`, { headers }).then(async () => {
+            removeFromCatalog(currentModalID.toString());
+            setShowModal(false);
+            setCurrentModalID("");
+          })
+        }
+      return modalMode == "archive" ? handleArchivePlan() : handleDeletePlan()
+    },
+    [modalMode, currentModalID, user.jwt, removeFromCatalog])
 
   return (
     <>
@@ -207,8 +222,8 @@ function Questions({ catalog, setCatalog, listStyle, activeRecords, setActiveRec
               setCurrentS3Key("");
               setShowModal(false);
             }}>Cancel</Button>
-            {listStyle == "videos" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={() => modalMode == "archive" ? handleArchiveVideo() : handleDeleteVideo()}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
-            {listStyle == "plans" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={() => modalMode == "archive" ? handleArchivePlan() : handleDeletePlan()}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
+            {listStyle == "videos" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={handleArchiveOrDeleteVideo}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
+            {listStyle == "plans" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={handleArchiveOrDeletePlan}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
           </div>
         </Card>
       </Dialog>

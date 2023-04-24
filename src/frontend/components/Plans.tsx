@@ -28,11 +28,6 @@ function Plans({ allRecords, activeRecords, filterBy, setActiveRecords, handlers
     setCurrentModalID,
     setShowModal
   } = handlers  
-  
-  const findRecordAndSetActiveRecords = (id: string, allRecords: GraphQLQueryResponseData[]) => {
-    const record = allRecords.filter((record: GraphQLQueryResponseData) => record.id === id)[0];
-    return record;
-  }
 
   return (
     <>
@@ -44,7 +39,7 @@ function Plans({ allRecords, activeRecords, filterBy, setActiveRecords, handlers
             setEditTitle(false);
             setEditPlan(false);
             setEditPrompts(false);
-            findRecordAndSetActiveRecords(p.id, allRecords);
+            setActiveRecords(p.id);
           }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill={theme.palette.primary.main} viewBox="0 0 16 16">
@@ -68,7 +63,7 @@ function Plans({ allRecords, activeRecords, filterBy, setActiveRecords, handlers
                 setEditTitle(false);
                 setEditPlan(false);
                 setEditPrompts(false);
-                findRecordAndSetActiveRecords(p.id, allRecords);
+                setActiveRecords(p.id);
                 setPlanMode('record');
               }} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#666" viewBox="0 0 16 16">
                   <path fillRule="evenodd" d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2V5z"/>
