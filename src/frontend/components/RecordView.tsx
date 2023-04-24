@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useContext } from "react";
+import { useEffect, useRef, useState, useContext, SyntheticEvent, FormEvent } from "react";
 import axios from "axios";
 import Image from "next/image";
 import { useReactMediaRecorder } from "react-media-recorder";
@@ -65,7 +65,12 @@ const VideoPreview = ({ stream }: { stream: MediaStream | null }) => {
           </>);
 };
 
-const RecordView = ({ questionId, handleNextQuestion, title="", answerId=-1 }: { questionId: number, handleNextQuestion?: any, title?: string, answerId?: any }) => {
+interface RecordSaveForm extends EventTarget {
+  title: HTMLInputElement;
+  rating: HTMLInputElement;
+}
+
+const RecordView = ({ questionId, handleNextQuestion, title="", answerId="" }: { questionId: string, handleNextQuestion?: (e?: SyntheticEvent) => void, title?: string, answerId?: string }) => {
   const { user } = useContext(UserContext);
   const theme = useTheme();
   const [recording, setRecording] = useState(false);
@@ -80,7 +85,7 @@ const RecordView = ({ questionId, handleNextQuestion, title="", answerId=-1 }: {
   const { startRecording, stopRecording, mediaBlobUrl, previewStream } =
     useReactMediaRecorder({ video: true });
 
-  const handleSave = async (e: any) => {
+  const handleSave = async (e: SyntheticEvent) => {
     setSaving(true);
     const mediaBlob: Blob = await fetch(mediaBlobUrl as string).then (res => res.blob());
     const dateStamp: number = new Date(Date.now()).getTime();
@@ -90,7 +95,7 @@ const RecordView = ({ questionId, handleNextQuestion, title="", answerId=-1 }: {
     const formData = new FormData();
     formData.append("file", file);
 
-    const s3result: any = await fetch(`/api/put-s3?id=${user.id}`, {
+    const s3result: Response = await fetch(`/api/put-s3?id=${user.id}`, {
       method: "POST",
       body: formData
     })
@@ -101,7 +106,7 @@ const RecordView = ({ questionId, handleNextQuestion, title="", answerId=-1 }: {
           users_permissions_user: user.id,
           user_id: user.id,
           question: questionId,
-          title: e.target.title.value,
+          title: (e.target as RecordSaveForm).title.value,
       }
     }
     const headers = {
@@ -121,7 +126,7 @@ const RecordView = ({ questionId, handleNextQuestion, title="", answerId=-1 }: {
           user_id: user.id,
           datetime: new Date(Date.now()).getTime(),
           question: questionId,
-          rating: e.target.rating.value,
+          rating: (e.target as RecordSaveForm).rating.value,
           answer: id,        
       }
     }

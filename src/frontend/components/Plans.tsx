@@ -1,9 +1,9 @@
 import { useTheme } from '@mui/material'
 import { formattedDate } from '../scripts/formatting'
-
+import { GraphQLQueryResponse, GraphQLQueryResponseData } from '../scripts/queries';
 interface PlansProps {
-  allRecords: Array<any>;
-  activeRecords: Array<any>;
+  allRecords: GraphQLQueryResponseData[];
+  activeRecords: GraphQLQueryResponseData[];
   setActiveRecords: Function;
   filterBy: string;
   handlers: {
@@ -30,7 +30,7 @@ function Plans({ allRecords, activeRecords, filterBy, setActiveRecords, handlers
   
   return (
     <>
-      {allRecords?.filter((p: any) => !p.attributes.title || p.attributes.title?.includes(filterBy) || p.attributes.question.data.attributes.question.includes(filterBy)).map((p: any) => (
+      {allRecords?.filter((p: GraphQLQueryResponseData) => !p.attributes.title || p.attributes.title?.includes(filterBy) || (p.attributes.question?.data as GraphQLQueryResponseData).attributes.question?.includes(filterBy)).map((p: GraphQLQueryResponseData) => (
         <div 
           key={p.id.toString()} 
           className={activeRecords[0].id === p.id ? "video-active" : "video"}
@@ -46,11 +46,11 @@ function Plans({ allRecords, activeRecords, filterBy, setActiveRecords, handlers
           </svg>
           <span className='date-answers-lockup'>
             {p.attributes.title && (<>{p.attributes.title}<br/></>)}
-            <span className='planned-date'>Planned {formattedDate(p.attributes.datetime_planned)}
-              {p.attributes.videos?.data.length > 0 && (
+            <span className='planned-date'>Planned {formattedDate(p.attributes.datetime_planned as number)}
+              {(p.attributes.videos?.data as GraphQLQueryResponseData[]).length > 0 && (
                 <>
                   {" | "}
-                  {p.attributes.videos.data.length} answer{p.attributes.videos.data.length == 1 ? "" : "s"}
+                  {(p.attributes.videos?.data as GraphQLQueryResponseData[]).length} answer{(p.attributes.videos?.data as GraphQLQueryResponseData[]).length == 1 ? "" : "s"}
                 </>
               )}
               </span>

@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-page-custom-font */
-import { useState } from "react";
+import { ReactChild, useState } from "react";
 import { useRouter } from "next/router"
 import Head from "next/head";
 import { useTheme } from "@mui/material";
@@ -9,14 +9,14 @@ import Footer from "./Footer";
 import BottomNav from "./BottomNav";
 import { User, UserContext } from "../scripts/context";
 
-const Layout = (props: any) => {
+const Layout = (props: { children: ReactChild[]}) => {
   const theme = useTheme();
   const router = useRouter();
   const activePage = router.pathname;
 
   const [user, setuser] = useState({} as User);
 
-  const handleSetUser = (user: any) => {
+  const handleSetUser = (user: User) => {
     localStorage.setItem("mdi-session-access-token", user.jwt);
     setuser(user);
   }
@@ -32,12 +32,12 @@ const Layout = (props: any) => {
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
         <link
           rel="preconnect"
-          href="https://fonts.googleapis.com"
+          href="https://fonts.googleapis.com?display=optional"
           crossOrigin="true"
         />
         <link
           rel="preconnect"
-          href="https://fonts.gstatic.com"
+          href="https://fonts.gstatic.com?display=optional"
           crossOrigin="true"
         />
         <link

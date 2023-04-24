@@ -84,12 +84,11 @@ function SignInForm({ showSignIn, setShowSignIn, signUpMode }: SignInFormProps) 
           setShowSignIn(false);
           setSignup(false);
         } 
-      }).catch((e: any) => {
-        if (e.response.status == 400) {
-          setSubmitError("Incorrect username or password.")
-        } else {
+        if (response.status == 400) {
+            setSubmitError("Incorrect username or password.")
+        } 
+      }).catch((_: Error) => {
           setSubmitError("An unexpected error occurred. Please try again later.")
-        }
     })
   }
 
@@ -156,7 +155,6 @@ function SignInForm({ showSignIn, setShowSignIn, signUpMode }: SignInFormProps) 
           }}>
             <TextField
               id="email"
-              autoFocus
               autoComplete="email"
               type="text"
               label="Email"

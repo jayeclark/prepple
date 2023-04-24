@@ -1,3 +1,36 @@
+export interface PlanAttributes {
+  title?: string;
+  planned_answer?: string;
+  prompts?: string;
+  user_id?: string;
+  datetime_planned?: number;
+  question?: GraphQLQueryResponse;
+  videos?: GraphQLQueryResponse;
+}
+
+export interface QuestionAttributes {
+  question?: string;
+  category?: number;
+}
+
+export interface VideoAttributes {
+  title?: string;
+  s3key?: string;
+  rating?: number;
+  datetime?: number;
+  archive?: boolean;
+  answer?: GraphQLQueryResponse;
+}
+
+export interface GraphQLQueryResponseData {
+  id: string;
+  attributes: PlanAttributes & QuestionAttributes & VideoAttributes
+}
+
+export interface GraphQLQueryResponse {
+  data: GraphQLQueryResponseData | GraphQLQueryResponseData[]
+}
+
 export const getQuestionIDs = `
 query getQuestionIDs($num: Int) {
   questions(pagination: { start: $num, limit: 1000}) {

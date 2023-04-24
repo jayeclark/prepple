@@ -1,8 +1,8 @@
 import { Button, useTheme } from "@mui/material";
 import { APP_NAME } from "../../constants/app";
 import ArrowIcon from "../svgs/ArrowIcon";
-import SvgIcon from "../svgs/SvgIcon";
-import { useCallback } from "react";
+import SvgIcon from '../svgs/SvgIcon';
+import { ReactNode, useCallback } from "react";
 
 const plan = (
   <svg
@@ -60,7 +60,7 @@ export function HowItWorks({ setShowSignIn }: HowItWorksProps) {
       <div className="steps-container">
         <h2 className="steps-title">
           How <span className="desktop-only">{APP_NAME}</span>
-          <span className="mobile-only">it</span> Works
+          <span className="mobile-only">It</span> Works
         </h2>
         <div className="steps">
           <Step
@@ -168,7 +168,7 @@ export function HowItWorks({ setShowSignIn }: HowItWorksProps) {
 
 interface StepProps {
   title: string;
-  icon: any;
+  icon: ReactNode;
   details: string;
   iconColor: string;
 }

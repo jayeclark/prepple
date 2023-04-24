@@ -2,28 +2,30 @@ import { useState, useContext, useEffect, useRef } from 'react'
 import Head from 'next/head'
 import Router from 'next/router'
 import QuestionList from "../components/QuestionList"
-import { getVideos } from '../scripts/queries'
+import { getVideos, GraphQLQueryResponseData, QuestionAttributes } from '../scripts/queries';
 import { UserContext } from '../scripts/context'
 import styles from '../styles/Home.module.css'
 import { API_URL } from '.'
+import { PlanCatalogEntry } from './plan';
 
 export default function Videos({ id }: { id: number}) {
 
   const { user } = useContext(UserContext);
-  const initialCatalog: Array<any> = [];
+  const initialCatalog: Array<PlanCatalogEntry> = [];
   const [catalog, setCatalog] = useState(initialCatalog);
-  const [activeRecords, setActiveRecords] = useState(['']);
+  const [activeRecords, setActiveRecords] = useState([{} as GraphQLQueryResponseData]);
 
   const handleSetActiveRecords = (id: string) => {
-    setActiveRecords([id]);
+    const question = catalog.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id == id))?.question as GraphQLQueryResponseData;
+    setActiveRecords([question]);
   }
   
   const getS3Key = (id: string) => {
-    const records = catalog.find(q => q.records.some((x: any) => x.id == id)).records;
-    const key = records.find((x: any) => x.id == id).attributes.s3key
+    const plans = catalog.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id == id))?.plans as GraphQLQueryResponseData[];
+    const key = plans.find((x: GraphQLQueryResponseData) => x.id == id)?.attributes.s3key;
     return key;
   }
-  const handleSetCatalog = (newCatalog: Array<any>) => {
+  const handleSetCatalog = (newCatalog: Array<PlanCatalogEntry>) => {
     setCatalog(newCatalog);
   }
 
@@ -56,36 +58,42 @@ export default function Videos({ id }: { id: number}) {
     if (catalog.length == 0) {
       handleGetVideos(user.id).then((res) => {
         if (res.length > 0) {  
-          const sorted = res.sort((a: any, b: any) => {
+          const sorted = res.sort((a: GraphQLQueryResponseData, b: GraphQLQueryResponseData) => {
             const questionA = a.attributes.question
             const questionB = b.attributes.question
-            if (questionB?.data.attributes.category < questionA?.data.attributes.category) {
+            if (((questionB?.data as GraphQLQueryResponseData).attributes.category || 0) < ((questionA?.data as GraphQLQueryResponseData).attributes.category || 0)) {
               return 1
             }
-            if (questionB?.data.attributes.category > questionA?.data.attributes.category) {
+            if (((questionB?.data as GraphQLQueryResponseData).attributes.category || 0) > ((questionA?.data as GraphQLQueryResponseData).attributes.category || 0)) {
               return -1
             }
             return 0
           });
-          const reduced = sorted.reduce((coll: any, item: any) => {
-            const index = coll.findIndex((x: any) => x.qid == item.attributes.question.data.id);
-            const videos = item.attributes.videos.data
+          const reduced = sorted.reduce((coll: PlanCatalogEntry[], item: GraphQLQueryResponseData) => {
+            const index = coll.findIndex((x: PlanCatalogEntry) => x.qid == (item.attributes.question?.data as GraphQLQueryResponseData).id);
+            const videos = (item.attributes.videos?.data as GraphQLQueryResponseData[])
             const title = item.attributes.title
             const question = item.attributes.question
             if (index >= 0) {
-              coll[index].records.push(...videos.filter((x: any) => x.attributes.archive === false).map((x: any) => {
-                x.title = title;
-                x.question = question;
-                return x;
+              coll[index].plans.push(...videos?.filter((x: GraphQLQueryResponseData) => x.attributes.archive === false).map((x: GraphQLQueryResponseData) => {
+                const newX = {
+                  ...x,
+                  title,
+                  question,
+                }
+                return newX;
               }))
             } else {
               coll.push({
-                qid: item.attributes.question.data.id,
-                question: item.attributes.question.data.attributes.question,
-                records: [...videos.filter((x: any) => x.attributes.archive === false).map((x: any) => {
-                x.title = title;
-                x.question = question;
-                return x;
+                qid: (item.attributes.question?.data as GraphQLQueryResponseData).id,
+                question: (item.attributes.question?.data as GraphQLQueryResponseData).attributes.question as QuestionAttributes,
+                plans: [...videos.filter((x: GraphQLQueryResponseData) => x.attributes.archive === false).map((x: GraphQLQueryResponseData) => {
+                  const newX = {
+                    ...x,
+                    title,
+                    question,
+                  }
+                return newX;
               })]
               }) 
             }
@@ -121,7 +129,7 @@ export default function Videos({ id }: { id: number}) {
         </section>
         <section className="viewer">
           <h1>&nbsp;</h1>
-          <video src={activeRecords[0] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${getS3Key(activeRecords[0])}` : ''} controls autoPlay />
+          <video src={activeRecords[0] ? `https://d1lt2f6ccu4rh4.cloudfront.net/${getS3Key(activeRecords[0].attributes.s3key || "")}` : ''} controls autoPlay />
         </section>
       </main>
       <style jsx>{`

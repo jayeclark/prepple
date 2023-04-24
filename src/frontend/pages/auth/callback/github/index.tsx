@@ -24,7 +24,7 @@ const Authed: NextPage = () => {
             username: data.user.username,
             id: data.user.id
       })
-      localStorage.setItem(`mdi-session-access-token`, data.jwt)
+      localStorage.setItem('mdi-session-access-token', data.jwt)
       router.push("/")
     }
   }

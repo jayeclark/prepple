@@ -4,7 +4,7 @@ import { s3 } from "../../scripts/s3"
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<any>
+  res: NextApiResponse<unknown>
 ) {
   const { authorization } = req.headers
   const { key } = req.query

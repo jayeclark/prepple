@@ -4,12 +4,17 @@ import CheckIcon from "../svgs/CheckIcon";
 import SvgIcon from "../svgs/SvgIcon";
 import { useCallback } from "react";
 
+type PlanIndex = 0 | 1 | 2;
+
 interface PlansProps {
   setShowSignIn: (b: boolean, s?: boolean) => void;
+  currentlyFocusedPlan?: number;
 }
-const CURRENTLY_FOCUSED_PLAN: number = 1;
 
-export function Plans({ setShowSignIn }: PlansProps) {
+
+const DEFAULT_FOCUSED_PLAN: PlanIndex = 1;
+
+export function Plans({ setShowSignIn, currentlyFocusedPlan }: PlansProps) {
 
   const theme = useTheme();
   const handleSetShowSignIn = useCallback(() => setShowSignIn(true), [setShowSignIn]);
@@ -21,9 +26,9 @@ export function Plans({ setShowSignIn }: PlansProps) {
           Available Subscription Plans
         </h2>
         <div className="plans">
-          <FreePlan isCurrentlyFocusedPlan={CURRENTLY_FOCUSED_PLAN === 0} setShowSignIn={handleSetShowSignIn} />
-          <BasicPlan isCurrentlyFocusedPlan={CURRENTLY_FOCUSED_PLAN === 1} setShowSignIn={handleSetShowSignIn} />
-          <PremiumPlan isCurrentlyFocusedPlan={CURRENTLY_FOCUSED_PLAN === 2} setShowSignIn={handleSetShowSignIn} />
+          <FreePlan isCurrentlyFocusedPlan={(currentlyFocusedPlan && currentlyFocusedPlan === 0) || DEFAULT_FOCUSED_PLAN === 0} setShowSignIn={handleSetShowSignIn} />
+          <BasicPlan isCurrentlyFocusedPlan={(currentlyFocusedPlan && currentlyFocusedPlan === 1) || DEFAULT_FOCUSED_PLAN === 1} setShowSignIn={handleSetShowSignIn} />
+          <PremiumPlan isCurrentlyFocusedPlan={(currentlyFocusedPlan && currentlyFocusedPlan === 2) || DEFAULT_FOCUSED_PLAN === 2} setShowSignIn={handleSetShowSignIn} />
         </div>
       </div>
       <style jsx>{`
@@ -166,7 +171,7 @@ function SubscriptionPlan({
   return (
     <>
       <div className={isCurrentlyFocusedPlan ? "plan active" : "plan"}>
-        <div className="price"><sup>$</sup>{dollars}{cents > 0 ? `.{cents}` : ""}<span style={{fontSize: "16px"}}>/month</span></div>
+        <div className="price"><sup>$</sup>{dollars}{cents > 0 ? `.${cents}` : ""}<span style={{fontSize: "16px"}}>/month</span></div>
         <h3>{name}</h3>
         {description.map((text: string, idx: number) => (<p key={`desc-${idx}`} className="feature-description">{text}</p>))}
         <div className="features">

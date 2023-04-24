@@ -19,7 +19,7 @@ export function Hero({ setShowSignIn }: HeroProps) {
         <div className="cta">
           <h1>Ace your behavioral interviews.</h1>
           <p className="cta-details">
-            Plan, practice, and get feedback on your answers to video interview
+            Plan, practice and get feedback on your answers to video interview
             questions.
           </p>
           <div>

@@ -13,5 +13,5 @@ export interface NavElementWrapperProps {
 
 export interface NavElementProps extends NavElementWrapperProps {
   name: string;
-  Icon: JSXElementConstructor<any>;
+  Icon: JSXElementConstructor<unknown>;
 }

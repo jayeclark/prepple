@@ -1,9 +1,10 @@
 import { useTheme } from "@mui/material"
 import { formattedDate, formattedRating } from "../scripts/formatting"
+import { GraphQLQueryResponseData } from '../scripts/queries';
 
 interface VideosProps {
-  allRecords: Array<any>;
-  activeRecords: Array<string>;
+  allRecords: Array<GraphQLQueryResponseData>;
+  activeRecords: Array<GraphQLQueryResponseData>;
   setActiveRecords: Function;
   filterBy: string;
   handlers: {
@@ -20,10 +21,10 @@ function Videos({ allRecords, activeRecords, setActiveRecords, filterBy, handler
 
   return (
     <>
-      {allRecords.filter((v: any) => !v.attributes.title || v.attributes.title?.includes(filterBy) || v.attributes.question.data.attributes.question.includes(filterBy)).map((v: any, i: number) => (
+      {allRecords.filter((v: GraphQLQueryResponseData) => !v.attributes.title || v.attributes.title?.includes(filterBy) || (v.attributes.question?.data as GraphQLQueryResponseData).attributes.question?.includes(filterBy)).map((v: GraphQLQueryResponseData, i: number) => (
         <div 
           key={v.attributes.s3key}
-          className={activeRecords.includes(v.id) ? "video-active" : "video"}
+          className={activeRecords.map((a: GraphQLQueryResponseData) => a.id).includes(v.id.toString()) ? "video-active" : "video"}
           style={{ borderTop: i > 0 ? '1px solid #efefef' : 'none' }} 
           onClick={() => setActiveRecords(v.id)}
         >
@@ -31,9 +32,9 @@ function Videos({ allRecords, activeRecords, setActiveRecords, filterBy, handler
             <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM6 6.883a.5.5 0 0 1 .757-.429l3.528 2.117a.5.5 0 0 1 0 .858l-3.528 2.117a.5.5 0 0 1-.757-.43V6.884z"/>
           </svg>
           <div className="indent">
-            {v.title && (<>{v.title}<br/></>)}
-            {v.attributes.rating >= 0 && (<>{formattedRating(v.attributes.rating)}&nbsp;&nbsp;</>)} 
-            <span className="date">{formattedDate(v.attributes.datetime)}</span><br />
+            {v.attributes.title && (<>{v.attributes.title}<br/></>)}
+            {v.attributes.rating && v.attributes.rating >= 0 && (<>{formattedRating(v.attributes.rating)}&nbsp;&nbsp;</>)} 
+            <span className="date">{formattedDate(v.attributes.datetime as number)}</span><br />
           </div>
           <div className="action-options">
             <svg onClick={(e) => { e.stopPropagation(); setModalMode("archive"); setCurrentModalID(v.id); setShowModal(true) }} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#666" viewBox="0 0 16 16">

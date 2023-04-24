@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/router";
 import styles from '../../styles/Link.module.css'
 import axios from 'axios'
@@ -6,20 +6,20 @@ import Card from '@mui/material/Card'
 import Button from '@mui/material/Button'
 import Snackbar from '@mui/material/Snackbar'
 import Skeleton from '@mui/material/Skeleton'
-import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/'
 import FeedbackSingle from '../../components/FeedbackSingle'
 import FeedbackDouble from '../../components/FeedbackDouble'
 import { API_URL } from "..";
-import { getLink } from "../../scripts/queries";
+import { GraphQLQueryResponse, GraphQLQueryResponseData, getLink } from '../../scripts/queries';
 
 export default function Link() {
   const router = useRouter()
 
   const theme = useTheme()
-  const initialVideos: Array<any> = []
+  const initialVideos: { id: string, s3key: string, title: string }[] = []
+  const initialQuestions: GraphQLQueryResponseData[] = []
   const [displayVideos, setDisplayVideos] = useState(initialVideos)
-  const [questions, setQuestions] = useState([...initialVideos])
+  const [questions, setQuestions] = useState([...initialQuestions])
   const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
   const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -27,8 +27,8 @@ export default function Link() {
   const [loading, setLoading] = useState(true);
 
   const getLinkDetails = async () => {
-    let videos: Array<any> = []
-    let questions: Array<any> = []
+    let videos: {id: string, s3key: string, title: string}[] = []
+    let questions: Array<GraphQLQueryResponseData> = []
     const linkSlug: string = router.query.link as string
     const response = await fetch(`${API_URL}/graphql`, {
         method: 'POST',
@@ -47,14 +47,16 @@ export default function Link() {
     const feedback = await data.attributes.feedback;
     setShowFeedback(feedback);
     const vids = await data.attributes.videos.data;
-    vids.forEach((v: any) => {
+    vids.forEach((v: GraphQLQueryResponseData) => {
       const temp = {
-        id: v.id,
-        s3key: v.attributes.s3key,
-        title: v.attributes.answer.data.attributes.title,
+        id: v.id || "",
+        s3key: v.attributes.s3key || "",
+        title: (v.attributes.answer?.data as GraphQLQueryResponseData).attributes.title || "",
       }
       videos.push(temp)
-      questions.push(v.attributes.answer.data.attributes.question.data.attributes.question)
+      const plan: GraphQLQueryResponseData = v.attributes.answer?.data as GraphQLQueryResponseData;
+      const question: GraphQLQueryResponseData = plan?.attributes?.question?.data as GraphQLQueryResponseData;
+      questions.push(question);
     })
     return { videos, questions };
   }
@@ -161,16 +163,16 @@ export default function Link() {
         <section title="question" className={displayVideos.length == 2 ? "questions" : "question"}>
           {(displayVideos.length == 1 || (displayVideos.length == 2 && questions[0] == questions[1])) && (
             <Card variant="outlined" sx={{ mb: theme.spacing(2), p: theme.spacing(3), display: 'flex', width: '100%', maxHeight: "100%", height: 'fit-content', minHeight: '55px', alignItems: 'center', justifyContent: 'center' }}>
-              <div><b>{questions[0]}</b></div>
+              <div><b>{questions[0].attributes.question}</b></div>
             </Card>
           )}
           {displayVideos.length == 2 && questions[0] !== questions[1] && (
                 <div className={styles.questions}>
               <Card variant="outlined" sx={{ mb: theme.spacing(2), p: theme.spacing(3), display: 'flex', width: 'calc(50% - 8px)', mr: 2, maxHeight: "max-content", height: 'calc(max(fit-content, 100%))', minHeight: '55px', alignItems: 'center', justifyContent: 'center' }}>
-                <div><b>{questions[0]}</b></div>
+                <div><b>{questions[0].attributes.question}</b></div>
               </Card>
               <Card variant="outlined" sx={{ mb: theme.spacing(2), p: theme.spacing(3), display: 'flex', width: 'calc(50% - 8px)', maxHeight: "max-content", height: 'calc(max(fit-content, 100%))', minHeight: '55px', alignItems: 'center', justifyContent: 'center' }}>
-                <div><b>{questions[1]}</b></div>
+                <div><b>{questions[1].attributes.question}</b></div>
               </Card>
             </div>
           )}
