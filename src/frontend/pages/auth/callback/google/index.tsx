@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { useRouter } from 'next/router'
 import type { NextPage } from 'next'
 import axios from 'axios'
@@ -9,7 +9,6 @@ import { API_URL } from '../../..'
 import { UserContext } from "../../../../scripts/context"
 
 const Authed: NextPage = () => {
-  const theme = useTheme();
   const router = useRouter();
   const { handleSetUser } = useContext(UserContext);
 

@@ -12,6 +12,7 @@ import styles from '../styles/Home.module.css'
 import close from '../assets/x-lg.svg'
 import { API_URL } from '.'
 import { VideoCatalogEntry } from './plan';
+import FeedbackSingle from '../../../build/frontend/components/FeedbackSingle';
 
 export default function Share() {
 
@@ -159,6 +160,10 @@ export default function Share() {
     })
   }
 
+  const handleCloseConfirmationDialog = () => { setShowConfirmation(false); setActiveRecords([{} as GraphQLQueryResponseData]); }
+  const handleShowPreview = () => setShowPreview(true);
+  const handleHidePreview = () => setShowPreview(false);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -211,12 +216,12 @@ export default function Share() {
             <p>{requestFeedback ? "People who visit the link will be able to rate your video answer and provide feedback (click Preview to see what they'll see). If you wish to disable this feature, toggle the \"request feedback\" button above." : "People who visit the link will not be able to provide feedback on your video answer. If you wish to enable this feature, toggle the \"request feedback\" button above."}</p>
           </span>
           }
-          <Button disabled={shareMode == "single" ? activeRecords[0].id == undefined : activeRecords.length < 2} sx={{ width: "calc(50% - 8px)", mt: 1 }} variant="outlined" onClick={() => setShowPreview(true)}>Preview</Button>
+          <Button disabled={shareMode == "single" ? activeRecords[0].id == undefined : activeRecords.length < 2} sx={{ width: "calc(50% - 8px)", mt: 1 }} variant="outlined" onClick={handleShowPreview}>Preview</Button>
           <Button disabled={shareMode == "single" ? activeRecords[0].id == undefined : activeRecords.length < 2} sx={{ width: "calc(50% - 8px)", mt: 1, ml: 2 }} variant="contained" onClick={createLink}>Share</Button>
         </section>
         <Dialog open={showPreview}>
           <div className="preview-pane">
-            <div className="close-icon" onClick={() => setShowPreview(false)}>
+            <div className="close-icon" onClick={handleHidePreview}>
               <Image src={close} width={18} height={18} alt="close" />
             </div>
             <div><h1 className="mt-0">Share Link Preview</h1></div>
@@ -225,7 +230,7 @@ export default function Share() {
         </Dialog>
         <Dialog open={showConfirmation}>
           <div className="confirmation-pane">
-            <div className="close-icon" onClick={() => { setShowConfirmation(false); setActiveRecords([{} as GraphQLQueryResponseData]); }}><Image src={close} width={18} height={18} alt="close" /></div>
+            <div className="close-icon" onClick={handleCloseConfirmationDialog}><Image src={close} width={18} height={18} alt="close" /></div>
             <div><h1 className="mt-0"></h1></div>
             <div className="p-div">Your share link has been created!</div>
             <div className="p-div">

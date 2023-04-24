@@ -248,25 +248,28 @@ export default function Plans() {
       setEditPlan(true);
       setEditPrompts(true);
   }
-
+  
   const renderResults = () => {
     return (
       <>
-      {searchResults.map((q: PlanCatalogEntry) => (
-        <Card sx={{ p: 1, mb: 2 }} key={q.qid}>
-          <div className="row">
-            <div><b>{q.question.question}</b>&nbsp;&nbsp;&nbsp;</div>
-          </div>
-          <div className="row">
-            <abbr className="icon" title="Add New Answer" onClick={() => { console.log(q); createNewAnswer(q.qid, q.question.question || "") }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-              </svg>
-            </abbr>
-            <div>&nbsp;&nbsp;&nbsp;Plan an answer to this question</div>
-          </div>
-          <style jsx>{`
+        {searchResults.map((q: PlanCatalogEntry) => {
+          const handleCreateAnswer = () => createNewAnswer(q.qid, q.question.question || "");
+
+          return (
+          <Card sx={{ p: 1, mb: 2 }} key={q.qid}>
+            <div className="row">
+              <div><b>{q.question.question}</b>&nbsp;&nbsp;&nbsp;</div>
+            </div>
+            <div className="row">
+              <abbr className="icon" title="Add New Answer" onClick={handleCreateAnswer}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
+                  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
+                </svg>
+              </abbr>
+              <div>&nbsp;&nbsp;&nbsp;Plan an answer to this question</div>
+            </div>
+            <style jsx>{`
             .row {
               padding: 8px;
               display: flex;
@@ -278,11 +281,10 @@ export default function Plans() {
               cursor: pointer;
             }
           `}</style>
-        </Card>
-      ))}
+          </Card>
+        )})}
       </>
-    )
-  }
+    )}
   
   interface SearchForm extends EventTarget {
     search: HTMLInputElement;
@@ -342,6 +344,28 @@ export default function Plans() {
     return "calc(110vh - 114px)"
   }
 
+  const handleInitiateEditTitle = () => setEditTitle(true);
+  const handleSubmitEditTitle = (e: SyntheticEvent) => handleUpdate(e, { title: (e.target as PlanForm).title.value });
+  const handleCancelEditTitle = () => setEditTitle(false);
+
+  const handleInitiateEditPlan = () => setEditPlan(true);
+  const handleSubmitEditPlan = (e: SyntheticEvent) => handleUpdate(e, { planned_answer: (e.target as PlanForm).planned_answer.value });
+  const handleCancelEditPlan = () => setEditPlan(false);
+
+  const handleInitiateEditPrompts = () => setEditPrompts(true);
+  const handleSubmitEditPrompts = (e: SyntheticEvent) => handleUpdate(e, { prompts: (e.target as PlanForm).prompts.value })
+  const handleCancelEditPrompts = () => setEditPrompts(false);
+
+  const handleSetPlanModeToEdit = () => setPlanMode('edit');
+  const handleExpandCollapseExistingAnswers = () => setCollapseExisting(!collapseExisting);
+  const handleClearSearch = () => {
+    setSearchResults([]);
+    setSearchFor("");
+    setSearched(false);
+  }
+  const handleSearchInputChange = (e: SyntheticEvent) => { setSearchFor((e.target as HTMLInputElement).value); if (searched) { setSearched(false) } };
+  const handleCollapseNewAnswerSection = () => setCollapseNew(!collapseNew);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -352,28 +376,24 @@ export default function Plans() {
 
       <main className={styles.main}>
         <section className="videos">
-          <h1>Plan a New Answer <span onClick={() => setCollapseNew(!collapseNew)} className={`mobile ${collapseNew ? "collapsed-icon" : "expanded-icon"}`}>{plus}</span></h1>
+          <h1>Plan a New Answer <span onClick={handleCollapseNewAnswerSection} className={`mobile ${collapseNew ? "collapsed-icon" : "expanded-icon"}`}>{plus}</span></h1>
           <div className={`collabsible ${collapseNew ? "collapsed" : "expanded"}`}>
           <form onSubmit={handleSearch}>
             <TextField 
               id="search" 
               name="search"
               label="Search for a question"
-              onChange={(e) => { setSearchFor(e.target.value); if (searched) { setSearched(false) } }}
+              onChange={handleSearchInputChange}
               sx={{ background: theme.palette.background.paper,  width: "100%", mb: 2 }}
             />
             <div className="search-button">
-              <Button sx={{ mr: 2, mb: 2 }} type="reset" variant="outlined" onClick={() => {
-                setSearchResults([]);
-                setSearchFor("");
-                setSearched(false);
-              }}>Clear</Button>
+              <Button sx={{ mr: 2, mb: 2 }} type="reset" variant="outlined" onClick={handleClearSearch}>Clear</Button>
               <Button sx={{ mb: 2 }}type="submit" variant="contained">Search</Button>
             </div>
           </form>
             {searchResults?.length > 0 ? renderResults() : searched === false ? "" : "No questions match that search." }
           </div>
-          <h1>My Planned Answers <span onClick={() => setCollapseExisting(!collapseExisting) }  className={`mobile ${collapseExisting ? "collapsed-icon" : "expanded-icon"}`}>{plus}</span></h1>
+          <h1>My Planned Answers <span onClick={handleExpandCollapseExistingAnswers}  className={`mobile ${collapseExisting ? "collapsed-icon" : "expanded-icon"}`}>{plus}</span></h1>
           <div className={`collabsible ${collapseExisting ? "collapsed" : "expanded"}`}>
           {catalog?.length > 0 ? (
             <QuestionList
@@ -405,7 +425,7 @@ export default function Plans() {
                 title={currentPlan.attributes.title}
                 answerId={currentPlan.id}
                 />
-                <Button sx={{ mt: 6 }} type="button" onClick={() => setPlanMode('edit')}>Cancel Recording</Button>
+                <Button sx={{ mt: 6 }} type="button" onClick={handleSetPlanModeToEdit}>Cancel Recording</Button>
             </>
           )}
             {planMode !== 'record' && (
@@ -413,7 +433,7 @@ export default function Plans() {
                 <h3 className="mb-0">
                   Story Title&nbsp;&nbsp;
                   {editTitle == false && (
-                    <svg className="clickable" onClick={() => setEditTitle(true)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <svg className="clickable" onClick={handleInitiateEditTitle} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                   </svg>
                   )}
@@ -422,19 +442,19 @@ export default function Plans() {
                   <p className="mb-4">{currentPlan.attributes.title}</p>
                 )}
                 {editTitle && (
-                  <form className="title" onSubmit={(e: SyntheticEvent) => handleUpdate(e, { title: (e.target as PlanForm).title.value })}>
+                  <form className="title" onSubmit={handleSubmitEditTitle}>
                     <TextField
                       name="title"
                       style={titleEditStyle}
                       defaultValue={currentPlan.attributes.title}
                     />
-                    <Button sx={{ mt: 1 }} onClick={() => setEditTitle(false)} type="button" variant="outlined">Cancel</Button>
+                    <Button sx={{ mt: 1 }} onClick={handleCancelEditTitle} type="button" variant="outlined">Cancel</Button>
                     <Button sx={{ mt: 1, ml: 1 }} type="submit" variant="contained">Save</Button>
                   </form>
                 )}
                 <h3 className="mb-1">Narrative&nbsp;&nbsp;
                   {editPlan === false && (
-                    <svg className="clickable" onClick={() => setEditPlan(true)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <svg className="clickable" onClick={handleInitiateEditPlan} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                   </svg>
                   )}
@@ -444,7 +464,7 @@ export default function Plans() {
                     <Markdown>{currentPlan.attributes.planned_answer}</Markdown>
                   )}
                 {editPlan && (
-                  <form onSubmit={(e: SyntheticEvent) => handleUpdate(e, { planned_answer: (e.target as PlanForm).planned_answer.value })} className="md-editor">
+                  <form onSubmit={handleSubmitEditPlan} className="md-editor">
                       <MdEditor
                         view={{ menu: true, md: true, html: false }}
                         canView={{ both: false, menu: true, md: true, html: true, fullScreen: false, hideMenu: true }}
@@ -453,7 +473,7 @@ export default function Plans() {
                       style={mdEditorStyle}
                       renderHTML={(text) => <ReactMarkdown>{text || ""}</ReactMarkdown>}
                     />
-                    <Button sx={{ mt: 1 }} onClick={() => setEditPlan(false)} type="button" variant="outlined">Cancel</Button>
+                    <Button sx={{ mt: 1 }} onClick={handleCancelEditPlan} type="button" variant="outlined">Cancel</Button>
                     <Button sx={{ mt: 1, ml: 1 }} type="submit" variant="contained">Save</Button>
                   </form>
                 )}
@@ -462,7 +482,7 @@ export default function Plans() {
             )}
             <h3 className="mb-1">Prompts&nbsp;&nbsp;
               {editPrompts === false && (
-                <svg className="clickable" onClick={() => setEditPrompts(true)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <svg className="clickable" onClick={handleInitiateEditPrompts} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
               </svg>
               )}
@@ -472,14 +492,14 @@ export default function Plans() {
                 <Markdown>{currentPlan.attributes.prompts}</Markdown>
               )}
               {editPrompts && (
-                <form onSubmit={(e: SyntheticEvent) => handleUpdate(e, { prompts: (e.target as PlanForm).prompts.value })} className="md-editor">
+                <form onSubmit={handleSubmitEditPrompts} className="md-editor">
                   <MdEditor
                     name="prompts"
                     defaultValue={currentPlan.attributes.prompts || ""}
                     style={mdEditorStyle}
                     renderHTML={(text) => <ReactMarkdown>{text || ""}</ReactMarkdown>}
                   />
-                  <Button sx={{ mt: 1 }} onClick={() => setEditPrompts(false)} type="button" variant="outlined">Cancel</Button>
+                  <Button sx={{ mt: 1 }} onClick={handleCancelEditPrompts} type="button" variant="outlined">Cancel</Button>
                   <Button sx={{ mt: 1, ml: 1 }} type="submit" variant="contained">Save</Button>
                 </form>
               )}
