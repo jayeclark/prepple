@@ -401,7 +401,7 @@ export default function Plans() {
               listStyle="plans"
               activeRecords={activeRecords}
               setActiveRecords={handleSetActiveRecords}
-              setCatalog={handleSetCatalog}
+              setCatalog={handleSetCatalog as ((c: PlanCatalogEntry[] | VideoCatalogEntry[]) => void)}
               planHandlers={{
                 setEditTitle: handleSetEditTitle,
                 setEditPlan: handleSetEditPlan,
