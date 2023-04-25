@@ -9,7 +9,7 @@ const ArrowIcon = (props: SvgElementProps) => (
     height="100%"
     viewBox="0 0 16 16"
     style={{flexGrow: 1}}
-    fill={props.fillColor || DEFAULT_FILL_COLOR}
+    fill={props.fillcolor || DEFAULT_FILL_COLOR}
     className="bi bi-arrow-right-short"
     {...props}
   >

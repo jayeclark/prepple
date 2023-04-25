@@ -50,7 +50,7 @@ export class VpcStack extends Stack {
 
     new CfnOutput(this, "VPCId", {
       value: this.vpc.vpcId,
-      description: "My Dev Interview VPC ID",
+      description: "Prepple VPC ID",
       exportName: VPC_ID_EXPORT_NAME
     });
 

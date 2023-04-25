@@ -1,6 +1,7 @@
 import { useTheme } from '@mui/material'
 import { formattedDate } from '../scripts/formatting'
 import { GraphQLQueryResponseData } from '../scripts/queries';
+import { useCallback } from 'react';
 interface PlansProps {
   allRecords: GraphQLQueryResponseData[];
   activeRecords: GraphQLQueryResponseData[];
@@ -29,17 +30,19 @@ function Plans({ allRecords, activeRecords, filterBy, setActiveRecords, handlers
     setShowModal
   } = handlers
 
+  const handlePlanClick = useCallback((id: string) => {
+    setEditTitle(false);
+    setEditPlan(false);
+    setEditPrompts(false);
+    setActiveRecords(id);
+  }, [setEditTitle, setEditPlan, setEditPrompts, setActiveRecords]);
+
   return <>{allRecords?.filter((p: GraphQLQueryResponseData) => !p.attributes.title || p.attributes.title?.includes(filterBy) || (p.attributes.question?.data as GraphQLQueryResponseData).attributes.question?.includes(filterBy)).map((p: GraphQLQueryResponseData) => (
     <div
       key={p.id.toString()}
       role="button"
       className={activeRecords[0].id === p.id ? "video-active" : "video"}
-      onClick={() => {
-        setEditTitle(false);
-        setEditPlan(false);
-        setEditPrompts(false);
-        setActiveRecords(p.id);
-      }}
+      onClick={() => handlePlanClick(p.id)}
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill={theme.palette.primary.main} viewBox="0 0 16 16">
         <path fillRule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3.854 2.146a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 1 1 .708-.708L2 3.293l1.146-1.147a.5.5 0 0 1 .708 0zm0 4a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 1 1 .708-.708L2 7.293l1.146-1.147a.5.5 0 0 1 .708 0zm0 4a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 0 1 .708-.708l.146.147 1.146-1.147a.5.5 0 0 1 .708 0z" />

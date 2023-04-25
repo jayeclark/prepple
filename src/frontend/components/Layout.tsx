@@ -22,7 +22,7 @@ const Layout = (props: { children: ReactChild[] | ReactChild}) => {
   }
 
   const title =
-    "My Dev Interview - Video interview practice app";
+    "Prepple - Video interview practice app";
 
   return (
     <>

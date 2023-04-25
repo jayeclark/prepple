@@ -25,7 +25,7 @@ export const SignInElement = ({ user, setShowSignIn }: SignInElementProps) => {
     <style jsx>{`
         .sign-in {
           cursor: pointer;
-          margin: auto 0px; 
+          margin: auto 12px auto 0px; 
           color: ${theme.palette.info.main}!important; 
           border: 1.5px solid ${theme.palette.info.main};
           padding: 8px 16px; 

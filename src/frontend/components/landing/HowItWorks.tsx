@@ -3,6 +3,7 @@ import { APP_NAME } from "../../constants/app";
 import ArrowIcon from "../svgs/ArrowIcon";
 import SvgIcon from '../svgs/SvgIcon';
 import { ReactNode, useCallback } from "react";
+import { HOW_IT_WORKS } from "../../constants/landingpageCopy";
 
 const plan = (
   <svg
@@ -64,24 +65,24 @@ export function HowItWorks({ setShowSignIn }: HowItWorksProps) {
         </h2>
         <div className="steps">
           <Step
-            title="Plan answers"
+            title={HOW_IT_WORKS.PLAN.desktopTitle}
             icon={plan}
             iconColor={theme.palette.secondary.main}
-            details="Details go here."
+            details={HOW_IT_WORKS.PLAN.details}
           />
           <Arrow />
           <Step
-            title="Record videos"
+            title={HOW_IT_WORKS.RECORD.desktopTitle}
             icon={record}
             iconColor={theme.palette.secondary.main}
-            details="Details go here."
+            details={HOW_IT_WORKS.RECORD.details}
           />
           <Arrow />
           <Step
-            title="Share for feedback"
+            title={HOW_IT_WORKS.SHARE.desktopTitle}
             icon={share}
             iconColor={theme.palette.secondary.main}
-            details="Details go here."
+            details={HOW_IT_WORKS.SHARE.details}
           />
         </div>
         <div className="steps-cta">
@@ -190,7 +191,7 @@ function Step({ icon, iconColor, title, details }: StepProps) {
       }
       .step {
         width: 80vw;
-        height: 20vw;
+        height: 25vw;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -198,6 +199,8 @@ function Step({ icon, iconColor, title, details }: StepProps) {
       }
       .step-details {
         font-size: 14px;
+        text-align: center;
+        padding: 0px 20px 0px 40px;
       }
       .icon {
         box-shadow: 1px 1px 4px rgba(0,0,0,0.1);

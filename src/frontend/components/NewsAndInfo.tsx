@@ -1,41 +1,38 @@
 import { useTheme, Skeleton } from "@mui/material"
+import { formattedDate } from '../scripts/formatting';
 
 export default function NewsAndInfo() {
   const theme = useTheme();
-
+  const date = new Date(Date.now());
+  const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().substring(2)}`;
   return (
     <>
       <div className="news">
-        <h4>Featured Questions</h4>
+        <h4>Featured Question - {formattedDate}</h4>
         <div className="news-items">
           <div className="news-item">
             <div className="question">
-              <h2><em>&quot;Tell me about a goal you reached and how you achieved it.&quot;</em></h2>
+              <h3><em>&quot;Tell me about a goal you reached and how you achieved it.&quot;</em></h3>
             </div>
             <p>
-              The interviewer is interested in learning about your process more than the goal itself. How do you plan out achieving a specific goal, and how do you keep yourself on track? 
+              With this question, an interviewer is looking to learn about your problem-solving skills, ability to set and work towards a goal, and your level of commitment and dedication.
             </p>
-          </div>
-          <div className="news-item">
-            <div className="question">
-              <h2><em>&quot;Tell me about an unpopular decision you made.&quot;</em></h2>
-            </div>
             <p>
-              The interviewer is interested in learning how you deal with conflict. This and similar questions may be especially common if you are interviewing for a management role.
+              To answer effectively, start by choosing a specific goal you set for yourself. Ideally this goal will be one that is relevant to the job you&apos;re applying for.
+              Begin by describing the goal in detail, including why it was important to you and the challenges you faced along the way to achieving the goal.
+              Be sure to also explain the specific steps you took to achieve the goal and any resources or support you used.
             </p>
-          </div>
-          <div className="news-item">
-            <div className="question">
-              <h2><em>&quot;What coding language are you most comfortable with?&quot;</em></h2>
-            </div>
             <p>
-              The interviewer is looking for more than just a one-word answer here. Give details on how you became comfortable with that language and what you most like about it.
+              Try to highlight your problem-solving skills, including any creative or innovative approaches you used to overcome obstacles.
+            </p>
+            <p>
+              Emphasize your perseverance and commitment, and explain how you stayed motivated and focused on your goal, even when faced with setbacks.
             </p>
           </div>
         </div>
       </div>
       <div className="info">
-        <h1>Helpful Links</h1>
+        <h1>Helpful Resources</h1>
         <div className="links">
           <a href="https://interviewsteps.com/blogs/news/amazon-star-method" target="_blank" rel="noreferrer">
           <div className="info-link">
@@ -123,9 +120,8 @@ export default function NewsAndInfo() {
       }
       .question {
         width: 100%;
-        height: 150px;
         display: flex;
-        justify-content: center;
+        justify-content: left;
         align-items: center;
         border-bottom: 1px solid #fff;
       }

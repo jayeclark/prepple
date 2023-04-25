@@ -166,7 +166,7 @@ export default function Share() {
   return (
     <div className={styles.container}>
       <Head>
-        <title>My Dev Interview - Video Interview Practice App</title>
+        <title>Prepple - Video Interview Practice App</title>
         <meta name="description" content="Video interview simulator with some wildcards thrown in." />
         <link rel="icon" href="/favicon.ico" />
       </Head>

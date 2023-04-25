@@ -32,7 +32,7 @@ const Authed: NextPage = () => {
   return (
     <div className={styles.container}>
       <Head>
-        <title>My Dev Interview</title>
+        <title>Prepple</title>
         <meta name="description" content="Video interview simulator with some wildcards thrown in." />
         <link rel="icon" href="/favicon.ico" />
       </Head>

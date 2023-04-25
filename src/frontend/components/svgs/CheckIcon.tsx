@@ -7,7 +7,7 @@ const CheckIcon = (props: SvgElementProps) => (
     xmlns="http://www.w3.org/2000/svg"
     width="100%"
     height="100%"
-    fill={props.fillColor || DEFAULT_FILL_COLOR}
+    fill={props.fillcolor || DEFAULT_FILL_COLOR}
     className="bi bi-check-circle-fill"
     viewBox="0 0 16 16">
     <path
