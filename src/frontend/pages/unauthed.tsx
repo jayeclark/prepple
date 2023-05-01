@@ -3,12 +3,10 @@ import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import SignInForm from '../components/SignInForm'
-import { getQuestionIDs, getQuestion } from '../scripts/queries'
-import { useTheme, Button } from '@mui/material/'
+import { Button } from '@mui/material/'
 import styles from '../styles/Home.module.css'
 
 const Authed: NextPage = () => {
-  const theme = useTheme();
   const router = useRouter();
   const [showSignIn, setShowSignIn] = useState(false)
 
