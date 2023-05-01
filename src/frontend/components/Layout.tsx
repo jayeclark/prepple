@@ -41,7 +41,7 @@ const Layout = (props: { children: ReactChild[] | ReactChild}) => {
           crossOrigin="true"
         />
         <link
-          href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700&display=swap"
+          href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700&&family=Roboto+Mono:wght@600&display=swap"
           rel="stylesheet"
           crossOrigin="anonymous"
         />
