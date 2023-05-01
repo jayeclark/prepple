@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import RecordView from '../components/RecordView'
+import VideoInterface from '../components/VideoInterface'
 import { getQuestionIDs, getQuestion } from '../scripts/queries'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import Chip from '@mui/material/Chip'
 import { useTheme } from '@mui/material/'
 import styles from '../styles/Home.module.css'
+import { offlineQuestions } from '../constants/offline'
 
 let url = 'http://localhost:1337'
 if (typeof window !== "undefined") {
@@ -16,7 +17,8 @@ if (typeof window !== "undefined") {
   }
 } 
 
-export const API_URL = process.env.API_URL || url
+export const API_URL = process.env.API_URL || url;
+console.log("API URL: "  + API_URL);
 
 const Home: NextPage = () => {
   const theme = useTheme();
@@ -31,41 +33,51 @@ const Home: NextPage = () => {
     let currentCount = 1000;
     let totalCount = 0;
     while (currentCount === 1000) {
-      const response = await fetch(`${API_URL}/graphql`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: getQuestionIDs
+      try {
+        const response = await fetch(`${API_URL}/graphql`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: getQuestionIDs
+          })
         })
-      })
-      const parsedResponse = await response.json();
-      const data = await parsedResponse.data.questions.data;
-      totalCount += data.length;
-      currentCount = data.length;
+        const parsedResponse = await response.json();
+        const data = await parsedResponse.data.questions.data;
+        totalCount += data.length;
+        currentCount = data.length;
+      } catch (e: unknown) {
+        currentCount = 0;
+        totalCount = 10;
+      }
     }
 
     return totalCount;
   }
 
   const fetchQuestion = async (idToFetch: string) => {
-    const response = await fetch(`${API_URL}/graphql`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: getQuestion,
-        variables: {
-          id: idToFetch
-        }
+    try {
+      const response = await fetch(`${API_URL}/graphql`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: getQuestion,
+          variables: {
+            id: idToFetch
+          }
+        })
       })
-    })
-    const parsedResponse = await response.json();
-    const { data } = await parsedResponse;
-    const { question: fetchedQuestion } = await data;
-    return fetchedQuestion;
+      const parsedResponse = await response.json();
+      const { data } = await parsedResponse;
+      const { question: fetchedQuestion } = await data;
+      return fetchedQuestion;
+    } catch (e: unknown) {
+      return offlineQuestions[parseInt(idToFetch)];
+    }
+
   }
 
   const getPreviousQuestion = async (idToFetch: string) => {
@@ -95,6 +107,7 @@ const Home: NextPage = () => {
       nextQuestion = await getRandomQuestion(length);
     }
 
+    console.log(nextQuestion);
     return {
       id: nextQuestion.data.id,
       content: nextQuestion.data.attributes.question,
@@ -168,16 +181,7 @@ const Home: NextPage = () => {
           <Card variant="outlined" sx={{ mb: theme.spacing(2), p: theme.spacing(3), display: 'flex', width: '100%', height: '10vw', minHeight: '100px', alignItems: 'center', justifyContent: 'center' }}>
             <div><b>{question.content}</b></div>
           </Card>
-          <RecordView handleNextQuestion={handleNext} key={question.id} questionId={question.id}/>
-          <div className="buttons">
-            <div className="previous-question">
-            {asked.length > 0 && <Button size="large" variant="text" onClick={handlePrevious}>&lt;&lt;&nbsp;Previous Question</Button>}
-            
-            </div>
-            <div className="skip-question">
-            <Button size="large" variant="text" onClick={handleSkip}>Skip Question&nbsp;&gt;&gt;</Button>
-            </div>
-          </div>
+          <VideoInterface handleNextQuestion={handleNext} key={question.id} questionId={question.id}/>
         </section>
       </main>
 
