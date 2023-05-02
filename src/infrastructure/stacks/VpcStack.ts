@@ -87,13 +87,6 @@ export class VpcStack extends Stack {
     vpcLogBucket.grantWrite(vpcFlowLogRole, "sharedVpcFlowLogs/*")
 
     this.createFlowLog(getCfnResourceName("sharedVpcFlowLogs", props.deploymentEnvironment), vpcLogBucket);
-
-    // TODO:
-    // - EIP?
-    // - VPN gateway?
-    // - Internet gateway?
-    
-    return this;
   }
 
   createFlowLog(uniqueResourceName: string, bucket: Bucket) {

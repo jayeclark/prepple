@@ -1,12 +1,8 @@
-import { useState, useEffect } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { getQuestionIDs, getQuestion } from '../scripts/queries'
-import { useTheme } from '@mui/material/'
 import styles from '../styles/Home.module.css'
 
 const Authed: NextPage = () => {
-  const theme = useTheme();
 
   return (
     <div className={styles.container}>
