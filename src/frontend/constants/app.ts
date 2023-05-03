@@ -13,3 +13,16 @@ export const COMPANY_NAME = "Prepple LLC";
 export const SIGN_IN = "Sign In";
 export const SIGN_UP = "Register";
 export const isUserLoggedIn = (user: User) => user?.jwt === undefined || user?.jwt === '';
+
+export enum VideoPlayerState {
+  PLAYING = "Playback",
+  RECORDING = "Record",
+  INITIALIZED = "Initialized"
+}
+
+export enum MediaState {
+  INITIALIZED = "initialized",
+  STREAMING = "streaming",
+  PAUSED = "paused",
+  STOPPED = "stopped"
+}
