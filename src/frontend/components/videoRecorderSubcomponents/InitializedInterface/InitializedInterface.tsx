@@ -22,11 +22,11 @@ export default function InitializedInterface({ sharedState, videoObject }: Video
   </div>
     <style jsx>{`
     .video-container {
-      width: 100%;
-      height: calc(min(54vh, 54vw));
+      height: calc(min(42vh, 42vw));
+      width: calc(min(56vh, 56vw));
+      padding-left: calc(50% - min(28vh, 28vw));
       background-color: black!important;
       max-width: 100%;
-      max-height: 100%;
       position: relative;
       display: flex;
       justify-content: center;

@@ -3,16 +3,16 @@ import { useReactMediaRecorder } from "react-media-recorder";
 import { UserContext } from "../scripts/context";
 
 import { MediaState, VideoPlayerState } from "../constants/app";
-import RecordInterface from "./videoRecorder/RecordInterface/RecordInterface";
-import PlaybackInterface from "./videoRecorder/PlaybackInterface/PlaybackInterface";
-import { SharedState, VideoObject } from "./videoRecorder/VideoRecorderBase/VideoRecorderBase";
-import InitializedInterface from "./videoRecorder/InitializedInterface/InitializedInterface";
+import RecordInterface from "./videoRecorderSubcomponents/RecordInterface/RecordInterface";
+import PlaybackInterface from "./videoRecorderSubcomponents/PlaybackInterface/PlaybackInterface";
+import { SharedState, VideoObject } from "./videoRecorderSubcomponents/VideoRecorderBase/VideoRecorderBase";
+import InitializedInterface from "./videoRecorderSubcomponents/InitializedInterface/InitializedInterface";
 
 
-const VideoInterface = ({ questionId, handleNextQuestion, title="", answerId="" }: { questionId: string, handleNextQuestion?: (e?: SyntheticEvent) => void, title?: string, answerId?: string }) => {
+const VideoRecorder = ({ questionId, handleNextQuestion, title="", answerId="" }: { questionId: string, handleNextQuestion?: (e?: SyntheticEvent) => void, title?: string, answerId?: string }) => {
   const { user } = useContext(UserContext);
   const [showPreview, setShowPreview] = useState(true);
-  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState("");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [videoRecorderMode, setVideoRecorderMode] = useState(VideoPlayerState.INITIALIZED);
   const [mediaStatus, setMediaStatus] = useState(MediaState.STOPPED);
@@ -62,20 +62,16 @@ const VideoInterface = ({ questionId, handleNextQuestion, title="", answerId="" 
           width: 100%;
         }
         .video-screen {
-          width: calc(min(72vh, 72vw));
-          height: calc(min(54vh, 54vw));
-          min-width: calc(min(72vh, 72vw));
-          min-height: calc(min(54vh, 54vw));
+          width: calc(min(36vh, 36vw));
+          height: calc(min(27vh, 27vw));
           max-width: 1600px;
           max-height: 1200px;
           position: relative;
         }
 
         video {
-          width: calc(min(72vh, 72vw));
-          height: calc(min(54vh, 54vw));
-          min-width: calc(min(72vh, 72vw));
-          min-height: calc(min(54vh, 54vw));
+          width: calc(min(36vh, 36vw));
+          height: calc(min(27vh, 27vw));
           border-radius: 6px;
         }
         
@@ -184,4 +180,4 @@ const VideoInterface = ({ questionId, handleNextQuestion, title="", answerId="" 
   );
 };
 
-export default VideoInterface;
+export default VideoRecorder;
