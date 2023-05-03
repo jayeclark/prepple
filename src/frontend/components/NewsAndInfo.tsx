@@ -1,5 +1,4 @@
-import { useTheme, Skeleton } from "@mui/material"
-import { formattedDate } from '../scripts/formatting';
+import { useTheme } from "@mui/material"
 
 export default function NewsAndInfo() {
   const theme = useTheme();
