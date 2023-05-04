@@ -67,7 +67,7 @@ const Layout = (props: { children: ReactChild[] | ReactChild}) => {
                 padding-top: 11px;
               }
               .padded-top {
-                padding-top: 57px;
+                padding-top: 80px;
               }
             `}
         </style>

@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 import "react-markdown-editor-lite/lib/index.css";
 import Head from 'next/head'
 import axios from 'axios'
-import RecordView from '../components/VideoInterface'
+import RecordView from '../components/VideoRecorder'
 import { Card, TextField, Button, useTheme } from '@mui/material';
 import Markdown from 'markdown-to-jsx';
 import { GraphQLQueryResponseData, QuestionAttributes, getPlans, getQuestions } from '../scripts/queries';

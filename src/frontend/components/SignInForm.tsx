@@ -13,7 +13,6 @@ import EyeFill from "../assets/eye-fill.svg"
 import EyeFillSlash from "../assets/eye-slash-fill.svg"
 import Close from "../assets/x-lg.svg"
 import { API_URL } from "../constants/app"
-import { authorizationUrl } from "../scripts/config"
 import { UserContext } from "../scripts/context"
 
 interface SignInFormProps {

@@ -1,14 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import VideoInterface from '../components/VideoInterface'
 import { getQuestionIDs, getQuestion } from '../scripts/queries'
-import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import Chip from '@mui/material/Chip'
 import { useTheme } from '@mui/material/'
-import styles from '../styles/Home.module.css'
+import styles from '../styles/Practice.module.css'
 import { offlineQuestions } from '../constants/offline'
+import QuestionNavigator from '../components/QuestionNavigator'
+import AnswerNavigator from '../components/AnswerNavigator'
 
 let url = 'http://localhost:1337'
 if (typeof window !== "undefined") {
@@ -170,29 +168,30 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <section className="options">
-          <span className="options-title"><b>Filter&nbsp;by<span className="mobile"> type of question</span>:</b></span>
-          <Chip color={filters.includes("Behavioral") ? "primary" : "default"} onClick={() => toggleFilter("Behavioral")} clickable sx={{ m: 0.5, px: 1 }} label="Behavioral" />
-          <Chip color={filters.includes("Communication") ? "primary" : "default"} onClick={() => toggleFilter("Communication")} clickable sx={{ m: 0.5, px: 2 }} label="Communication" /> 
-          <Chip color={filters.includes("Opinion") ? "primary" : "default"} onClick={() => toggleFilter("Opinion")} clickable sx={{ m: 0.5, px: 2 }} label="Opinion" />
-          <Chip color={filters.includes("Technical") ? "primary" : "default"} onClick={() => toggleFilter("Technical")} clickable sx={{ m: 0.5, px: 2 }} label="Technical" /> 
+        <section className="question-navigator">
+          <QuestionNavigator question={question} />
         </section>
-        <section className="question">
-          <Card variant="outlined" sx={{ mb: theme.spacing(2), p: theme.spacing(3), display: 'flex', width: '100%', height: '10vw', minHeight: '100px', alignItems: 'center', justifyContent: 'center' }}>
-            <div><b>{question.content}</b></div>
-          </Card>
-          <VideoInterface handleNextQuestion={handleNext} key={question.id} questionId={question.id}/>
+        <section className="answer-navigator">
+          <AnswerNavigator questionId={question.id} />
         </section>
       </main>
 
       <style jsx>{`
-        .question {
-          width: calc(min(72vh, 72vw));
-          height: calc(min(54vh, 54vw) + 182px);
-          min-width: calc(min(72vh, 72vw));
-          min-height: calc(min(54vh, 54vw) + 182px);
-          max-width: 1600px;
-          max-height: calc(min(1200px, 100vh - 120));
+        .question-navigator {
+          width: 45vw;
+          flex-grow: 0;
+          min-width: 200px;
+          max-width: 550px;
+          height: calc(100vh - 134.5px - 3rem);
+          border: 1px solid blue;
+          padding: 1rem;
+        }
+        .answer-navigator {
+          border: 1px solid green;
+          width: 55vw;
+          min-width: 200px;
+          padding: 1rem;
+          height: calc(100vh - 134.5px - 3rem);
         }
         .buttons {
           display: flex!important:
