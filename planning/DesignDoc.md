@@ -253,7 +253,177 @@ The current working plan is to organize the platform architecture into four grou
 3. an event platform (event bus + event store) that can help the core web app scale by decoupling follow-on actions from the API events that trigger them.
 4. a machine learning application consisting of a model training stack that interacts with the event platform, persistence layer & monitoring stacks (to trigger alarms related to model drift), and an administrative/debugging UI.
 
-The middleware layer is organized into four services: a core API handling standard CRUD transactions for the persistence layer, auth API, billing API, and a video ingest API that processes practice videos for storage and analysis. 
+![High Level Design Diagram](./Prepple-HighLevelArchitecture.png)
 
-![High Level Design Diagram](./Prepple-HighLevel-Transparent-Screenshot.png)
+The core web app, with the exception of the video ingest component, is a relatively straightforward design with separate frontend and backend. The backend is composed of a core API for CRUD functions and lightweight, specialized APIs for authentication/authorization, billing, short link management/redirects, and video ingestion & analysis. A separate event platform records user actions and other selected events for storage in an events table. These events can be used in machine learning workflows (early ML will be focused on predicting user engagement, subscriptions, and lifecycle as well as identifying potential micro-mentors) and may also trigger text message, email or push notifications as well as other workflows. For example, the initiation of a new video streaming connection with the video encoder server results in the publication of a message to an SNS topic that then triggers a step function that manages the storage and analysis of video content. A machine learning stack and ML administrative stack handle the training and serving of models. (In addition to internally trained models for predicting user behavior, Prepple’s video analysis tools rely on pre-trained models for computer vision, natural language processing, and audio analysis.) Finally, an administrative UI stack provides access to moderation tools and service dashboards.
+
+#### 2.5.2 Core Web App
+
+The heart of Prepple is a Next.js PWA-style web app with a CRUD API backend for core db modification functions, and specialized microservices for authorization/authentication, billing, and short links. (In contrast to a true PWA, however, Prepple has limited functionality offline.) The front-end web client is a Typescript/Next.js app - a refactored version of the original project, My Dev Interview. The core backend API is a straightforward Java/Spring app that allows users to create, edit, review, and delete the basic entities of the app: interview prep plans, planned answers to behavioral interview questions, and recorded video answers to questions (with associated transcripts.) This API also handles saving data on video resumes, feedback requests, ratings, company associations, and both user-derived and AI-derived reports of misconduct (the language models used to process video transcripts and conduct content analysis are also capable of flagging inappropriate content.) Though not in the initial priority list, discussion forums for interview questions will be added in the future and will likely also operate via the core API. 
+
+The choice to separate backend functionality into different APIs is based on several factors. In general, we are interested in minimizing costs by taking advantage of serverless architecture for low-load backend functionality and using a Fargate ECS or EKS deployment strategy for higher-load functionality like CRUD and video ingest, which requires splitting the functionality into different apps. As discussed later in the trade-offs section, for this specific project, a broader range of languages and frameworks is favored over a single framework or single-language approach because of the potential to attract a larger number of contributors from the Open Source community. Separating backend functionality into individual microservices when there is little to no shared code among the services also helps make the mono repo codebase structure more navigable to new contributors. 
+
+**AUTHORIZATION/AUTHENTICATION**  
+Authorization and authentication will be via OIDC. Users will be able to log in with their personal email, Gmail account, or GitHub account. JWTs containing information on the scope of user permissions will be saved locally in cookies, meaning that the load on the auth API will be significantly lower than for the core API, since the auth API will only be called upon login, logout, password change, initiation of video analysis, or when a decoded JWT passed in an API request’s auth header is found to be expired.
+
+**BILLING**  
+The billing API is expected to have a significantly lower load than the core CRUD API, video ingest API, or auth API. In a well-performing freemium SaaS model, less than 10% of users are paid subscribers. Billing functions are expected to be called relatively infrequently for subscribing, canceling subscriptions, and on a periodic basis to verify that a user is still subscribed (i.e. that their subscription hasn’t automatically lapsed due to issues with their payment method) or update authorization claims based on an event emitted by the payment processor.
+
+**SHORTLINKS**  
+A key feature of Prepple is the blending of AI and human feedback. Users can build video resumes and circulate them or individual answers to friends for feedback via a star-rating system. The service for generating short-links and associating them with specific video resumes and recorded answers is envisioned as its own separate API. This will reduce load on the core API and will make it easier to extend & enhance the shortlink URL generator in the future. In the initial release, functionality will be limited (create URLs, expire them as appropriate, send redirect requests as applicable) but in future development, the API will be expanded to provide better tracking of short-link use and better visibility to users of how and when their feedback providers have accessed the links.  
+
+#### 2.5.3 Video Ingest Api
+
+Video ingestion & analysis is expected to be a resource-intensive process that will likely require its own load balancer and specialized strategies to ensure that video analysis and AI feedback are sent back to the end user with acceptable latency. The initial MVP involves transcribing video content and analyzing the listenability and content of that transcript, in response to a user clicking a ‘run analysis’ button. The goal is to have the apparent latency of the analysis be similar to the latency observed when testing a solution in Leetcode (4 - 10 seconds.) This will involve real-time analysis and results caching, and may require experimentation with concurrency to accelerate processing time. (Functionally, we expect that most users will review their video prior to submitting it for analysis, which can provide additional time for backend analysis to ‘catch up’.) 
+
+Longer term, a complete video analysis will consist of a transcript analysis, vocal tone analysis, and computer-vision-based emotion analysis. Users should be able to receive a subset of this analysis in real-time or immediately after reviewing a recently-recorded video, similar to how Leetcode users can test out their solution with a limited number of self-defined test cases prior to submitting their final answer for analysis.
+
+The video ingest design is discussed in more detail in section 2.7.2.
+
+#### 2.5.4 Event Bus & Machine Learning
+
+Sequelae of user actions that do not require immediate reaction via one of the backend API routes become part of the event ecosystem of Prepple. Events that occur during API calls are sent to an SQS queue, processed into a Kinesis streams-enabled DynamoDB events table, and then processed for fan-out. The core use cases are email, text, and push notifications, and the use of user events in machine learning training & prediction workflows.  
+
+In addition to the event processing stack, this area of the platform includes a multi-tenant model training system and a machine learning admin app for administering the training workflows, shadow mode, and other settings as well as visualizing the performance of the ML models without directly logging in to the AWS console.
+
+Initial machine learning workflows focus on two relatively limited areas (due to the small expected user base at outset):
+
+- Predicting high engagement, high-value users
+- Identifying potential micro-mentors from among feedback providers
+
+This area of the platform is targeted for phase III of the development process and will likely change in design and scope as that phase gets closer to initiation.
+
+#### 2.5.4 Customer Service & Administration
+
+Customer service functions for billing, account management, and moderation will exist in a separate Ruby on Rails web app. The choice of framework is primarily driven by the potential of attracting open source contributions - compared to the web app and the ML management app, this customer service admin application will likely rely heavily on open source contributions, and Ruby has one of the highest PR-to-issues ratios on GitHub.  
+
+#### 2.5.3 Android and IOS Clients
+
+Initial development will focus exclusively on the web client. However, unlike with LeetCode and traditional coding interview prep tools, behavioral interviews can be planned for and practiced on mobile devices as well as via desktop browsers. A priority once the web app exits beta will be developing Android and IOS apps to provide mobile access to the platform. The current plan is to develop the iOS app with Swift, and the Android app with Kotlin. (An alternative option is to use React Native for cross-platform development.)
+
+2.5.5. Infrastructure and CICD
+Currently, Prepple is in the very earliest stages of development and exists in two separate GitHub repositories - one large monorepo containing the code for most of the components, and a smaller repository containing a very early scaffolding of the machine learning management app. The ML management app resources are provisioned with Terraform and deployed via a Jenkins CICD server. Other resources are provisioned with AWS CDK and deployed using AWS CodePipeline via a single deployment pipeline. Future refactoring will separate out the resources to deploy in parallel via different pipelines. Currently, a failed deployment of any one resource at a certain point in the pipeline will block the promotion of all resources from beta to gamma to prod, which is not the intended behavior. A new deployment to the front-end should be able to fail and block that particular pipeline without also preventing full deployment of updates to the backend API.
+
+![Main CICD](./Prepple-Pipeline.png)
+
+![ML App CICD](./Prepple-Alternative-Deployment-Pipeline.png)
+
+### 2.6 Tradeoffs
+
+#### 2.6.1 Multiple languages & frameworks vs unified language and framework
+
+The choice to develop in multiple languages and frameworks is an unorthodox one and is driven by the expected financial trajectory of the project. Early financial modeling suggests that even at Leetcode levels of popularity, Prepple would generate only relatively modest income. Because of this, it’s likely to remain a passion project driven by an individual, rather than develop into a business with a development team. In the most likely scenario, Prepple merely covers its costs - but still provides a valuable service to a dedicated group of job seekers in a range of industries.
+
+Because of this, and because of the project’s ‘build in public’ orientation, contributions from the open source community will be an important part of the future development of the platform. The range of languages included in the project design covers more than 50% of all pull requests on GitHub, meaning that the project would have the potential to reach a much larger pool of potential contributors. All but one of the languages has a PR-to-Issue ratio greater than 1, meaning that there are more pull requests opened in the language than there are issues to resolve, a sign of a strong and active open source contributor community.
+
+On a personal level - I just enjoy working in multiple languages at once. Choosing a variety of frameworks and languages, including ones that I don’t know as well but would like to improve in, ensures that I will stay highly engaged with the project.
+
+A trade-off with this strategy, however, is that if the financial prospects of Prepple change, it may be difficult to recruit developers as many engineers prefer a single stack or language over a polyglot approach. If this becomes the case, it would make sense to shift the Android and iOS clients to React Native, and rewrite the CS Admin App and the Auth, Billing, and Shorturl APIs in Java so that the core languages are limited to Java and Typescript. (The ML admin app would most likely stay as Python/Django because of the prevalence of python in machine learning applications.)
+
+|Prepple Component|Language|GitHub PR Prevalence|PR/Issue Ratio|
+|--|--|--|--|
+|Web Client|TypeScript|7.93%|0.77|
+|Android Client|Kotlin|1.44%|1.09|
+|iOS Client|Swift|0.94%|1.11|
+|Core API|Java|11.36%|1.05|
+|Auth, Billing, & Shorturl APIs|Go|10.47%|1.10|
+|ML Admin App|Python|17.28%|1.06|
+|CS Admin App (RoR)|Ruby|5.03%|2.42|
+|Overall| |54.45%|1.06|
+
+#### 2.6.2 Complexity of provisioned resources vs complexity of code
+
+Prepple has a relatively high number of CloudFormation stacks and individual AWS resources. There is a tradeoff between complexity of the infrastructure vs complexity of the code - by separating the infrastructure up into smaller pieces, the code base for any one component becomes simpler.
+
+#### 2.6.3 Cost vs flexibility
+
+Several of the decisions in this design may result in higher costs compared to a more monolithic design, especially at larger scale. This is not a one-way door, however - several of the resources that are currently separated out as their own API’s could eventually be built into the core backend API.  
+
+### 2.7 Design Detail - Video Ingest & Analysis
+
+![Video Ingest Schema](./Prepple-Pipeline.png)
+
+### 2.8 Alternative Designs
+
+#### 2.8.1 Classic Enterprise Monolith
+
+#### 2.8.2 React Native + Express
+
+#### 2.8.3 Desktop App w/RTMP ingest
+
+## 3 Design Details
+
+### 3.1 Functional requirements
+
+#### 3.1.1 Core Auth & Billing Functionality
+
+#### 3.1.2 Question & Answer View
+
+#### 3.1.3 Prepper Landing Page
+
+#### 3.1.4 Video resume builder
+
+#### 3.1.5 Video resume view
+
+#### 3.1.6 Candidate search & contact page
+
+#### 3.1.7 Recruiter landing page
+
+#### 3.1.8 Micro-mentor search & contact
+
+#### 3.1.9 Micro-mentor Landing Page
+
+#### 3.1.10 Notifications
+
+#### 3.1.11 Prep plans
+
+#### 3.1.12 Answer data view
+
+### 3.2 Non-functional requirements
+
+#### 3.2.1 Scaling
+
+As discussed in the load calculations, scaling becomes a concern for certain components of the system only at the very top end of expected usage levels, and only during peak times. A Fargate-enabled ECS cluster should be sufficient to mitigate these concerns, but it may also be a good idea to build in an easy way to transition to an EKS based deployment strategy.  
+
+#### 3.2.2 Latency
+
+Minimizing latency is a major concern. Analyzing video, audio, and visual content takes time - as does actually uploading the video itself to the server orchestrating the analysis! The time between when a user clicks the ‘analyze video’ button and when they receive their results should be similar to the user experience on sites like Leetcode, Codewars, and Hackerrank. We don’t want to create needless costs by starting analysis on videos that won’t ultimately need it (users may record 4 or 5 attempts before determining that a video is their ‘best effort’ meriting analysis.) However, some amount of pre-processing and pre-analysis will likely be necessary in order to limit the latency of the results.
+
+#### 3.2.3 Availability & Recovery
+
+Service availability is a medium concern. Prepple is an interview prep tool - it does not contain sensitive data. While it is an important tool in interview prep, it is not as critical as, say, having access to one’s bank account or health information. Users will, however, be subscribing to the service to gain access to more features - they will expect the application to be highly available, and downtime or slow recovery could affect retention of both paying and non-paying customers.
+
+#### 3.2.4 Security & Privacy
+
+There are no unusual security or privacy concerns for Prepple aside from the standard ones. Users will have full control over the degree of public visibility of their video answers. The application does not store any sensitive data, and billing data storage is handled by a third party service.
+
+#### 3.2.5 Monitoring & Observability
+
+As a small, founder-driven project, monitoring infrastructure health and user behavior will be highly important in flagging, diagnosing, and resolving potential operational issues with the platform. The application has a central monitoring stack with separate CloudWatch dashboards focusing on infrastructure health, user experience, and general business performance for the various components of the platform. 
+
+#### 3.2.6 Testing
+
+The current plan is to implement Prepple with the full complement of unit, integration, E2E, load, chaos, and canary tests. This is particularly important since Prepple will eventually be welcoming contributions from the open source community - developers who are unfamiliar with the codebase risk inadvertently breaking existing functionality as they implement their changes. Chaos testing is of special interest because it relates to service recoverability and to the user experience when an individual component of the system goes down. (This can also be tested to a certain extent using integration tests and mocked inaccurate or improperly formatted responses.)
+
+#### 3.2.7 Internationalization & Accessibility
+
+There are currently no plans to localize Prepple to other languages. Based on my experience working in an internationalized open source project, this is a significant undertaking and is difficult to complete well using only volunteer open source contributions. The front end GH Actions CICD for pull requests is set up to run deep source analyses on the code, which should help catch and resolve most basic accessibility issues.
+
+#### 3.2.8 Regulatory Concerns
+
+Though the application is clearly not directed at children under the age of 13, some care will have to be taken to ensure that demographic data is collecte and that children for whom COPPA protections would apply are not using Prepple. In addition, even though there are no immediate plans for internationalization of the app, some number of users may be located in states or countries where privacy protection laws (CCPA and GDPR) apply. Care will have to be taken to build in the functionality for opting out of cookies and deleting personal data.
+
+### 3.3 Phasing
+
+## 4 Open Questions
+
+## 5 Appendices
+
+### 5.1 Doc Data/Change Log
+
+### 5.2 FAQ
+
+### 5.3 Background Information
+
+### 5.4 Glossary
 
