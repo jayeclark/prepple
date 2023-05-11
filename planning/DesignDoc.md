@@ -341,7 +341,7 @@ Several of the decisions in this design may result in higher costs compared to a
 
 ### 2.7 Design Detail - Video Ingest & Analysis
 
-![Video Ingest Schema](./Prepple-Pipeline.png)
+![Video Ingest Schema](./Prepple-Video-Ingest.png)
 
 ### 2.8 Alternative Designs
 
