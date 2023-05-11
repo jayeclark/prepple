@@ -1,21 +1,20 @@
-import React, { MutableRefObject } from 'react'
-import { useState, useContext, useEffect, useRef } from 'react'
+import React, { SyntheticEvent, useCallback, useState, useContext, useEffect } from 'react'
 import { useRouter } from 'next/router';
 import dynamic from "next/dynamic";
 import ReactMarkdown from "react-markdown";
 import "react-markdown-editor-lite/lib/index.css";
 import Head from 'next/head'
 import axios from 'axios'
-import RecordView from '../components/RecordView'
-import { Card, TextField, Button } from '@mui/material'
-import { useTheme } from "@mui/material"
+import RecordView from '../components/VideoRecorder'
+import { Card, TextField, Button, useTheme } from '@mui/material';
 import Markdown from 'markdown-to-jsx';
-import { getPlans, getQuestions } from '../scripts/queries'
+import { GraphQLQueryResponseData, QuestionAttributes, getPlans, getQuestions } from '../scripts/queries';
 import QuestionList from "../components/QuestionList"
 import { UserContext } from '../scripts/context'
 import { redirectIfUnauthed } from '../scripts/auth'
 import styles from '../styles/Home.module.css'
-import { API_URL } from '.';
+import { API_URL } from '../constants/app';
+import { PlanCatalogEntry, VideoCatalogEntry } from '../types/records';
 
 const MdEditor = dynamic(() => import("react-markdown-editor-lite"), {
   ssr: false
@@ -25,20 +24,16 @@ const plus = (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fil
   <path fillRule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
 </svg>)
 
-export default function Plans({ id }: { id: number}) {
+export default function Plans() {
 
   const { user } = useContext(UserContext);
   const router = useRouter();
   const theme = useTheme();
 
-  interface Plan {
-    id: string;
-    attributes?: any
-  }
-  const plan: Plan = { id: '0' }
-  const initCatalog: Array<any> = [];
+  const plan: GraphQLQueryResponseData = { id: '0' } as GraphQLQueryResponseData;
+  const initCatalog: Array<PlanCatalogEntry> = [];
   const [catalog, setCatalog] = useState(initCatalog);
-  const [activeRecords, setActiveRecords] = useState(['']);
+  const [activeRecords, setActiveRecords] = useState([] as GraphQLQueryResponseData[]);
   const [currentPlan, setCurrentPlan] = useState(plan);
   const [editTitle, setEditTitle] = useState(false);
   const [editPlan, setEditPlan] = useState(false);
@@ -50,15 +45,15 @@ export default function Plans({ id }: { id: number}) {
   const [collapseNew, setCollapseNew] = useState(false);
   const [collapseExisting, setCollapseExisting] = useState(false);
 
-  const handleSetCatalog = (newCatalog: Array<any>) => {
+  const handleSetCatalog = (newCatalog: Array<PlanCatalogEntry>) => {
     setCatalog(newCatalog);
   }
 
   const handleSetActiveRecords = (id: string) => {
-    setActiveRecords([id]);
-    const records = catalog.find((q: any) => q.records.some((x: any) => x.id == id)).records
-    const plan = records.find((x: any) => x.id == id)
-    setCurrentPlan(plan);
+    const plans = catalog.find((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id === id))?.plans
+    const plan = plans?.find((x: GraphQLQueryResponseData) => x.id === id)
+    setActiveRecords([plan as GraphQLQueryResponseData]);
+    setCurrentPlan(plan as GraphQLQueryResponseData);
   }
 
   const handleSetEditTitle = (bool: boolean) => {
@@ -77,13 +72,13 @@ export default function Plans({ id }: { id: number}) {
     setPlanMode(str);
   }
 
-  const handleGetPlans = async (userId: string) => {
+  const handleGetPlans = useCallback(async (userId: string) => {
     const request = {
-        query: getPlans,
-        variables: {
-          id: userId
-        }
+      query: getPlans,
+      variables: {
+        id: userId
       }
+    }
     const result = await fetch(`${API_URL}/graphql`, {
       headers: {
         Authorization: `Bearer ${user.jwt}`,
@@ -95,53 +90,54 @@ export default function Plans({ id }: { id: number}) {
     const parsed = await result.json()
     const answers = await parsed.data.answers
     return answers.data;
-  }
+  }, [user.jwt])
 
   useEffect(() => {
     redirectIfUnauthed(user.jwt, router);
 
     if (user.jwt) {
       handleGetPlans(user.id).then((res) => {
-        const sorted = res.sort((a: any, b: any) => a.attributes.question?.data.attributes.category - b.attributes.question?.data.attributes.category);
-        const reduced = sorted.reduce((coll: any, item: any) => {
-          const index = coll.findIndex((x: any) => x.qid == item.attributes.question.data.id);
-          if (index >= 0 && item.attributes.datetime_planned > 0) {
-            coll[index].records.push(item)
-          } else if (item.attributes.datetime_planned > 0) {
-            coll.push({
-              qid: item.attributes.question.data.id,
-              question: item.attributes.question.data.attributes.question,
-              records: [item]
-            }) 
+        const questionsSortedByCategory = res.sort((a: GraphQLQueryResponseData, b: GraphQLQueryResponseData) =>
+          ((a.attributes.question?.data as GraphQLQueryResponseData).attributes.category || 0) - ((b.attributes.question?.data as GraphQLQueryResponseData).attributes.category || 0));
+        const reduced = questionsSortedByCategory.reduce((collector: PlanCatalogEntry[], item: GraphQLQueryResponseData) => {
+          const index = collector.findIndex((x: PlanCatalogEntry) => x.qid === (item.attributes.question?.data as GraphQLQueryResponseData).id);
+          if (index >= 0 && item.attributes.datetime_planned && item.attributes.datetime_planned > 0) {
+            collector[index].plans.push(item)
+          } else if (item.attributes.datetime_planned && item.attributes.datetime_planned > 0) {
+            collector.push({
+              qid: (item.attributes.question?.data as GraphQLQueryResponseData).id,
+              question: (item.attributes.question?.data as GraphQLQueryResponseData).attributes.question as QuestionAttributes,
+              plans: [item]
+            })
           }
-          return coll;
+          return collector;
         }, [])
         setCatalog(reduced);
       })
     }
-  }, [])
+  }, [handleGetPlans, router, user.id, user.jwt])
 
-  const handleUpdate = async (e: any, payload: object) => {
+  const handleUpdate = useCallback(async (e: SyntheticEvent, payload: object) => {
     e.preventDefault();
     const headers = {
       Authorization: `Bearer ${user.jwt}`,
       'Content-Type': 'application/json'
     }
-    if (planMode == "edit") {
+    if (planMode === "edit") {
       const body = {
-        data: { ...payload}
+        data: { ...payload }
       }
       await axios.put(`${API_URL}/api/answers/${currentPlan.id}`, body, { headers }).then(() => {
         const newPlan = { ...currentPlan };
         newPlan.attributes = { ...newPlan.attributes, ...payload };
 
-        const qIndex = catalog.findIndex((q: any) => q.records.some((x: any) => x.id == currentPlan.id))
+        const qIndex = catalog.findIndex((q: PlanCatalogEntry) => q.plans.some((x: GraphQLQueryResponseData) => x.id === currentPlan.id))
         const newQ = { ...catalog[qIndex] };
-        const pIndex = newQ.records.findIndex((p: any) => p.id == currentPlan.id)
-        const newPlans = [...newQ.records];
+        const pIndex = newQ.plans.findIndex((p: GraphQLQueryResponseData) => p.id === currentPlan.id)
+        const newPlans = [...newQ.plans];
         newPlans[pIndex] = newPlan;
-        newQ.records = newPlans;
-        const newCatalog = [ ...catalog ];
+        newQ.plans = newPlans;
+        const newCatalog = [...catalog];
         newCatalog[qIndex] = newQ;
         const key = Object.keys(payload)[0]
         if (key === "title") {
@@ -163,14 +159,14 @@ export default function Plans({ id }: { id: number}) {
           users_permissions_user: user.id,
           user_id: user.id,
           datetime_planned: new Date(Date.now()).getTime(),
-          question: currentPlan.attributes.question.data.id,
+          question: (currentPlan.attributes.question?.data as GraphQLQueryResponseData).id,
         }
       }
 
       await axios.post(`${API_URL}/api/answers/`, body, { headers }).then((res) => {
-        const qid = currentPlan.attributes.question.data.id;
+        const qid = (currentPlan.attributes.question?.data as GraphQLQueryResponseData).id;
 
-        const qIndex = catalog.findIndex((q: any) => q.qid === qid);
+        const qIndex = catalog.findIndex((q: PlanCatalogEntry) => q.qid === qid);
         const newQ = { ...catalog[qIndex] };
         const plan = {
           id: res.data.data.id,
@@ -178,17 +174,17 @@ export default function Plans({ id }: { id: number}) {
             ...res.data.data.attributes,
             question: {
               data: {
-                id: currentPlan.attributes.question.data.id,
+                id: (currentPlan.attributes.question?.data as GraphQLQueryResponseData).id,
                 attributes: {
-                  question: currentPlan.attributes.question.data.attributes.question
+                  question: (currentPlan.attributes.question?.data as GraphQLQueryResponseData).attributes.question
                 }
               }
             }
           }
         };
-        newQ.records = newQ.records.length ? newQ.records.filter((x: any) => x.id !== '0') : []
-        newQ.records.push(plan);
-        const newCatalog = [ ...catalog ];
+        newQ.plans = newQ.plans.length ? newQ.plans.filter((x: GraphQLQueryResponseData) => x.id !== '0') : []
+        newQ.plans.push(plan);
+        const newCatalog = [...catalog];
         newCatalog[qIndex] = newQ;
         const key = Object.keys(payload)[0]
         if (key === "title") {
@@ -206,10 +202,9 @@ export default function Plans({ id }: { id: number}) {
         setPlanMode("edit");
       })
     }
+  }, [catalog, currentPlan, planMode, user.id, user.jwt])
 
-  }
-
-  const createNewAnswer = (qid: number, question: string) => {
+  const createNewAnswer = useCallback((qid: string, question: string) => {
     const newPlan = {
       id: '0',
       attributes: {
@@ -218,45 +213,53 @@ export default function Plans({ id }: { id: number}) {
         prompts: "",
         question: {
           data: {
-            id: qid,
+            id: qid.toString(),
             attributes: {
-              question: question
+              question
             }
           }
         }
       }
     };
     // Add in a check -- don't add the question to the catalog if already there
-    const existing = catalog.filter(q => q.question == question)
-    if (existing.length == 0) {
-      const newPlanCatalog = [...catalog, { qid: qid, question: question, records: [] }];
-      setCatalog(newPlanCatalog);
-    } 
-      setPlanMode("create");
-      setCurrentPlan(newPlan);
-      setEditTitle(true);
-      setEditPlan(true);
-      setEditPrompts(true);
-  }
+    const existing = catalog.filter(q => q.question === question)
+    if (existing.length === 0) {
+      const newPlanCatalog = [...catalog, { qid, question, records: [] }];
+      setCatalog(newPlanCatalog as PlanCatalogEntry[]);
+    }
+    setPlanMode("create");
+    setCurrentPlan(newPlan as GraphQLQueryResponseData);
+    setEditTitle(true);
+    setEditPlan(true);
+    setEditPrompts(true);
+  }, [catalog])
 
+  const handleCreateAnswer = useCallback((e: SyntheticEvent) => {
+    const id = (e.target as HTMLElement).id;
+    const question = catalog.filter((q: PlanCatalogEntry | VideoCatalogEntry) => q.qid === id)[0].question.question;
+    createNewAnswer(id, question || "");
+  }, [createNewAnswer, catalog])
+  
   const renderResults = () => {
     return (
       <>
-      {searchResults.map((q: any) => (
-        <Card sx={{ p: 1, mb: 2 }} key={q.qid}>
-          <div className="row">
-            <div><b>{q.attributes.question}</b>&nbsp;&nbsp;&nbsp;</div>
-          </div>
-          <div className="row">
-            <abbr className="icon" title="Add New Answer" onClick={() => { console.log(q); createNewAnswer(q.id, q.attributes.question) }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-              </svg>
-            </abbr>
-            <div>&nbsp;&nbsp;&nbsp;Plan an answer to this question</div>
-          </div>
-          <style jsx>{`
+        {searchResults.map((q: PlanCatalogEntry) => {
+
+          return (
+            <Card sx={{ p: 1, mb: 2 }} key={q.qid}>
+              <div className="row">
+                <div><b>{q.question.question}</b>&nbsp;&nbsp;&nbsp;</div>
+              </div>
+              <div className="row">
+                <div role="button" className="icon" title="Add New Answer" id={q.qid} onClick={handleCreateAnswer}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
+                  </svg>
+                </div>
+                <div>&nbsp;&nbsp;&nbsp;Plan an answer to this question</div>
+              </div>
+              <style jsx>{`
             .row {
               padding: 8px;
               display: flex;
@@ -268,21 +271,32 @@ export default function Plans({ id }: { id: number}) {
               cursor: pointer;
             }
           `}</style>
-        </Card>
-      ))}
+            </Card>
+          )
+        })}
       </>
     )
   }
   
-  const handleSearch = async (e: any) => {
+  interface SearchForm extends EventTarget {
+    search: HTMLInputElement;
+  }
+
+  interface PlanForm extends EventTarget {
+    title: HTMLInputElement;
+    planned_answer: HTMLInputElement;
+    prompts: HTMLInputElement;
+  }
+
+  const handleSearch = async (e: SyntheticEvent) => {
     e.preventDefault();
     if (searchFor.length > 0) {
-        const request = {
-          query: getQuestions,
-          variables: {
-            search: e.target.search.value,
-          }
+      const request = {
+        query: getQuestions,
+        variables: {
+          search: (e.target as SearchForm).search.value,
         }
+      }
       const result = await fetch(`${API_URL}/graphql`, {
         headers: {
           Authorization: `Bearer ${user.jwt}`,
@@ -298,70 +312,96 @@ export default function Plans({ id }: { id: number}) {
       setSearchResults(questionData);
       setSearched(true);
       setSearchFor("");
-      e.target.search.value = "";
+      (e.target as SearchForm).search.value = "";
     }
   }
 
-  const titleEditStyle = { flexGrow: 1, width: "100%", backgroundColor: theme.palette.background.paper,}
+  const titleEditStyle = { flexGrow: 1, width: "100%", backgroundColor: theme.palette.background.paper, }
 
   const mdEditorStyle = { minHeight: 300, height: "auto", width: "100%" };
 
   const calcMaxHeight = () => {
-      if (collapseNew && collapseExisting) {
-        return "calc(100vh - 146px - 114px)"
-      }
-      if (collapseNew && !collapseExisting) {
-        return "calc(100vh - 446px)"
-      }
-      if (!collapseNew && collapseExisting) {
-        return "calc(50vh - 14px)"
-      }
-      if (!collapseNew && !collapseExisting) {
-        return "calc(50vh - 14px)"
-      }
+    if (collapseNew && collapseExisting) {
+      return "calc(100vh - 146px - 114px)"
+    }
+    if (collapseNew && !collapseExisting) {
+      return "calc(100vh - 446px)"
+    }
+    if (!collapseNew && collapseExisting) {
+      return "calc(50vh - 14px)"
+    }
+    if (!collapseNew && !collapseExisting) {
+      return "calc(50vh - 14px)"
+    }
     return "calc(110vh - 114px)"
   }
+
+  const handleInitiateEditTitle = useCallback(() => setEditTitle(true), []);
+  const handleSubmitEditTitle = useCallback(
+    (e: SyntheticEvent) => { handleUpdate(e, { title: (e.target as PlanForm).title.value }) },
+    [handleUpdate]);
+  const handleCancelEditTitle = useCallback(() => setEditTitle(false), []);
+
+  const handleInitiateEditPlan =  useCallback(() => setEditPlan(true), []);
+  const handleSubmitEditPlan = useCallback(
+    (e: SyntheticEvent) => { handleUpdate(e, { planned_answer: (e.target as PlanForm).planned_answer.value }) },
+    [handleUpdate]);
+  const handleCancelEditPlan = useCallback(() => setEditPlan(false), []);
+
+  const handleInitiateEditPrompts = useCallback(() => setEditPrompts(true), []);
+  const handleSubmitEditPrompts = useCallback(
+    (e: SyntheticEvent) => { handleUpdate(e, { prompts: (e.target as PlanForm).prompts.value }) },
+    [handleUpdate]);
+  const handleCancelEditPrompts = useCallback(() => setEditPrompts(false), []);
+
+  const handleSetPlanModeToEdit = useCallback(() => setPlanMode('edit'), []);
+  const handleExpandCollapseExistingAnswers = useCallback(() => setCollapseExisting(!collapseExisting), [collapseExisting]);
+  const handleClearSearch = useCallback(() => {
+    setSearchResults([]);
+    setSearchFor("");
+    setSearched(false);
+  }, []);
+  const handleSearchInputChange = useCallback((e: SyntheticEvent) => { setSearchFor((e.target as HTMLInputElement).value); if (searched) { setSearched(false) } }, [searched]);
+  const handleCollapseNewAnswerSection = useCallback(() => setCollapseNew(!collapseNew), [collapseNew]);
+
+  const handleRenderHTML = useCallback((text: string) => (<ReactMarkdown>{text || ""}</ReactMarkdown>), [])
 
   return (
     <div className={styles.container}>
       <Head>
-        <title>My Dev Interview - Video Interview Practice App</title>
+        <title>Prepple - Video Interview Practice App</title>
         <meta name="description" content="Video interview simulator with some wildcards thrown in." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
         <section className="videos">
-          <h1>Plan a New Answer <span onClick={() => setCollapseNew(!collapseNew)} className={`mobile ${collapseNew ? "collapsed-icon" : "expanded-icon"}`}>{plus}</span></h1>
+          <h1>Plan a New Answer <span role="button" onClick={handleCollapseNewAnswerSection} className={`mobile ${collapseNew ? "collapsed-icon" : "expanded-icon"}`}>{plus}</span></h1>
           <div className={`collabsible ${collapseNew ? "collapsed" : "expanded"}`}>
           <form onSubmit={handleSearch}>
             <TextField 
               id="search" 
               name="search"
               label="Search for a question"
-              onChange={(e) => { setSearchFor(e.target.value); if (searched) { setSearched(false) } }}
+              onChange={handleSearchInputChange}
               sx={{ background: theme.palette.background.paper,  width: "100%", mb: 2 }}
             />
             <div className="search-button">
-              <Button sx={{ mr: 2, mb: 2 }} type="reset" variant="outlined" onClick={() => {
-                setSearchResults([]);
-                setSearchFor("");
-                setSearched(false);
-              }}>Clear</Button>
+              <Button sx={{ mr: 2, mb: 2 }} type="reset" variant="outlined" onClick={handleClearSearch}>Clear</Button>
               <Button sx={{ mb: 2 }}type="submit" variant="contained">Search</Button>
             </div>
           </form>
             {searchResults?.length > 0 ? renderResults() : searched === false ? "" : "No questions match that search." }
           </div>
-          <h1>My Planned Answers <span onClick={() => setCollapseExisting(!collapseExisting) }  className={`mobile ${collapseExisting ? "collapsed-icon" : "expanded-icon"}`}>{plus}</span></h1>
+          <h1>My Planned Answers <span role="button" onClick={handleExpandCollapseExistingAnswers}  className={`mobile ${collapseExisting ? "collapsed-icon" : "expanded-icon"}`}>{plus}</span></h1>
           <div className={`collabsible ${collapseExisting ? "collapsed" : "expanded"}`}>
           {catalog?.length > 0 ? (
             <QuestionList
               catalog={catalog}
-              style="plans"
+              listStyle="plans"
               activeRecords={activeRecords}
               setActiveRecords={handleSetActiveRecords}
-              setCatalog={handleSetCatalog}
+              setCatalog={handleSetCatalog as ((c: PlanCatalogEntry[] | VideoCatalogEntry[]) => void)}
               planHandlers={{
                 setEditTitle: handleSetEditTitle,
                 setEditPlan: handleSetEditPlan,
@@ -374,47 +414,47 @@ export default function Plans({ id }: { id: number}) {
         </section>
         <section className="viewer">
           <h1 className="desktop">&nbsp;</h1>
-          {(+currentPlan.id > 0 || planMode == "create") && (<>
+          {(Number(currentPlan.id) > 0 || planMode === "create") && (<>
             <Card variant="outlined" sx={{ mb: theme.spacing(2), p: theme.spacing(2), display: 'flex', width: '100%', height: '10vh', minHeight: '80px', alignItems: 'center', justifyContent: 'center' }}>
-              <div><b>{currentPlan.attributes.question.data.attributes.question}</b></div>
+              <div><b>{(currentPlan.attributes.question?.data as GraphQLQueryResponseData).attributes.question}</b></div>
             </Card>
-                      {+currentPlan.id > 0 && planMode == "record" && (
+                      {Number(currentPlan.id) > 0 && planMode === "record" && (
             <>
               <RecordView
-                questionId={currentPlan.attributes.question.data.id}
+                questionId={(currentPlan.attributes.question?.data as GraphQLQueryResponseData).id}
                 title={currentPlan.attributes.title}
                 answerId={currentPlan.id}
                 />
-                <Button sx={{ mt: 6 }} type="button" onClick={() => setPlanMode('edit')}>Cancel Recording</Button>
+                <Button sx={{ mt: 6 }} type="button" onClick={handleSetPlanModeToEdit}>Cancel Recording</Button>
             </>
           )}
             {planMode !== 'record' && (
               <>
                 <h3 className="mb-0">
                   Story Title&nbsp;&nbsp;
-                  {editTitle == false && (
-                    <svg className="clickable" onClick={() => setEditTitle(true)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  {editTitle === false && (
+                    <svg className="clickable" onClick={handleInitiateEditTitle} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                   </svg>
                   )}
                 </h3>
-                {editTitle == false && (
+                {editTitle === false && (
                   <p className="mb-4">{currentPlan.attributes.title}</p>
                 )}
                 {editTitle && (
-                  <form className="title" onSubmit={(e: any) => handleUpdate(e, { title: e.target.title.value })}>
+                  <form className="title" onSubmit={handleSubmitEditTitle}>
                     <TextField
                       name="title"
-                      style={titleEditStyle}
+                      sx={titleEditStyle}
                       defaultValue={currentPlan.attributes.title}
                     />
-                    <Button sx={{ mt: 1 }} onClick={() => setEditTitle(false)} type="button" variant="outlined">Cancel</Button>
+                    <Button sx={{ mt: 1 }} onClick={handleCancelEditTitle} type="button" variant="outlined">Cancel</Button>
                     <Button sx={{ mt: 1, ml: 1 }} type="submit" variant="contained">Save</Button>
                   </form>
                 )}
                 <h3 className="mb-1">Narrative&nbsp;&nbsp;
                   {editPlan === false && (
-                    <svg className="clickable" onClick={() => setEditPlan(true)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <svg className="clickable" onClick={handleInitiateEditPlan} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                   </svg>
                   )}
@@ -424,16 +464,16 @@ export default function Plans({ id }: { id: number}) {
                     <Markdown>{currentPlan.attributes.planned_answer}</Markdown>
                   )}
                 {editPlan && (
-                  <form onSubmit={(e: any) => handleUpdate(e, { planned_answer: e.target.planned_answer.value })} className="md-editor">
+                  <form onSubmit={handleSubmitEditPlan} className="md-editor">
                       <MdEditor
                         view={{ menu: true, md: true, html: false }}
                         canView={{ both: false, menu: true, md: true, html: true, fullScreen: false, hideMenu: true }}
-                      name="planned_answer"
-                      defaultValue={currentPlan.attributes.planned_answer || ""}
-                      style={mdEditorStyle}
-                      renderHTML={(text) => <ReactMarkdown>{text || ""}</ReactMarkdown>}
-                    />
-                    <Button sx={{ mt: 1 }} onClick={() => setEditPlan(false)} type="button" variant="outlined">Cancel</Button>
+                        name="planned_answer"
+                        defaultValue={currentPlan.attributes.planned_answer || ""}
+                        style={mdEditorStyle} // skipcq JS-0394
+                        renderHTML={handleRenderHTML}
+                      />
+                    <Button sx={{ mt: 1 }} onClick={handleCancelEditPlan} type="button" variant="outlined">Cancel</Button>
                     <Button sx={{ mt: 1, ml: 1 }} type="submit" variant="contained">Save</Button>
                   </form>
                 )}
@@ -442,7 +482,7 @@ export default function Plans({ id }: { id: number}) {
             )}
             <h3 className="mb-1">Prompts&nbsp;&nbsp;
               {editPrompts === false && (
-                <svg className="clickable" onClick={() => setEditPrompts(true)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <svg className="clickable" onClick={handleInitiateEditPrompts} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
               </svg>
               )}
@@ -452,14 +492,14 @@ export default function Plans({ id }: { id: number}) {
                 <Markdown>{currentPlan.attributes.prompts}</Markdown>
               )}
               {editPrompts && (
-                <form onSubmit={(e: any) => handleUpdate(e, { prompts: e.target.prompts.value })} className="md-editor">
+                <form onSubmit={handleSubmitEditPrompts} className="md-editor">
                   <MdEditor
                     name="prompts"
                     defaultValue={currentPlan.attributes.prompts || ""}
-                    style={mdEditorStyle}
+                    style={mdEditorStyle} // skipcq JS-0394
                     renderHTML={(text) => <ReactMarkdown>{text || ""}</ReactMarkdown>}
                   />
-                  <Button sx={{ mt: 1 }} onClick={() => setEditPrompts(false)} type="button" variant="outlined">Cancel</Button>
+                  <Button sx={{ mt: 1 }} onClick={handleCancelEditPrompts} type="button" variant="outlined">Cancel</Button>
                   <Button sx={{ mt: 1, ml: 1 }} type="submit" variant="contained">Save</Button>
                 </form>
               )}
@@ -563,8 +603,8 @@ export default function Plans({ id }: { id: number}) {
             width: 100%;
             margin-right: 0;
             padding: 8px 16px 8px 16px;
-            min-height: ${currentPlan.id == "0" ? "calc(100vh - 148px)" : ""};
-            max-height: ${currentPlan.id == "0" ? "100%" : "calc(50vh - 92px)"};
+            min-height: ${currentPlan.id === "0" ? "calc(100vh - 148px)" : ""};
+            max-height: ${currentPlan.id === "0" ? "100%" : "calc(50vh - 92px)"};
             overflow: scroll;
             vertical-align: bottom;
             box-shadow: 0px -3px 3px rgb(0,0,0,0.3);

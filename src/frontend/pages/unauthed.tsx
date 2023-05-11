@@ -3,12 +3,10 @@ import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import SignInForm from '../components/SignInForm'
-import { getQuestionIDs, getQuestion } from '../scripts/queries'
-import { useTheme, Button } from '@mui/material/'
+import { Button } from '@mui/material/'
 import styles from '../styles/Home.module.css'
 
 const Authed: NextPage = () => {
-  const theme = useTheme();
   const router = useRouter();
   const [showSignIn, setShowSignIn] = useState(false)
 
@@ -19,7 +17,7 @@ const Authed: NextPage = () => {
   return (
     <div className={styles.container}>
       <Head>
-        <title>My Dev Interview</title>
+        <title>Prepple</title>
         <meta name="description" content="Video interview simulator with some wildcards thrown in." />
         <link rel="icon" href="/favicon.ico" />
       </Head>

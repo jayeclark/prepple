@@ -11,7 +11,6 @@ import { useCallback } from "react";
 export function NavElement({path, setActivePage, name, Icon, user}: NavElementProps) {
   const theme = useTheme();
   const router = useRouter();
-  console.log(user?.jwt);
   const handleSetActivePage = useCallback(() => setActivePage(path), [setActivePage, path]);
 
   return (
@@ -21,7 +20,7 @@ export function NavElement({path, setActivePage, name, Icon, user}: NavElementPr
             <div className={styles.navLink}>
             {user?.jwt == undefined ? null : (<div className={styles.optionIcon}>
               <SvgIcon
-                Icon={Icon!}
+                Icon={Icon!} // skipcq JS-0339
                 width={22}
                 height={22}
                 fillColor={theme.palette.background.default}

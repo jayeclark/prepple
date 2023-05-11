@@ -50,7 +50,7 @@ export class VpcStack extends Stack {
 
     new CfnOutput(this, "VPCId", {
       value: this.vpc.vpcId,
-      description: "My Dev Interview VPC ID",
+      description: "Prepple VPC ID",
       exportName: VPC_ID_EXPORT_NAME
     });
 
@@ -87,13 +87,6 @@ export class VpcStack extends Stack {
     vpcLogBucket.grantWrite(vpcFlowLogRole, "sharedVpcFlowLogs/*")
 
     this.createFlowLog(getCfnResourceName("sharedVpcFlowLogs", props.deploymentEnvironment), vpcLogBucket);
-
-    // TODO:
-    // - EIP?
-    // - VPN gateway?
-    // - Internet gateway?
-    
-    return this;
   }
 
   createFlowLog(uniqueResourceName: string, bucket: Bucket) {

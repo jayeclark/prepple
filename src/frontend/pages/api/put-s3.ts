@@ -12,14 +12,12 @@ export const config = {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<any>
+  res: NextApiResponse<unknown>
 ) {
-  let parsedFiles;
-  const data: any = await new Promise((resolve, reject) => {
+  const data: { err: Error, fields: formidable.Fields, files: formidable.Files} = await new Promise((resolve, reject) => {
     const form = formidable({ multiples: true });
     form.parse(req, (err, fields, files) => {
-      parsedFiles = files;
-      if (err) reject({ err })
+      if (err) reject(err)
       resolve({ err, fields, files })
     })
   })
@@ -27,13 +25,13 @@ export default async function handler(
   const file = await data.files.file;
   const { id } = req.query;
   const timestamp = new Date(Date.now()).getTime();
-  const key = id + "-" + timestamp + ".mp4";
+  const key = `${id}-${timestamp}.mp4`;
 
   try {
     const response = await s3.putObject({ 
       Bucket: 'mydevinterview-videos',
       Key: key,
-      Body: fs.createReadStream(file.filepath),
+      Body: fs.createReadStream((file as formidable.File).filepath),
       ContentType: 'audio/mpeg'
     }).promise()
     res.send({ response, filename: key });

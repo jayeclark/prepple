@@ -33,7 +33,6 @@ function NavBar({ currentActivePage }: {currentActivePage: string}) {
     handleSetUser({} as User)
     router.push("/");
   }, [handleSetUser, router]);
-  console.log(user);
 
   return (
     <>

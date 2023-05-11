@@ -12,8 +12,7 @@ import Github from "../assets/github.png"
 import EyeFill from "../assets/eye-fill.svg"
 import EyeFillSlash from "../assets/eye-slash-fill.svg"
 import Close from "../assets/x-lg.svg"
-import { API_URL } from "../pages/index"
-import { authorizationUrl } from "../scripts/config"
+import { API_URL } from "../constants/app"
 import { UserContext } from "../scripts/context"
 
 interface SignInFormProps {
@@ -84,12 +83,11 @@ function SignInForm({ showSignIn, setShowSignIn, signUpMode }: SignInFormProps) 
           setShowSignIn(false);
           setSignup(false);
         } 
-      }).catch((e: any) => {
-        if (e.response.status == 400) {
-          setSubmitError("Incorrect username or password.")
-        } else {
+        if (response.status === 400) {
+            setSubmitError("Incorrect username or password.")
+        } 
+      }).catch((_: Error) => {
           setSubmitError("An unexpected error occurred. Please try again later.")
-        }
     })
   }
 
@@ -156,7 +154,6 @@ function SignInForm({ showSignIn, setShowSignIn, signUpMode }: SignInFormProps) 
           }}>
             <TextField
               id="email"
-              autoFocus
               autoComplete="email"
               type="text"
               label="Email"

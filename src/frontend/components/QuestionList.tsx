@@ -1,30 +1,32 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useCallback } from 'react'
 import { TextField, Card, Dialog, Button, useTheme } from '@mui/material'
 import axios from 'axios'
 import Videos from './Videos'
 import Plans from './Plans'
 import { UserContext } from '../scripts/context'
-import { API_URL } from '../pages'
-
-const plus = (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-  <path fillRule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
-</svg>)
-
+import { API_URL } from '../constants/app'
+import { GraphQLQueryResponseData } from '../scripts/queries';
+import { PlanCatalogEntry, VideoCatalogEntry } from '../types/records';
 interface QuestionsProps {
-  catalog: Array<any>;
-  style: "plans" | "videos";
-  activeRecords: Array<string>;
-  setActiveRecords: Function;
-  setCatalog: Function;
-  planHandlers?: any;
+  catalog: PlanCatalogEntry[] | VideoCatalogEntry[];
+  listStyle: "plans" | "videos";
+  activeRecords: GraphQLQueryResponseData[];
+  setActiveRecords: (s: string) => void;
+  setCatalog: (c: VideoCatalogEntry[] | PlanCatalogEntry[]) => void;
+  planHandlers?: {
+    setEditTitle: (b: boolean) => void;
+    setEditPlan: (b: boolean) => void;
+    setEditPrompts: (b: boolean) => void;
+    setPlanMode: (s: string) => void;
+  };
 }
 
-function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords, planHandlers }: QuestionsProps) {
+function Questions({ catalog, setCatalog, listStyle, activeRecords, setActiveRecords, planHandlers }: QuestionsProps) {
   const { user } = useContext(UserContext)
   const theme = useTheme()
   const [filterBy, setFilterBy] = useState('')
   const [modalMode, setModalMode] = useState("delete")
-  const [currentModalID, setCurrentModalID] = useState(-1)
+  const [currentModalID, setCurrentModalID] = useState("")
   const [currentS3Key, setCurrentS3Key] = useState("")
   const [showModal, setShowModal] = useState(false)
   
@@ -34,7 +36,7 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
     setModalMode(mode);
   }
 
-  const handleSetCurrentModalID = (id: number) => {
+  const handleSetCurrentModalID = (id: string) => {
     setCurrentModalID(id);
   }
 
@@ -46,85 +48,103 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
     setShowModal(bool);
   }
 
-  interface Question {
-    records: Array<any>;
-    qid: number;
-    question: string;
-  }
-  const removeFromCatalog = (id: string) => {
-    const newCatalog = catalog.map((question: Question) => {
-          question.records = question.records.filter(x => x.id !== id)
-          return question;
-      })
-      .filter((q) => q.records.length > 0);
-    setCatalog(newCatalog); 
-    if (activeRecords[0] == id) {
-      setActiveRecords('')
-    }
-  }
-  
-  const handleArchiveVideo = () => {
-    const body = {
-      data: {
-          archive: true
+
+  const removeFromCatalog = useCallback((id: string) => {
+    const newCatalog = catalog.map((question: PlanCatalogEntry | VideoCatalogEntry) => {
+      if ('plans' in question) {
+        question.plans = question.plans.filter(x => x.id !== id)
       }
-    }
-    const headers = {
-      Authorization: `Bearer ${user.jwt}`,
-      'Content-Type': 'application/json'
-    }
-    axios.put(`${API_URL}/api/videos/${currentModalID}`, body, {headers}).then(res => {
-      removeFromCatalog(currentModalID.toString());
-      setShowModal(false);
-      setCurrentModalID(-1);
-    })
-  }
-
-  const handleArchivePlan = () => {
-    const body = {
-      data: {
-          archive: true
+      if ('videos' in question) {
+        question.videos = question.videos.filter(x => x.id !== id)
       }
-    }
-    const headers = {
-      Authorization: `Bearer ${user.jwt}`,
-      'Content-Type': 'application/json'
-    }
-    axios.put(`${API_URL}/api/answers/${currentModalID}`, body, {headers}).then(res => {
-      removeFromCatalog(currentModalID.toString());
-      setShowModal(false);
-      setCurrentModalID(-1);
+      return question;
     })
-  }
-
-  const handleDeleteVideo = async () => {
-    const headers = {
-      Authorization: `Bearer ${user.jwt}`
+      .filter((q) => {
+        if ('plans' in q) {
+          return q.plans.length > 0;
+        }
+        if ('videos' in q) {
+          return q.videos.length > 0;
+        }
+        return false;
+      });
+    setCatalog('plans' in newCatalog[0] ? newCatalog as PlanCatalogEntry[] : newCatalog as VideoCatalogEntry[]);
+    if (activeRecords[0].id === id) {
+      setActiveRecords("");
     }
-    axios.delete(`${API_URL}/api/videos/${currentModalID}`, { headers }).then(async (res) => {
-      const response = await fetch(`/api/delete-s3?key=${currentS3Key}`, {
-        method: "POST",
-        headers
-      })
-      removeFromCatalog(currentModalID.toString());
-      setShowModal(false);
-      setCurrentModalID(-1);
-      setCurrentS3Key("");
-    })
-  }
+  }, [activeRecords, catalog, setActiveRecords, setCatalog]);
   
-  const handleDeletePlan = async () => {
-    const headers = {
-      Authorization: `Bearer ${user.jwt}`
-    }
-    axios.delete(`${API_URL}/api/answers/${currentModalID}`, { headers }).then(async (res) => {
-      removeFromCatalog(currentModalID.toString());
-      setShowModal(false);
-      setCurrentModalID(-1);
-    })
-  }
+  const handleArchiveOrDeleteVideo = useCallback(
+    () => {
+      const handleDeleteVideo = async () => {
+        const headers = {
+          Authorization: `Bearer ${user.jwt}`
+        }
+        await axios.delete(`${API_URL}/api/videos/${currentModalID}`, { headers }).then(async () => {
+          await fetch(`/api/delete-s3?key=${currentS3Key}`, {
+            method: "POST",
+            headers
+          })
+          removeFromCatalog(currentModalID.toString());
+          setShowModal(false);
+          setCurrentModalID("");
+          setCurrentS3Key("");
+        })
+      }
 
-  const filterInputStyle = { backgroundColor: theme.palette.background.paper,  width: "100%", marginBottom: 16 }
+      const handleArchiveVideo = () => {
+        const body = {
+          data: {
+              archive: true
+          }
+        }
+        const headers = {
+          Authorization: `Bearer ${user.jwt}`,
+          'Content-Type': 'application/json'
+        }
+        axios.put(`${API_URL}/api/videos/${currentModalID}`, body, {headers}).then(() => {
+          removeFromCatalog(currentModalID.toString());
+          setShowModal(false);
+          setCurrentModalID("");
+        })
+      }
+      return modalMode === "archive" ? handleArchiveVideo() : handleDeleteVideo()
+    },
+    [modalMode, currentModalID, user.jwt, currentS3Key, removeFromCatalog]
+  ); 
+
+  const handleArchiveOrDeletePlan = useCallback(
+    () => {
+      const handleArchivePlan = () => {
+        const body = {
+          data: {
+              archive: true
+          }
+        }
+        const headers = {
+          Authorization: `Bearer ${user.jwt}`,
+          'Content-Type': 'application/json'
+        }
+        axios.put(`${API_URL}/api/answers/${currentModalID}`, body, {headers}).then(() => {
+          removeFromCatalog(currentModalID.toString());
+          setShowModal(false);
+          setCurrentModalID("");
+        })
+      }
+
+      const handleDeletePlan = async () => {
+          const headers = {
+            Authorization: `Bearer ${user.jwt}`
+          }
+          await axios.delete(`${API_URL}/api/answers/${currentModalID}`, { headers }).then(() => {
+            removeFromCatalog(currentModalID.toString());
+            setShowModal(false);
+            setCurrentModalID("");
+          })
+        }
+      return modalMode === "archive" ? handleArchivePlan() : handleDeletePlan()
+    },
+    [modalMode, currentModalID, user.jwt, removeFromCatalog])
 
   return (
     <>
@@ -136,17 +156,46 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
           sx={{ background: theme.palette.background.paper, width: '100%', mb: 2 }}
       />
       <div className="cards-list">
-      {catalog.filter((q: any) => {
-        const question = q.question as string; 
-        const records = q.records;
-        return (question && question.toLowerCase().match(filterBy)) || records.some((v: any) => v.attributes.title?.toLowerCase().match(filterBy))
-      })
-        .map((q: any) => (
-        <Card sx={{ p: 1, mb: 2 }} key={q.qid}>
-          <div className="question"><b>{q.question}</b></div>
-            {style == 'videos' && (
+        {'plans' in catalog[0] ? (catalog as PlanCatalogEntry[]).filter((q: PlanCatalogEntry) => {
+            const question = q.question as string; 
+            let records: GraphQLQueryResponseData[] = [];
+            if ('plans' in q) {
+              records = q.plans;
+            } 
+            return (question?.toLowerCase().match(filterBy)) || records.some((v: GraphQLQueryResponseData) => v.attributes.title?.toLowerCase().match(filterBy))
+          }).map((q: PlanCatalogEntry) => (
+            <Card sx={{ p: 1, mb: 2 }} key={q.qid}>
+              <div className="question"><b>{q.question.question}</b></div>
+                <Plans
+                  allRecords={q.plans}
+                  activeRecords={activeRecords}
+                  setActiveRecords={setActiveRecords}
+                  filterBy={filterBy}
+                  handlers={{
+                    setModalMode: handleSetModalMode,
+                    setCurrentModalID: handleSetCurrentModalID,
+                    setShowModal: handleSetShowModal,
+                    setEditTitle: setEditTitle as (b: boolean) => void,
+                    setEditPlan: setEditPlan as (b: boolean) => void,
+                    setEditPrompts: setEditPrompts as (b: boolean) => void,
+                    setPlanMode: setPlanMode as (s: string) => void,
+                  }}
+                />
+            </Card>
+          )) : null
+        }
+      {'videos' in catalog[0] && (catalog as VideoCatalogEntry[]).filter((q: VideoCatalogEntry) => {
+          const question = q.question as string; 
+          let records: GraphQLQueryResponseData[] = [];
+          if ('videos' in q) {
+            records = q.videos;
+          } 
+          return (question?.toLowerCase().match(filterBy)) || records.some((v: GraphQLQueryResponseData) => v.attributes.title?.toLowerCase().match(filterBy))
+        }).map((q: VideoCatalogEntry) => (
+          <Card sx={{ p: 1, mb: 2 }} key={q.qid}>
+            <div className="question"><b>{q.question.question}</b></div>
               <Videos
-                allRecords={q.records}
+                allRecords={q.videos}
                 activeRecords={activeRecords}
                 setActiveRecords={setActiveRecords}
                 filterBy={filterBy}
@@ -157,38 +206,20 @@ function Questions({ catalog, setCatalog, style, activeRecords, setActiveRecords
                   setShowModal: handleSetShowModal,
                 }}
               />
-            )}
-            {style == 'plans' && (
-              <Plans
-                allRecords={q.records}
-                activeRecords={activeRecords}
-                setActiveRecords={setActiveRecords}
-                filterBy={filterBy}
-                handlers={{
-                  setModalMode: handleSetModalMode,
-                  setCurrentModalID: handleSetCurrentModalID,
-                  setShowModal: handleSetShowModal,
-                  setEditTitle,
-                  setEditPlan,
-                  setEditPrompts,
-                  setPlanMode
-                }}
-              />
-            )}
-        </Card>
+          </Card>
         ))}
       </div>
       <Dialog open={showModal}>
         <Card sx={{ p: 4 }}>
-          <div className="delete-confirm">Are you sure you want to {modalMode} this {style == "videos" ? "video" : "answer plan"}?</div>
+          <div className="delete-confirm">Are you sure you want to {modalMode} this {listStyle === "videos" ? "video" : "answer plan"}?</div>
           <div>
             <Button sx={{ width: 'calc(50% - 4px)', mr: 1 }} variant="outlined" onClick={() => {
-              setCurrentModalID(-1);
+              setCurrentModalID("");
               setCurrentS3Key("");
               setShowModal(false);
             }}>Cancel</Button>
-            {style == "videos" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={() => modalMode == "archive" ? handleArchiveVideo() : handleDeleteVideo()}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
-            {style == "plans" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={() => modalMode == "archive" ? handleArchivePlan() : handleDeletePlan()}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
+            {listStyle === "videos" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={handleArchiveOrDeleteVideo}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
+            {listStyle === "plans" && <Button sx={{ width: 'calc(50% - 4px)' }} variant="contained" onClick={handleArchiveOrDeletePlan}>{modalMode === "archive" ? "Archive" : "Delete"}</Button>}
           </div>
         </Card>
       </Dialog>

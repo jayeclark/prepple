@@ -1,19 +1,19 @@
 import { JSXElementConstructor } from "react";
 
 export interface SvgElementProps {
-  fillColor?: string;
+  fillcolor?: string;
 }
 
 interface SvgIconProps {
   width: number;
   height: number;
   fillColor?: string;
-  Icon: JSXElementConstructor<any>;
+  Icon: JSXElementConstructor<SvgElementProps>;
 }
 
 const SvgIcon = ({Icon, ...props}: SvgIconProps) => (
   <div style={{ width: props.width, height: props.height }}>
-    <Icon fillColor={props.fillColor}/>
+    <Icon fillcolor={props.fillColor || 'currentColor'}/>
   </div>
 )
 export default SvgIcon

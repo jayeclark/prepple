@@ -11,7 +11,7 @@ export function PlanNavElement({ path, user, setActivePage }: NavElementWrapperP
     const handleSetActivePage = useCallback(() => setActivePage(path), [setActivePage, path]);
 
   return !user?.jwt ? null : (
-            <div className={router.pathname == path ? "nav-item-active" : "nav-item"} onClick={handleSetActivePage}>
+          <div className={router.pathname == path ? "nav-item-active" : "nav-item"} onClick={handleSetActivePage}>
             <Link href={path} passHref>
                 <div className="nav-link">
                   <div className="option-icon" >

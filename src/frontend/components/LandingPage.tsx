@@ -65,7 +65,7 @@ export default function LandingPage() {
       <Features />
       <Plans setShowSignIn={handleShowSignin} />
       <SignInForm
-        signUpMode={true}
+        signUpMode
         showSignIn={showSignIn}
         setShowSignIn={handleShowSignin}
       />

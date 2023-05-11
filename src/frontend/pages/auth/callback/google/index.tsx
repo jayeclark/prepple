@@ -1,21 +1,19 @@
-import { useState, useEffect, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { useRouter } from 'next/router'
 import type { NextPage } from 'next'
 import axios from 'axios'
 import Head from 'next/head'
-import { useTheme } from '@mui/material/'
 import styles from '../../../../styles/Home.module.css'
-import { API_URL } from '../../..'
+import { API_URL } from '../../../../constants/app'
 import { UserContext } from "../../../../scripts/context"
 
 const Authed: NextPage = () => {
-  const theme = useTheme();
   const router = useRouter();
   const { handleSetUser } = useContext(UserContext);
 
   const authGoogleUser = async () => {
     const query = router.query
-    if (query.hasOwnProperty("access_token")) {
+    if ("access_token" in query) {
       const response = await axios.get(`${API_URL}/api/auth/google/callback`, { params: { access_token: query.access_token }})
       const data = await response.data
       handleSetUser({
@@ -24,7 +22,7 @@ const Authed: NextPage = () => {
             username: data.user.username,
             id: data.user.id
       })
-      localStorage.setItem(`mdi-session-access-token`, data.jwt)
+      localStorage.setItem('mdi-session-access-token', data.jwt)
       router.push("/")
     }
   }
@@ -34,7 +32,7 @@ const Authed: NextPage = () => {
   return (
     <div className={styles.container}>
       <Head>
-        <title>My Dev Interview</title>
+        <title>Prepple</title>
         <meta name="description" content="Video interview simulator with some wildcards thrown in." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
