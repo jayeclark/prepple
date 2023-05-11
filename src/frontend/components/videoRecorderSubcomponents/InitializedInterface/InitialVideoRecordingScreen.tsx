@@ -5,5 +5,5 @@ import { VideoRecorderComponentProps } from "../VideoRecorderBase/VideoRecorderB
 export default function InitialVideoRecordingScreen({videoObject, sharedState}: VideoRecorderComponentProps) {
   const showPreview = sharedState.showPreview.value;
   console.log(showPreview);
-  return showPreview ? <PreviewStreamScreen sharedState={sharedState} videoObject={videoObject}/> : <PreviewStaticPhotoScreen />
+  return showPreview ? <PreviewStreamScreen sharedState={sharedState} videoObject={videoObject}/> : <PreviewStaticPhotoScreen sharedState={sharedState}/>
 }
