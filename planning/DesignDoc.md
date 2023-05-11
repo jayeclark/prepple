@@ -301,10 +301,11 @@ Customer service functions for billing, account management, and moderation will 
 
 Initial development will focus exclusively on the web client. However, unlike with LeetCode and traditional coding interview prep tools, behavioral interviews can be planned for and practiced on mobile devices as well as via desktop browsers. A priority once the web app exits beta will be developing Android and IOS apps to provide mobile access to the platform. The current plan is to develop the iOS app with Swift, and the Android app with Kotlin. (An alternative option is to use React Native for cross-platform development.)
 
-2.5.5. Infrastructure and CICD
+#### 2.5.5. Infrastructure and CICD
+
 Currently, Prepple is in the very earliest stages of development and exists in two separate GitHub repositories - one large monorepo containing the code for most of the components, and a smaller repository containing a very early scaffolding of the machine learning management app. The ML management app resources are provisioned with Terraform and deployed via a Jenkins CICD server. Other resources are provisioned with AWS CDK and deployed using AWS CodePipeline via a single deployment pipeline. Future refactoring will separate out the resources to deploy in parallel via different pipelines. Currently, a failed deployment of any one resource at a certain point in the pipeline will block the promotion of all resources from beta to gamma to prod, which is not the intended behavior. A new deployment to the front-end should be able to fail and block that particular pipeline without also preventing full deployment of updates to the backend API.
 
-![Main CICD](./Prepple-Pipeline.png)
+![Main CICD](./Prepple-DeploymentPipeline-Transparent-Screenshot.png)
 
 ![ML App CICD](./Prepple-Alternative-Deployment-Pipeline.png)
 
