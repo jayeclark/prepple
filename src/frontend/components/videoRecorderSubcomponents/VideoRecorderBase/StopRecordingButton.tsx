@@ -1,24 +1,36 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { VideoRecorderComponentProps } from './VideoRecorderBase';
 import { MediaState } from '../../../constants/app';
 import { Button, useTheme } from '@mui/material';
 import { STOP_RECORDING } from '../../../constants/videoRecorder';
-import { takeScreenshotFromMediaStream } from '../../../scripts/takeScreenshotFromStream';
+import { loadImageCapture, takeScreenshotFromMediaStream } from '../../../scripts/takeScreenshotFromStream';
 
 
 export default function StopRecordingButton({ sharedState, videoObject }: VideoRecorderComponentProps) {
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
+  const [imageCaptureClass, setImageCaptureClass] = useState(null);
   const { pauseRecording, previewStream } = videoObject;
   const updateMediaStatus = sharedState.mediaStatus.setter;
   const setPhotoPreviewUrl = sharedState.photoPreviewUrl.setter;
+
+  useEffect(() => {
+    async function getImageCapture() {
+      const ImageCapture = await loadImageCapture();
+      return ImageCapture;
+    }
+    
+    if (typeof window !== undefined) {
+      getImageCapture().then((ImageCapture) => setImageCaptureClass(ImageCapture));
+    }
+  })
     
   const handleStopRecording = useCallback(async () => {
     console.log('stopping recording');
     updateMediaStatus(MediaState.PAUSED);
     setLoading(true);
 
-    const srcPromise = takeScreenshotFromMediaStream(previewStream as MediaStream);
+    const srcPromise = takeScreenshotFromMediaStream(previewStream as MediaStream, imageCaptureClass);
     pauseRecording();
 
     updateMediaStatus(MediaState.STOPPED);
@@ -26,7 +38,7 @@ export default function StopRecordingButton({ sharedState, videoObject }: VideoR
     setPhotoPreviewUrl(src);
     
 
-  }, [previewStream, setPhotoPreviewUrl, pauseRecording, updateMediaStatus ])
+  }, [previewStream, setPhotoPreviewUrl, pauseRecording, updateMediaStatus, imageCaptureClass ])
   
   return (<>
     <Button onClick={handleStopRecording} aria-label={STOP_RECORDING}>
