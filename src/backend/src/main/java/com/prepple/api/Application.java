@@ -6,9 +6,10 @@ import org.springframework.context.annotation.Import;
 
 import com.prepple.api.controller.PingController;
 
+
 @SpringBootApplication
 // We use direct @Import instead of @ComponentScan to speed up cold starts
-// @ComponentScan(basePackages = "com.mydevinterview.api.controller")
+// @ComponentScan(basePackages = "com.prepple.api.controller")
 @Import({ PingController.class })
 public class Application {
 

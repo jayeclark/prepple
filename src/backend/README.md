@@ -1,4 +1,4 @@
-# Prepple Serverless API
+# prepple serverless API
 The prepple project, created with [`aws-serverless-java-container`](https://github.com/awslabs/aws-serverless-java-container).
 
 The starter project defines a simple `/ping` resource that can accept `GET` requests with its tests.
@@ -16,7 +16,7 @@ You can use the SAM CLI to quickly build the project
 $ mvn archetype:generate -DartifactId=prepple -DarchetypeGroupId=com.amazonaws.serverless.archetypes -DarchetypeArtifactId=aws-serverless-jersey-archetype -DarchetypeVersion=1.9.1 -DgroupId=com.prepple.api -Dversion=1.0-SNAPSHOT -Dinteractive=false
 $ cd prepple
 $ sam build
-Building resource 'PreppleAPI'
+Building resource 'PreppleFunction'
 Running JavaGradleWorkflow:GradleBuild
 Running JavaGradleWorkflow:CopyArtifacts
 
@@ -67,7 +67,7 @@ Once the deployment is completed, the SAM CLI will print out the stack's outputs
 -------------------------------------------------------------------------------------------------------------
 OutputKey-Description                        OutputValue
 -------------------------------------------------------------------------------------------------------------
-MyDevInterviewApi - URL for application            https://xxxxxxxxxx.execute-api.us-west-2.amazonaws.com/Prod/pets
+PreppleApi - URL for application            https://xxxxxxxxxx.execute-api.us-west-2.amazonaws.com/Prod/pets
 -------------------------------------------------------------------------------------------------------------
 ```
 
