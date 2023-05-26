@@ -18,7 +18,7 @@ public class Question {
     private String question;
 
     @ManyToOne
-    @JoinColumn(name = "question_id")
+    @JoinColumn(name="parent_id", referencedColumnName="question_id")
     private Question parent;
 
     private double acceptance;
