@@ -6,7 +6,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.Entity;
 import java.io.Serializable;
 import java.util.List;
 
@@ -21,7 +20,7 @@ public abstract class AbstractHibernateDao<T extends Serializable> {
     }
 
     // API
-    public T findOne(final long id) {
+    public T findOne(final String id) {
         return (T) getCurrentSession().get(entity, id);
     }
 
@@ -45,7 +44,7 @@ public abstract class AbstractHibernateDao<T extends Serializable> {
         getCurrentSession().delete(entity);
     }
 
-    public void deleteById(final long entityId) {
+    public void deleteById(final String entityId) {
         final T entity = findOne(entityId);
         Preconditions.checkNotNull(entity);
         delete(entity);

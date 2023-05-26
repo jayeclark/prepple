@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public interface IGenericDao<T extends Serializable> {
-    T findOne(long id);
+    T findOne(String id);
 
     List<T> findAll();
 
@@ -14,5 +14,5 @@ public interface IGenericDao<T extends Serializable> {
 
     void delete(T entity);
 
-    void deleteById(long entityId);
+    void deleteById(String entityId);
 }
