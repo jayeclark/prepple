@@ -5,4 +5,6 @@ public class Constants {
     public static final String POSTGRES_USERNAME_KEY = "PG_USERNAME";
     public static final String POSTGRES_PASSWORD_KEY = "PG_PASSWORD";
 
+    public static final Integer MAX_QUESTION_BATCH_SIZE = 25;
+
 }
