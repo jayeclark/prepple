@@ -12,3 +12,6 @@ cdk.context.json
 **/.DS_Store
 */.DS_Store
 **/*/prepple.iml
+**/*/root.pem
+**/*/root.crt
+**/*/.idea
