@@ -1,0 +1,10 @@
+<hibernate-mapping package="com.prepple.api.domain">
+
+    <class name="Question" table="QUESTIONS">
+        <id name="id" column="QUESTION_ID">
+            <generator class="native"/>
+        </id>
+        <property name="question"/>
+    </class>
+
+</hibernate-mapping>
