@@ -27,6 +27,9 @@ public class Question {
     @JoinColumn(name="parent_id", referencedColumnName="question_id")
     private Question parent;
 
+    @Column(name="guide_id")
+    private String guideId;
+
     private double acceptance;
 
     private double variation;
