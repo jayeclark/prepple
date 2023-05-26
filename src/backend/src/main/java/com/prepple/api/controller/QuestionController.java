@@ -19,7 +19,7 @@ public class QuestionController {
         return pong;
     }
 
-    @RequestMapping(path = "/questions", method = RequestMethod.POST)
+    @RequestMapping(path = "/questions", method = RequestMethod.GET)
     public Map<String, String> getQuestion() {
         Map<String, String> pong = new HashMap<>();
         pong.put("pong", "Hello, World!");
