@@ -1,5 +1,6 @@
 package com.prepple.api.model;
 
+import com.fasterxml.jackson.databind.jsonschema.JsonSerializableSchema;
 import lombok.Data;
 
 import javax.persistence.Column;
@@ -9,11 +10,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.io.Serializable;
 import java.sql.Time;
 
 @Entity
 @Data
-public class Question {
+public class Question implements Serializable {
     @Id
     @Column(name="question_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
