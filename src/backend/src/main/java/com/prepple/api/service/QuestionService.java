@@ -1,6 +1,7 @@
 package com.prepple.api.service;
 
 import com.prepple.api.dao.postgres.QuestionDao;
+import com.prepple.api.dto.QuestionDto;
 import com.prepple.api.model.Question;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,21 +15,21 @@ public class QuestionService implements IGenericService<Question> {
     QuestionDao dao;
 
     // TODO: Implement randomization with and without replacement based on session store
-    public Question getRandom() {
+    public QuestionDto getRandom() {
         List<Question> questions = dao.findAll();
-        return questions.get(0);
+        return mapQuestionToQuestionDto(questions.get(0));
     }
 
     @Override
-    public Question create(Question question) {
+    public QuestionDto create(Question question) {
         Question result = dao.create(question);
-        return result;
+        return mapQuestionToQuestionDto(result);
     }
 
     @Override
-    public Question getById(String questionID) {
+    public QuestionDto getById(String questionID) {
         Question result = dao.findOne(questionID);
-        return result;
+        return mapQuestionToQuestionDto(result);
     }
 
     @Override
@@ -39,5 +40,21 @@ public class QuestionService implements IGenericService<Question> {
     @Override
     public void deleteById(String questionID) {
         dao.deleteById(questionID);
+    }
+
+    public static QuestionDto mapQuestionToQuestionDto(Question question) {
+        Question parent = question.getParent();
+
+        QuestionDto result = new QuestionDto();
+        result.setId(question.getId());
+        result.setTitle(question.getTitle());
+        result.setQuestion(question.getQuestion());
+        result.setParentId(parent != null ? parent.getId() : null);
+        result.setAcceptance(question.getAcceptance());
+        result.setFrequency(question.getFrequency());
+        result.setVariation(question.getVariation());
+        result.setCreatedAt(question.getCreatedAt());
+        result.setUpdatedAt(question.getUpdatedAt());
+        return result;
     }
 }

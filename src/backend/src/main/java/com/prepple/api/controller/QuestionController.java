@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.prepple.api.configuration.Constants;
+import com.prepple.api.dto.QuestionDto;
 import com.prepple.api.model.Question;
 import com.prepple.api.model.QuestionBatchRequest;
 import com.prepple.api.service.QuestionService;
@@ -28,26 +29,26 @@ public class QuestionController {
     ObjectMapper mapper = Mapper.getInstance();
 
     @RequestMapping(path = "/question/random", method = RequestMethod.GET)
-    public Map<String, Question> getRandomQuestion() {
-        Question question = service.getRandom();
-        Map<String, Question> response = new HashMap<>();
+    public Map<String, QuestionDto> getRandomQuestion() {
+        QuestionDto question = service.getRandom();
+        Map<String, QuestionDto> response = new HashMap<>();
         response.put("question", question);
         return response;
     }
 
     @RequestMapping(path = "/questions/{id}", method = RequestMethod.GET)
-    public Map<String, Question> getQuestionById(@PathVariable(value="id") String id) {
-        Question question = service.getById(id);
-        Map<String, Question> response = new HashMap<>();
+    public Map<String, QuestionDto> getQuestionById(@PathVariable(value="id") String id) {
+        QuestionDto question = service.getById(id);
+        Map<String, QuestionDto> response = new HashMap<>();
         response.put("question", question);
         return response;
     }
 
     @RequestMapping(path = "/questions", method = RequestMethod.POST)
-    public Map<String, Question> addQuestion(@RequestBody String body) throws JsonProcessingException {
+    public Map<String, QuestionDto> addQuestion(@RequestBody String body) throws JsonProcessingException {
         Question entityToCreate = mapper.readValue(body, Question.class);
-        Question question = service.create(entityToCreate);
-        Map<String, Question> response = new HashMap<>();
+        QuestionDto question = service.create(entityToCreate);
+        Map<String, QuestionDto> response = new HashMap<>();
         response.put("question", question);
         return response;
     }
@@ -79,16 +80,14 @@ public class QuestionController {
     }
 
     @RequestMapping(path = "/questions/batch", method = RequestMethod.POST)
-    public Map<String, List<Question>> getQuestionsBatch(@RequestBody String body) throws JsonProcessingException {
+    public Map<String, List<QuestionDto>> getQuestionsBatch(@RequestBody String body) throws JsonProcessingException {
         QuestionBatchRequest request = mapper.readValue(body, QuestionBatchRequest.class);
         List<String> ids = request.getIdsToFetch();
         Preconditions.checkState(ids.size() <= Constants.MAX_QUESTION_BATCH_SIZE);
 
-        List<Question> questions = ids.stream().map(id -> service.getById(id)).collect(Collectors.toList());
-        Map<String, List<Question>> response = new HashMap<>();
+        List<QuestionDto> questions = ids.stream().map(id -> service.getById(id)).collect(Collectors.toList());
+        Map<String, List<QuestionDto>> response = new HashMap<>();
         response.put("question", questions);
         return response;
     }
-
-
 }

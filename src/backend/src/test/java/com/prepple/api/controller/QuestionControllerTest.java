@@ -1,6 +1,7 @@
 package com.prepple.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.prepple.api.dto.QuestionDto;
 import com.prepple.api.model.Question;
 import com.prepple.api.service.QuestionService;
 import com.prepple.api.util.Mapper;
@@ -39,36 +40,36 @@ class QuestionControllerTest {
 
     private List<String> idsToFetch;
 
-    private Question RANDOM_QUESTION = Question.builder()
+    private QuestionDto RANDOM_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
             .id("123")
             .title("first title")
             .question("random question")
             .createdAt(new Time(System.currentTimeMillis()))
-            .build();
+            .build());
 
-    private Question QUESTION_BY_ID = Question.builder()
+    private QuestionDto QUESTION_BY_ID = QuestionService.mapQuestionToQuestionDto(Question.builder()
             .id("678")
             .title("second title")
             .question("question retrieved by id")
             .createdAt(new Time(System.currentTimeMillis() - 1000))
-            .build();
+            .build());
 
-    private Question CREATE_QUESTION = Question.builder()
+    private QuestionDto CREATE_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
             .id("345")
             .title("request title")
             .question("request question")
             .createdAt(new Time(System.currentTimeMillis() - 1000))
 
-            .build();
+            .build());
 
-    private Question UPDATE_QUESTION = Question.builder()
+    private QuestionDto UPDATE_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
             .id("345")
             .title("request title")
             .question("request question")
             .createdAt(new Time(System.currentTimeMillis() - 1000))
             .acceptance(0.7)
             .frequency(0.5)
-            .build();
+            .build());
 
     private JSONObject addQuestionJSON;
     private JSONObject updateQuestionJSON;
@@ -93,7 +94,7 @@ class QuestionControllerTest {
                         .contentType("application/json"))
                 .andReturn();
 
-        Map<String, Question> expectedResponse = new HashMap<>();
+        Map<String, QuestionDto> expectedResponse = new HashMap<>();
         expectedResponse.put("question", RANDOM_QUESTION);
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         assertEquals(actualResponseBody,
@@ -147,7 +148,7 @@ class QuestionControllerTest {
                         .contentType("application/json"))
                 .andReturn();
 
-        Map<String, Question> expectedResponse = new HashMap<>();
+        Map<String, QuestionDto> expectedResponse = new HashMap<>();
         expectedResponse.put("question", QUESTION_BY_ID);
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         assertEquals(actualResponseBody,
@@ -198,7 +199,7 @@ class QuestionControllerTest {
                 .contentType("application/json"))
                 .andReturn();
 
-        Map<String, Question> expectedResponse = new HashMap<>();
+        Map<String, QuestionDto> expectedResponse = new HashMap<>();
         expectedResponse.put("question", CREATE_QUESTION);
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         assertEquals(actualResponseBody,
@@ -300,21 +301,21 @@ class QuestionControllerTest {
                         .contentType("application/json"))
                 .andReturn();
 
-        Question expectedQuestion1 = RANDOM_QUESTION;
-        Question expectedQuestion2 = QUESTION_BY_ID;
+        QuestionDto expectedQuestion1 = RANDOM_QUESTION;
+        QuestionDto expectedQuestion2 = QUESTION_BY_ID;
 
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         JSONObject actualResponse = new JSONObject(actualResponseBody);
         JSONArray actualResponseQuestions = actualResponse.getJSONArray("question");
 
         String q1 = actualResponseQuestions.getString(0);
-        Question actualQuestion1 = mapper.readValue(q1, Question.class);
+        QuestionDto actualQuestion1 = mapper.readValue(q1, QuestionDto.class);
         assertEquals(expectedQuestion1.getId(), actualQuestion1.getId());
         assertEquals(expectedQuestion1.getTitle(), actualQuestion1.getTitle());
         assertEquals(expectedQuestion1.getQuestion(), actualQuestion1.getQuestion());
 
         String q2 = actualResponseQuestions.getString(1);
-        Question actualQuestion2 = mapper.readValue(q2, Question.class);
+        QuestionDto actualQuestion2 = mapper.readValue(q2, QuestionDto.class);
         assertEquals(expectedQuestion2.getId(), actualQuestion2.getId());
         assertEquals(expectedQuestion2.getTitle(), actualQuestion2.getTitle());
         assertEquals(expectedQuestion2.getQuestion(), actualQuestion2.getQuestion());
