@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public abstract class AbstractHibernateDao<T extends Serializable> {
-    private Class<T> entity;
+    private Class<T> entity; // skipcq: JAVA-S1060
 
     @Autowired
     protected SessionFactory sessionFactory;

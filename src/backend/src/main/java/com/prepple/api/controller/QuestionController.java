@@ -24,6 +24,7 @@ public class QuestionController {
     @Autowired
     QuestionService service;
 
+    @Autowired
     ObjectMapper mapper = Mapper.getInstance();
 
     @RequestMapping(path = "/question/random", method = RequestMethod.GET)
