@@ -1,8 +1,9 @@
 package com.prepple.api.model;
 
 import com.fasterxml.jackson.databind.jsonschema.JsonSerializableSchema;
-import lombok.Data;
+import lombok.*;
 
+import javax.annotation.Nonnull;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,14 +16,19 @@ import java.sql.Time;
 
 @Entity
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Question implements Serializable {
     @Id
     @Column(name="question_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
 
+    @NonNull
     private String title;
 
+    @NonNull
     private String question;
 
     @ManyToOne
@@ -39,6 +45,7 @@ public class Question implements Serializable {
     private double frequency;
 
     @Column(name="created_at")
+    @NonNull
     private Time createdAt;
 
     @Column(name="updated_at")

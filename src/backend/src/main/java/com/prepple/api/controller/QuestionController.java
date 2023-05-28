@@ -1,7 +1,6 @@
 package com.prepple.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.json.JsonWriteContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.prepple.api.configuration.Constants;
@@ -27,42 +26,42 @@ public class QuestionController {
 
     ObjectMapper mapper = Mapper.getInstance();
 
-    @RequestMapping(path = "/questions/random", method = RequestMethod.GET)
-    public Map<String, String> getRandomQuestion() {
+    @RequestMapping(path = "/question/random", method = RequestMethod.GET)
+    public Map<String, Question> getRandomQuestion() {
         Question question = service.getRandom();
-        Map<String, String> response = new HashMap<>();
-        response.put("question", question.toString());
+        Map<String, Question> response = new HashMap<>();
+        response.put("question", question);
         return response;
     }
 
     @RequestMapping(path = "/questions/{id}", method = RequestMethod.GET)
-    public Map<String, String> getQuestion(@PathVariable(value="id") String id) {
+    public Map<String, Question> getQuestionById(@PathVariable(value="id") String id) {
         Question question = service.getById(id);
-        Map<String, String> response = new HashMap<>();
-        response.put("question", question.toString());
+        Map<String, Question> response = new HashMap<>();
+        response.put("question", question);
         return response;
     }
 
     @RequestMapping(path = "/questions", method = RequestMethod.POST)
-    public Map<String, String> addQuestion(@RequestBody String body) throws JsonProcessingException {
+    public Map<String, Question> addQuestion(@RequestBody String body) throws JsonProcessingException {
         Question entityToCreate = mapper.readValue(body, Question.class);
         Question question = service.create(entityToCreate);
-        Map<String, String> response = new HashMap<>();
-        response.put("question", mapper.writeValueAsString(question));
+        Map<String, Question> response = new HashMap<>();
+        response.put("question", question);
         return response;
     }
 
-    @RequestMapping(path = "/questions/{*id}", method = RequestMethod.PUT)
+    @RequestMapping(path = "/questions/{id}", method = RequestMethod.PUT)
     public Map<String, String> updateQuestion(@PathVariable(value="id") String id, @RequestBody String body) throws JsonProcessingException {
         Question entityToUpdate = mapper.readValue(body, Question.class);
-        Preconditions.checkState(entityToUpdate.getId() == id);
+        Preconditions.checkState(entityToUpdate.getId().equals(id));
         service.update(entityToUpdate);
         Map<String, String> response = new HashMap<>();
         response.put("update", "success");
         return response;
     }
 
-    @RequestMapping(path = "/questions/{*id}", method = RequestMethod.DELETE)
+    @RequestMapping(path = "/questions/{id}", method = RequestMethod.DELETE)
     public Map<String, String> deleteQuestion(@PathVariable(value="id") String id) {
         service.deleteById(id);
         Map<String, String> response = new HashMap<>();
@@ -78,15 +77,15 @@ public class QuestionController {
         return pong;
     }
 
-    @RequestMapping(path = "/questions/batch", method = RequestMethod.GET)
-    public Map<String, String> getQuestionsBatch(@RequestBody String body) throws JsonProcessingException {
+    @RequestMapping(path = "/questions/batch", method = RequestMethod.POST)
+    public Map<String, List<Question>> getQuestionsBatch(@RequestBody String body) throws JsonProcessingException {
         QuestionBatchRequest request = mapper.readValue(body, QuestionBatchRequest.class);
         List<String> ids = request.getIdsToFetch();
         Preconditions.checkState(ids.size() <= Constants.MAX_QUESTION_BATCH_SIZE);
 
         List<Question> questions = ids.stream().map(id -> service.getById(id)).collect(Collectors.toList());
-        Map<String, String> response = new HashMap<>();
-        response.put("question", mapper.writeValueAsString(questions));
+        Map<String, List<Question>> response = new HashMap<>();
+        response.put("question", questions);
         return response;
     }
 
