@@ -1,9 +1,6 @@
 package com.prepple.api.controller;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonParser;
 import com.prepple.api.model.Question;
 import com.prepple.api.service.QuestionService;
 import com.prepple.api.util.Mapper;
@@ -12,9 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -33,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = QuestionController.class)
-public class QuestionControllerTest {
+class QuestionControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -356,5 +351,4 @@ public class QuestionControllerTest {
         assertTrue(errorThrown);
         assertEquals(exceptionType, "java.lang.IllegalStateException");
     }
-
 }
