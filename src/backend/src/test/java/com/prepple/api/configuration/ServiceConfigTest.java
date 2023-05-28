@@ -1,36 +1,22 @@
 package com.prepple.api.configuration;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-import com.amazonaws.serverless.proxy.internal.LambdaContainerHandler;
-import com.amazonaws.serverless.proxy.internal.testutils.AwsProxyRequestBuilder;
-import com.amazonaws.serverless.proxy.internal.testutils.MockLambdaContext;
-import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.prepple.api.StreamLambdaHandler;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import static org.junit.Assert.*;
 import static com.prepple.api.configuration.Constants.POSTGRES_URL_KEY;
 import static com.prepple.api.configuration.Constants.POSTGRES_USERNAME_KEY;
 import static com.prepple.api.configuration.Constants.POSTGRES_PASSWORD_KEY;
-
 
 public class ServiceConfigTest {
     private static String envPgUrl;
     private static String envPgUsername;
     private static String envPgPassword;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() {
         envPgUrl = System.getenv(POSTGRES_URL_KEY);
         envPgUsername = System.getenv(POSTGRES_USERNAME_KEY);
