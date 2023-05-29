@@ -251,7 +251,7 @@ class QuestionControllerTest {
             exceptionType = (e.getCause()).toString();
         }
         assertTrue(errorThrown);
-        assertEquals(exceptionType, "java.lang.IllegalStateException");
+        assertEquals("java.lang.IllegalStateException", exceptionType);
     }
 
     /*******************************************/
@@ -350,6 +350,6 @@ class QuestionControllerTest {
             exceptionType = (e.getCause()).toString();
         }
         assertTrue(errorThrown);
-        assertEquals(exceptionType, "java.lang.IllegalStateException");
+        assertEquals("java.lang.IllegalStateException", exceptionType);
     }
 }
