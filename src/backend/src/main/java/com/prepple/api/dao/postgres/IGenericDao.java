@@ -37,13 +37,13 @@ public interface IGenericDao<T extends Serializable> {
 
     /**
      * Delete an entity
-     * @param entity
+     * @param entity <T>
      */
     void delete(T entity);
 
     /**
      * Delete an entity based on id
-     * @param entityId
+     * @param entityId String
      */
     void deleteById(String entityId);
 }

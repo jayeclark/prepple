@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Time;
 
+/**
+ * Dto implementation for the question entity
+ */
 @Data
 @NoArgsConstructor
 public class QuestionDto implements IGenericDto<Question> {

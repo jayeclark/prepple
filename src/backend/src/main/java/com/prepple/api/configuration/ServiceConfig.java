@@ -4,6 +4,9 @@ import static com.prepple.api.configuration.Constants.POSTGRES_URL_KEY;
 import static com.prepple.api.configuration.Constants.POSTGRES_USERNAME_KEY;
 import static com.prepple.api.configuration.Constants.POSTGRES_PASSWORD_KEY;
 
+/**
+ * Obtains environment variables and makes them available as static service configuration variables
+ */
 public class ServiceConfig {
     private static String pgUrl;
     private static String pgUsername;

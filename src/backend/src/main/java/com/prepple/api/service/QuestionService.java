@@ -45,6 +45,11 @@ public class QuestionService implements IGenericService<Question> {
         dao.deleteById(questionID);
     }
 
+    /**
+     * Converts question entity returned by Dao into a safe Dto object
+     * @param question Question The question object to convert
+     * @return QuestionDto A simplified data transfer object to avoid exposing business logic
+     */
     public static QuestionDto mapQuestionToQuestionDto(Question question) {
         Question parent = question.getParent();
 
