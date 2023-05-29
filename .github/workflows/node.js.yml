@@ -16,10 +16,6 @@ jobs:
         node-version: [14.x, 16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
-    env:
-      PG_USERNAME: postgres
-      PG_PASSWORD: password1
-
     services:
       postgres:
         image: postgres:10
@@ -38,6 +34,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+      env:
+        PG_USERNAME: postgres
+        PG_PASSWORD: password1
     - run: npm ci
     - run: npm run build --if-present
     - run: npm run test:unit
