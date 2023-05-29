@@ -1,17 +1,17 @@
 # This Dockerfile contains the image specification of our database
 FROM postgres:10-alpine
 
-RUN certs.sh
+ENV POSTGRES_USER jayclark
+ENV POSTGRES_PASSWORD password1
+ENV POSTGRES_DB prepple
+ENV POSTGRES_HOST_AUTH_METHOD trust
 
-COPY ./certs/out/server.key /var/lib/postgresql
-COPY ./certs/out/server.crt /var/lib/postgresql
-COPY ./certs/out/root.crt /var/lib/postgresql
-
-COPY ./ssl-conf.sh /usr/local/bin
+COPY ./certs/out/server.key /var/lib/postgresql/server.key
+COPY ./certs/out/server.crt /var/lib/postgresql/server.crt
+COPY ./certs/out/root.crt /var/lib/postgresql/root.crt
 
 RUN chown 0:70 /var/lib/postgresql/server.key && chmod 640 /var/lib/postgresql/server.key
 RUN chown 0:70 /var/lib/postgresql/server.crt && chmod 640 /var/lib/postgresql/server.crt
-RUN chown 0:70 /var/lib/postgresql/root.crt && chmod 640 /var/lib/postgresql/root.crt
 
 ENTRYPOINT ["docker-entrypoint.sh"] 
 

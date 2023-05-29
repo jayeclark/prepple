@@ -25,13 +25,13 @@ public class ServiceConfig {
             case POSTGRES:
                 return pgUrl;
         }
-        return null;
+        return pgUrl;
     }
 
     public static String getDbUsername(Database db) {
         switch(db) {
             case POSTGRES:
-                return pgUsername;
+                return System.getenv(POSTGRES_USERNAME_KEY);
         }
         return null;
     }
@@ -39,7 +39,7 @@ public class ServiceConfig {
     public static String getDbPassword(Database db) {
         switch(db) {
             case POSTGRES:
-                return pgPassword;
+                return System.getenv(POSTGRES_PASSWORD_KEY);
         }
         return null;
     }
