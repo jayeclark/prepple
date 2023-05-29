@@ -11,8 +11,30 @@ import java.io.Serializable;
  * @param <T> The type of entity for which the service is being defined
  */
 public interface IGenericService<T extends Serializable> {
+    /**
+     * A service should include a method to create a new entity and return
+     * a Dto
+     * @param entity <T>
+     * @return IGenericDto<T>
+     */
     public IGenericDto<T> create(T entity);
+
+    /**
+     * A service should include a method to get an entity by its id
+     * @param id String
+     * @return IGenericDto<T>
+     */
     public IGenericDto<T> getById(String id);
+
+    /**
+     * A service should include a method to update an entity
+     * @param entity <T>
+     */
     public void update(T entity);
+
+    /**
+     * A service should include a method to delete an entity based on its id
+     * @param id String
+     */
     public void deleteById(String id);
 }

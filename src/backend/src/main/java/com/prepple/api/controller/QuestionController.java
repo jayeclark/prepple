@@ -31,6 +31,11 @@ public class QuestionController {
     @Autowired
     ObjectMapper mapper = Mapper.getInstance();
 
+    /**
+     * Retrieves a random question from the database
+     * TODO: Add in session storage and the option to sample questions with and without replacement
+     * @return Map<String, QuestionDto> A REST API json response containing a single question data transfer object
+     */
     @RequestMapping(path = "/question/random", method = RequestMethod.GET)
     public Map<String, QuestionDto> getRandomQuestion() {
         QuestionDto question = service.getRandom();
@@ -39,6 +44,11 @@ public class QuestionController {
         return response;
     }
 
+    /**
+     * Retrieves a single question from the database based on its unique id
+     * @param id String The id of the question that should be retrieved
+     * @return Map<String, QuestionDto> A REST API json response containing a single question data transfer object
+     */
     @RequestMapping(path = "/questions/{id}", method = RequestMethod.GET)
     public Map<String, QuestionDto> getQuestionById(@PathVariable(value="id") String id) {
         QuestionDto question = service.getById(id);
@@ -47,6 +57,13 @@ public class QuestionController {
         return response;
     }
 
+    /**
+     * Adds a question to the database
+     * @param body String A parseable JSON object containing entity data for creating a question
+     * @return @return Map<String, QuestionDto> A REST API json response containing a single question
+     * data transfer object representing the question that was just created
+     * @throws JsonProcessingException
+     */
     @RequestMapping(path = "/questions", method = RequestMethod.POST)
     public Map<String, QuestionDto> addQuestion(@RequestBody String body) throws JsonProcessingException {
         Question entityToCreate = mapper.readValue(body, Question.class);
@@ -56,6 +73,14 @@ public class QuestionController {
         return response;
     }
 
+    /**
+     * Updates a question in the database
+     * @param id String The id of the question that should be updated
+     * @param body String A parsable JSON object containing the new entity data
+     * @return Map<String, String> A response indicating that the update was successful
+     * TODO: Change response type to indicate whether entity was upserted or not, or whether there were changes
+     * @throws JsonProcessingException
+     */
     @RequestMapping(path = "/questions/{id}", method = RequestMethod.PUT)
     public Map<String, String> updateQuestion(@PathVariable(value="id") String id, @RequestBody String body) throws JsonProcessingException {
         Question entityToUpdate = mapper.readValue(body, Question.class);
@@ -66,6 +91,13 @@ public class QuestionController {
         return response;
     }
 
+    /**
+     * Deletes a question from the postgres database
+     * TODO: What happens to questions stored elsewhere in other data stores when this happens?
+     * @param id String The ID of the question to be deleted
+     * @return Map<String, String> A response indicating that the deletion was successful
+     * TODO: Change response type to indicate more useful information
+     */
     @RequestMapping(path = "/questions/{id}", method = RequestMethod.DELETE)
     public Map<String, String> deleteQuestion(@PathVariable(value="id") String id) {
         service.deleteById(id);
@@ -74,6 +106,10 @@ public class QuestionController {
         return response;
     }
 
+    /**
+     * Searches questions with a specific query
+     * @return TBD. (Need to plan/implement query design and how it will work on the front end)
+     */
     @RequestMapping(path = "/questions", method = RequestMethod.GET)
     public Map<String, String> searchQuestions() {
         // TODO: Implement search functionality for common searches, depends on creating related entities first
@@ -82,6 +118,12 @@ public class QuestionController {
         return pong;
     }
 
+    /**
+     * Retrieves a batch of questions based on their ids
+     * @param body String A JSON Array of ids that should be retrieved
+     * @return A list of question data transfer objects for the requested IDs
+     * @throws JsonProcessingException
+     */
     @RequestMapping(path = "/questions/batch", method = RequestMethod.POST)
     public Map<String, List<QuestionDto>> getQuestionsBatch(@RequestBody String body) throws JsonProcessingException {
         QuestionBatchRequest request = mapper.readValue(body, QuestionBatchRequest.class);

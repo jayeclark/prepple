@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class QuestionDao extends AbstractHibernateDao<Question> implements IGenericDao<Question> {
+    /**
+     * Sets the Dao to relate to the Question entity
+     */
     public QuestionDao(){
         setEntity(Question.class);
     }

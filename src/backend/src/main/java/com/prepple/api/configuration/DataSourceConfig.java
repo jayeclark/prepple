@@ -20,6 +20,10 @@ import javax.sql.DataSource;
 @PropertySource("application-${spring.profiles.active}.properties")
 public class DataSourceConfig {
 
+    /**
+     * Creates a data source definition from information in app.properties and environment variables
+     * @return DataSource The primary data source that will be used by the Spring app
+     */
     @Bean
     @Primary
     @ConfigurationProperties(prefix = "app.datasource")
