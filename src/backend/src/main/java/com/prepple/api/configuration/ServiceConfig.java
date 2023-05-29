@@ -9,6 +9,8 @@ public class ServiceConfig {
     private static String pgUsername;
     private static String pgPassword;
 
+    public static final Integer MAX_QUESTION_BATCH_SIZE = 25;
+
     private ServiceConfig() {
         pgUrl = System.getenv(POSTGRES_URL_KEY);
         pgUsername = System.getenv(POSTGRES_USERNAME_KEY);

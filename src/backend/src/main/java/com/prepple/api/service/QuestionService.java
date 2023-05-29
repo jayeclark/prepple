@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * Service implementation for the Question entity.
+ */
 @Component
 public class QuestionService implements IGenericService<Question> {
 

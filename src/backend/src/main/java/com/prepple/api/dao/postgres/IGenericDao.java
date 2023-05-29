@@ -3,6 +3,10 @@ package com.prepple.api.dao.postgres;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Defines a generic interface for the Dao
+ * @param <T>
+ */
 public interface IGenericDao<T extends Serializable> {
     T findOne(String id);
 

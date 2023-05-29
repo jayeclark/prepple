@@ -12,6 +12,10 @@ import org.springframework.context.annotation.PropertySource;
 
 import javax.sql.DataSource;
 
+/**
+ * Configuration class for database connection. URL is derived from
+ * active profile properties file and username and password are derived from env variables
+ */
 @Configuration
 @PropertySource("application-${spring.profiles.active}.properties")
 public class DataSourceConfig {

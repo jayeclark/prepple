@@ -1,8 +1,10 @@
 package com.prepple.api.model;
 
 import lombok.Data;
-import java.util.List;
 
+/**
+ * Batch request implementation for the Question entity
+ */
 @Data
 public class QuestionBatchRequest extends AbstractBatchRequest<String> {
     public QuestionBatchRequest() {

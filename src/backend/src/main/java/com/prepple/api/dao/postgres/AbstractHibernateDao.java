@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Defines an abstract Dao class that can be extended to different entities within the data model
+ * @param <T> The specific entity type for which the Dao will be instantiated
+ */
 public abstract class AbstractHibernateDao<T extends Serializable> {
     private Class<T> entity; // skipcq: JAVA-S1060
 

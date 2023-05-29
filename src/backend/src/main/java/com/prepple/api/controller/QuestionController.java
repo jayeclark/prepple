@@ -3,7 +3,7 @@ package com.prepple.api.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.prepple.api.configuration.Constants;
+import com.prepple.api.configuration.ServiceConfig;
 import com.prepple.api.dto.QuestionDto;
 import com.prepple.api.model.Question;
 import com.prepple.api.model.QuestionBatchRequest;
@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Class defines REST API routes and service calls for to the Question entity.
+ */
 @RestController
 @EnableWebMvc
 public class QuestionController {
@@ -83,7 +86,7 @@ public class QuestionController {
     public Map<String, List<QuestionDto>> getQuestionsBatch(@RequestBody String body) throws JsonProcessingException {
         QuestionBatchRequest request = mapper.readValue(body, QuestionBatchRequest.class);
         List<String> ids = request.getIdsToFetch();
-        Preconditions.checkState(ids.size() <= Constants.MAX_QUESTION_BATCH_SIZE);
+        Preconditions.checkState(ids.size() <= ServiceConfig.MAX_QUESTION_BATCH_SIZE);
 
         List<QuestionDto> questions = ids.stream().map(id -> service.getById(id)).collect(Collectors.toList());
         Map<String, List<QuestionDto>> response = new HashMap<>();
