@@ -7,8 +7,8 @@ import com.amazonaws.serverless.proxy.internal.testutils.MockLambdaContext;
 import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
 import com.amazonaws.services.lambda.runtime.Context;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.HttpHeaders;
@@ -19,22 +19,29 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
-public class StreamLambdaHandlerTest {
+
+
+
+class StreamLambdaHandlerTest {
 
     private static StreamLambdaHandler handler;
     private static Context lambdaContext;
 
-    @BeforeClass
-    public static void setUp() {
+    @BeforeAll
+    static void setUp() {
         handler = new StreamLambdaHandler();
         lambdaContext = new MockLambdaContext();
     }
 
     @Test
-    public void ping_streamRequest_respondsWithHello() {
+    void ping_streamRequest_respondsWithHello() {
         InputStream requestStream = new AwsProxyRequestBuilder("/ping", HttpMethod.GET)
                                             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
                                             .buildStream();
@@ -56,7 +63,7 @@ public class StreamLambdaHandlerTest {
     }
 
     @Test
-    public void invalidResource_streamRequest_responds404() {
+    void invalidResource_streamRequest_responds404() {
         InputStream requestStream = new AwsProxyRequestBuilder("/pong", HttpMethod.GET)
                                             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
                                             .buildStream();
@@ -69,7 +76,7 @@ public class StreamLambdaHandlerTest {
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatusCode());
     }
 
-    private void handle(InputStream is, ByteArrayOutputStream os) {
+    void handle(InputStream is, ByteArrayOutputStream os) {
         try {
             handler.handleRequest(is, os, lambdaContext);
         } catch (IOException e) {

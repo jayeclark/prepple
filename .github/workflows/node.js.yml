@@ -14,16 +14,52 @@ jobs:
     strategy:
       matrix:
         node-version: [14.x, 16.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/         
 
+    services:
+      postgresql:
+        image: jayeclark/postgres-ssl
+        env:
+          POSTGRES_DB: "prepple"
+          POSTGRES_USER: "jayclark"
+          POSTGRES_PASSWORD: "password1"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
-    - uses: actions/checkout@v3
+    - name: Check out code
+      uses: actions/checkout@v3
+    - name: Use Java 18
+      uses: actions/setup-java@v3
+      env:
+        PG_USERNAME: jayclark
+        PG_PASSWORD: password1
+      with:
+        distribution: 'adopt-hotspot' # See 'Supported distributions' for available options
+        java-version: '18'
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
+      env:
+        PG_USERNAME: jayclark
+        PG_PASSWORD: password1
+    - name: Copy root pem file to resources/certificates
+      run: cp ./src/backend/src/main/resources/certificates/ghactions-root.pem ./src/backend/src/main/resources/certificates/root.pem
+    - name: Install dependencies
+      run: npm ci
+    - name: Run build scripts
+      run: npm run build --if-present
+      env:
+        PG_USERNAME: jayclark
+        PG_PASSWORD: password1
+        POSTGRES_USER: jayclark
+        POSTGRES_PASSWORD: password1
+        POSTGRES_DB: prepple
     - run: npm run test:unit
     - run: npm run test:integration

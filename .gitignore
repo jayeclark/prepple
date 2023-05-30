@@ -8,3 +8,13 @@ build
 src/backend/target
 .aws-sam
 cdk.context.json
+.DS_Store
+**/.DS_Store
+*/.DS_Store
+**/*/prepple.iml
+**/src/main/resources/certificates/root.pem
+**/src/main/resources/certificates/ghactions-root.key
+**/src/main/resources/certificates/root.crt
+**/*/root.key
+**/src/main/resources/certificates/root.csr
+**/*/.idea

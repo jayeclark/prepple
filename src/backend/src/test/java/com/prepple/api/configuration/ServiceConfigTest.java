@@ -1,56 +1,42 @@
 package com.prepple.api.configuration;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-import com.amazonaws.serverless.proxy.internal.LambdaContainerHandler;
-import com.amazonaws.serverless.proxy.internal.testutils.AwsProxyRequestBuilder;
-import com.amazonaws.serverless.proxy.internal.testutils.MockLambdaContext;
-import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.prepple.api.StreamLambdaHandler;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import static org.junit.Assert.*;
 import static com.prepple.api.configuration.Constants.POSTGRES_URL_KEY;
 import static com.prepple.api.configuration.Constants.POSTGRES_USERNAME_KEY;
 import static com.prepple.api.configuration.Constants.POSTGRES_PASSWORD_KEY;
 
-
-public class ServiceConfigTest {
+class ServiceConfigTest {
     private static String envPgUrl;
     private static String envPgUsername;
     private static String envPgPassword;
 
-    @BeforeClass
-    public static void setUp() {
+    @BeforeAll
+    static void setUp() {
         envPgUrl = System.getenv(POSTGRES_URL_KEY);
         envPgUsername = System.getenv(POSTGRES_USERNAME_KEY);
         envPgPassword = System.getenv(POSTGRES_PASSWORD_KEY);
     }
 
     @Test
-    public void getURL_givenPOSTGRESdb_returnsExpectedValue() {
+    void getURL_givenPOSTGRESdb_returnsExpectedValue() {
         String url = ServiceConfig.getDbUrl(Database.POSTGRES);
         assertEquals(url, envPgUrl);
     }
 
     @Test
-    public void getURL_givenDDBdb_returnsNull() {
+    void getURL_givenDDBdb_returnsNull() {
         String url = ServiceConfig.getDbUrl(Database.DDB);
         assertNull(url);
     }
 
     @Test
-    public void getURL_givenNULLdb_throwsException() {
+    void getURL_givenNULLdb_throwsException() {
         Boolean exceptionThrown = false;
         try {
             ServiceConfig.getDbUrl(null);
@@ -63,19 +49,19 @@ public class ServiceConfigTest {
 
 
     @Test
-    public void getUsername_givenPOSTGRESdb_returnsExpectedValue() {
+    void getUsername_givenPOSTGRESdb_returnsExpectedValue() {
         String username = ServiceConfig.getDbUsername(Database.POSTGRES);
         assertEquals(username, envPgUsername);
     }
 
     @Test
-    public void getUsername_givenDDBdb_returnsNull() {
+    void getUsername_givenDDBdb_returnsNull() {
         String username = ServiceConfig.getDbUsername(Database.DDB);
         assertNull(username);
     }
 
     @Test
-    public void getUsername_givenNULLdb_throwsException() {
+    void getUsername_givenNULLdb_throwsException() {
         Boolean exceptionThrown = false;
         try {
             ServiceConfig.getDbUsername(null);
@@ -88,19 +74,19 @@ public class ServiceConfigTest {
 
 
     @Test
-    public void getPassword_givenPOSTGRESdb_returnsExpectedValue() {
+    void getPassword_givenPOSTGRESdb_returnsExpectedValue() {
         String password = ServiceConfig.getDbPassword(Database.POSTGRES);
         assertEquals(password, envPgPassword);
     }
 
     @Test
-    public void getPassword_givenDDBdb_returnsNull() {
+    void getPassword_givenDDBdb_returnsNull() {
         String username = ServiceConfig.getDbPassword(Database.DDB);
         assertNull(username);
     }
 
     @Test
-    public void getPassword_givenNULLdb_throwsException() {
+    void getPassword_givenNULLdb_throwsException() {
         Boolean exceptionThrown = false;
         try {
             ServiceConfig.getDbPassword(null);
@@ -110,8 +96,4 @@ public class ServiceConfigTest {
         }
         assertTrue(exceptionThrown);
     }
-
-
-
-
 }
