@@ -18,3 +18,5 @@ cdk.context.json
 **/*/root.key
 **/src/main/resources/certificates/root.csr
 **/*/.idea
+**/*/openssl-san.cnf
+**/*/root.srl

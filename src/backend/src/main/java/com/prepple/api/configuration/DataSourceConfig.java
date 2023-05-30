@@ -1,6 +1,7 @@
 package com.prepple.api.configuration;
 
 import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,33 @@ import javax.sql.DataSource;
 public class DataSourceConfig {
 
     /**
+     * Creates a data source properties object for the local data source when
+     * running the build steps
+     *
+     * @return DataSourceProperties The config properties that should be used to
+     *         create the data source.
+     */
+    @Bean
+    @Primary
+    @ConfigurationProperties(prefix = "app.datasource")
+    public DataSourceProperties dataSourcePropertiesLocal() {
+        return new DataSourceProperties();
+    }
+
+    /**
+     * Creates a data source properties object for the local data source when
+     * testing API endpoints locally using sam local start-api
+     *
+     * @return DataSourceProperties The config properties that should be used to
+     *         create the data source.
+     */
+    @Bean
+    @ConfigurationProperties(prefix = "app.docker.datasource")
+    public DataSourceProperties dataSourcePropertiesDocker() {
+        return new DataSourceProperties();
+    }
+
+    /**
      * Creates a data source definition from information in app.properties and
      * environment variables
      * 
@@ -27,13 +55,12 @@ public class DataSourceConfig {
      *         app
      */
     @Bean
-    @Primary
-    @ConfigurationProperties(prefix = "app.datasource")
     public DataSource getDataSource() {
-        return DataSourceBuilder.create()
-                .username(ServiceConfig.getDbUsername(Database.POSTGRES))
-                .password(ServiceConfig.getDbPassword(Database.POSTGRES))
-                .type(HikariDataSource.class)
-                .build();
+        Boolean isAwsSamLocal = System.getenv("AWS_SAM_LOCAL") != null
+                && (System.getenv("AWS_SAM_LOCAL")).equals("true");
+        DataSourceProperties properties = isAwsSamLocal != null && isAwsSamLocal ? dataSourcePropertiesDocker() : dataSourcePropertiesLocal();
+        properties.setUsername(ServiceConfig.getDbUsername(Database.POSTGRES));
+        properties.setPassword(ServiceConfig.getDbPassword(Database.POSTGRES));
+        return properties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
     }
 }
