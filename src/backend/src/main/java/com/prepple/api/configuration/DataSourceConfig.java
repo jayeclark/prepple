@@ -20,6 +20,13 @@ import javax.sql.DataSource;
 @PropertySource("application-${spring.profiles.active}.properties")
 public class DataSourceConfig {
 
+    /**
+     * Creates a data source properties object for the local data source when
+     * running the build steps
+     *
+     * @return DataSourceProperties The config properties that should be used to
+     *         create the data source.
+     */
     @Bean
     @Primary
     @ConfigurationProperties(prefix = "app.datasource")
@@ -27,6 +34,13 @@ public class DataSourceConfig {
         return new DataSourceProperties();
     }
 
+    /**
+     * Creates a data source properties object for the local data source when
+     * testing API endpoints locally using sam local start-api
+     *
+     * @return DataSourceProperties The config properties that should be used to
+     *         create the data source.
+     */
     @Bean
     @ConfigurationProperties(prefix = "app.docker.datasource")
     public DataSourceProperties dataSourcePropertiesDocker() {
@@ -44,7 +58,7 @@ public class DataSourceConfig {
     public DataSource getDataSource() {
         Boolean isAwsSamLocal = System.getenv("AWS_SAM_LOCAL") != null
                 && (System.getenv("AWS_SAM_LOCAL")).equals("true");
-        DataSourceProperties properties = isAwsSamLocal ? dataSourcePropertiesDocker() : dataSourcePropertiesLocal();
+        DataSourceProperties properties = isAwsSamLocal != null && isAwsSamLocal ? dataSourcePropertiesDocker() : dataSourcePropertiesLocal();
         properties.setUsername(ServiceConfig.getDbUsername(Database.POSTGRES));
         properties.setPassword(ServiceConfig.getDbPassword(Database.POSTGRES));
         return properties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
