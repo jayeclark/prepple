@@ -1,0 +1,14 @@
+version: '3.5'
+
+services:
+  postgres:
+    container_name: jayeclark-prepple-backend
+    image: jayeclark/postgres-ssl
+    networks:
+      - backend
+    ports:
+      - 5432:5432
+
+networks:
+  backend:
+    name: prepple-backend

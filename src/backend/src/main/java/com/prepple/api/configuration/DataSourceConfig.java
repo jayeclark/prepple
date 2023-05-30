@@ -1,6 +1,7 @@
 package com.prepple.api.configuration;
 
 import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,19 @@ import javax.sql.DataSource;
 @PropertySource("application-${spring.profiles.active}.properties")
 public class DataSourceConfig {
 
+    @Bean
+    @Primary
+    @ConfigurationProperties(prefix = "app.datasource")
+    public DataSourceProperties dataSourcePropertiesLocal() {
+        return new DataSourceProperties();
+    }
+
+    @Bean
+    @ConfigurationProperties(prefix = "app.docker.datasource")
+    public DataSourceProperties dataSourcePropertiesDocker() {
+        return new DataSourceProperties();
+    }
+
     /**
      * Creates a data source definition from information in app.properties and
      * environment variables
@@ -27,13 +41,12 @@ public class DataSourceConfig {
      *         app
      */
     @Bean
-    @Primary
-    @ConfigurationProperties(prefix = "app.datasource")
     public DataSource getDataSource() {
-        return DataSourceBuilder.create()
-                .username(ServiceConfig.getDbUsername(Database.POSTGRES))
-                .password(ServiceConfig.getDbPassword(Database.POSTGRES))
-                .type(HikariDataSource.class)
-                .build();
+        Boolean isAwsSamLocal = System.getenv("AWS_SAM_LOCAL") != null
+                && (System.getenv("AWS_SAM_LOCAL")).equals("true");
+        DataSourceProperties properties = isAwsSamLocal ? dataSourcePropertiesDocker() : dataSourcePropertiesLocal();
+        properties.setUsername(ServiceConfig.getDbUsername(Database.POSTGRES));
+        properties.setPassword(ServiceConfig.getDbPassword(Database.POSTGRES));
+        return properties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
     }
 }

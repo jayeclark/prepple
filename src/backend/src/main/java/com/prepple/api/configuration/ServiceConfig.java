@@ -23,9 +23,9 @@ public class ServiceConfig {
     public static String getDbUrl(Database db) {
         switch(db) {
             case POSTGRES:
-                return pgUrl;
+                return System.getenv(POSTGRES_URL_KEY);
         }
-        return pgUrl;
+        return null;
     }
 
     public static String getDbUsername(Database db) {

@@ -15,6 +15,11 @@ Resources:
       MemorySize: 512
       Policies: AWSLambdaBasicExecutionRole
       Timeout: 30
+      Environment:
+        Variables:
+          PG_USERNAME: jayclark
+          PG_PASSWORD: password1
+          AWS_SAM_LOCAL: true
       Events:
         ProxyResource:
           Type: Api
