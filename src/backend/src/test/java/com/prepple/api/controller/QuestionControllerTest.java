@@ -33,37 +33,40 @@ class QuestionControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private ObjectMapper mapper = Mapper.getInstance();
+    private final ObjectMapper mapper = Mapper.getInstance();
 
     @MockBean
     private QuestionService service;
 
     private List<String> idsToFetch;
 
-    private QuestionDto RANDOM_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
-            .id("123")
+    private final QuestionDto RANDOM_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
+            .id(123L)
+            .urn("abc")
             .title("first title")
             .question("random question")
             .createdAt(new Time(System.currentTimeMillis()))
             .build());
 
-    private QuestionDto QUESTION_BY_ID = QuestionService.mapQuestionToQuestionDto(Question.builder()
-            .id("678")
+    private final QuestionDto QUESTION_BY_ID = QuestionService.mapQuestionToQuestionDto(Question.builder()
+            .id(678)
+            .urn("def")
             .title("second title")
             .question("question retrieved by id")
             .createdAt(new Time(System.currentTimeMillis() - 1000))
             .build());
 
-    private QuestionDto CREATE_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
-            .id("345")
+    private final QuestionDto CREATE_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
+            .id(345)
+            .urn("cde")
             .title("request title")
             .question("request question")
             .createdAt(new Time(System.currentTimeMillis() - 1000))
-
             .build());
 
-    private QuestionDto UPDATE_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
-            .id("345")
+    private final QuestionDto UPDATE_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
+            .id(345)
+            .urn("cde")
             .title("request title")
             .question("request question")
             .createdAt(new Time(System.currentTimeMillis() - 1000))
@@ -74,12 +77,10 @@ class QuestionControllerTest {
     private JSONObject addQuestionJSON;
     private JSONObject updateQuestionJSON;
 
-    /*******************************************/
-    /** GET RANDOM QUESTION                   **/
-    /*******************************************/
+    // GET RANDOM QUESTION
     @Test
     void when_getRandomQuestion_validInput_thenReturns200() throws Exception {
-        when(service.getRandom()).thenReturn(RANDOM_QUESTION);
+        when(service.getRandom()).thenReturn(Collections.singletonList(RANDOM_QUESTION));
 
         mockMvc.perform(get("/question/random")
                         .contentType("application/json"))
@@ -88,7 +89,7 @@ class QuestionControllerTest {
 
     @Test
     void when_getRandomQuestion_validInput_thenReturnsExpectedOutput() throws Exception {
-        when(service.getRandom()).thenReturn(RANDOM_QUESTION);
+        when(service.getRandom()).thenReturn(Collections.singletonList(RANDOM_QUESTION));
 
         MvcResult mvcResult = mockMvc.perform(get("/question/random")
                         .contentType("application/json"))
@@ -103,7 +104,7 @@ class QuestionControllerTest {
 
     @Test
     void when_getRandomQuestion_invalidPostMethod_thenReturns4xx() throws Exception {
-        when(service.getRandom()).thenReturn(RANDOM_QUESTION);
+        when(service.getRandom()).thenReturn(Collections.singletonList(RANDOM_QUESTION));
 
         mockMvc.perform(post("/question/random")
                         .contentType("application/json"))
@@ -112,7 +113,7 @@ class QuestionControllerTest {
 
     @Test
     void when_getRandomQuestion_invalidPutMethod_thenReturns4xx() throws Exception {
-        when(service.getRandom()).thenReturn(RANDOM_QUESTION);
+        when(service.getRandom()).thenReturn(Collections.singletonList(RANDOM_QUESTION));
 
         mockMvc.perform(put("/question/random")
                         .contentType("application/json"))
@@ -121,19 +122,17 @@ class QuestionControllerTest {
 
     @Test
     void when_getRandomQuestion_invalidDeleteMethod_thenReturns4xx() throws Exception {
-        when(service.getRandom()).thenReturn(RANDOM_QUESTION);
+        when(service.getRandom()).thenReturn(Collections.singletonList(RANDOM_QUESTION));
 
         mockMvc.perform(delete("/question/random")
                         .contentType("application/json"))
                 .andExpect(status().is4xxClientError());
     }
 
-    /*******************************************/
-    /** GET QUESTION BY ID                    **/
-    /*******************************************/
+    //GET QUESTION BY ID
     @Test
     void when_getQuestionById_validInput_thenReturns200() throws Exception {
-        when(service.getById(anyString())).thenReturn(QUESTION_BY_ID);
+        when(service.getById(anyLong())).thenReturn(QUESTION_BY_ID);
 
         mockMvc.perform(get("/questions/{id}", "678")
                         .contentType("application/json"))
@@ -142,7 +141,7 @@ class QuestionControllerTest {
 
     @Test
     void when_getQuestionById_validInput_thenReturnsExpectedOutput() throws Exception {
-        when(service.getById(eq("678"))).thenReturn(QUESTION_BY_ID);
+        when(service.getById(eq(678))).thenReturn(QUESTION_BY_ID);
 
         MvcResult mvcResult = mockMvc.perform(get("/questions/{id}", "678")
                         .contentType("application/json"))
@@ -157,21 +156,20 @@ class QuestionControllerTest {
 
     @Test
     void when_getQuestionById_invalidPostMethod_thenReturns4xx() throws Exception {
-        when(service.getById(anyString())).thenReturn(QUESTION_BY_ID);
+        when(service.getById(anyLong())).thenReturn(QUESTION_BY_ID);
 
         mockMvc.perform(post("/questions/{id}", "678")
                         .contentType("application/json"))
                 .andExpect(status().is4xxClientError());
     }
 
-    /*******************************************/
-    /** ADD QUESTION                          **/
-    /*******************************************/
+    //ADD QUESTION
     @Test
     void when_addQuestion_validInput_thenReturns200() throws Exception {
         addQuestionJSON = new JSONObject();
         addQuestionJSON
                 .put("id", CREATE_QUESTION.getId())
+                .put("urn", CREATE_QUESTION.getUrn())
                 .put("title", CREATE_QUESTION.getTitle())
                 .put("question", CREATE_QUESTION.getQuestion())
                 .put("createdAt", CREATE_QUESTION.getCreatedAt());
@@ -188,6 +186,7 @@ class QuestionControllerTest {
         addQuestionJSON = new JSONObject();
         addQuestionJSON
                 .put("id", CREATE_QUESTION.getId())
+                .put("urn", CREATE_QUESTION.getUrn())
                 .put("title", CREATE_QUESTION.getTitle())
                 .put("question", CREATE_QUESTION.getQuestion())
                 .put("createdAt", CREATE_QUESTION.getCreatedAt())
@@ -206,14 +205,13 @@ class QuestionControllerTest {
                 mapper.writeValueAsString(expectedResponse));
     }
 
-    /*******************************************/
-    /** UPDATE QUESTION                       **/
-    /*******************************************/
+    //UPDATE QUESTION
     @Test
     void when_updateQuestion_validInput_thenReturns200() throws Exception {
         updateQuestionJSON = new JSONObject();
         updateQuestionJSON
                 .put("id", UPDATE_QUESTION.getId())
+                .put("urn", UPDATE_QUESTION.getUrn())
                 .put("title", UPDATE_QUESTION.getTitle())
                 .put("question", UPDATE_QUESTION.getQuestion())
                 .put("createdAt", UPDATE_QUESTION.getCreatedAt())
@@ -232,6 +230,7 @@ class QuestionControllerTest {
         updateQuestionJSON = new JSONObject();
         updateQuestionJSON
                 .put("id", UPDATE_QUESTION.getId())
+                .put("urn", UPDATE_QUESTION.getUrn())
                 .put("title", UPDATE_QUESTION.getTitle())
                 .put("question", UPDATE_QUESTION.getQuestion())
                 .put("createdAt", UPDATE_QUESTION.getCreatedAt())
@@ -239,7 +238,7 @@ class QuestionControllerTest {
                 .put("frequency", UPDATE_QUESTION.getFrequency());
         doNothing().when(service).update(any(Question.class));
 
-        Boolean errorThrown = false;
+        boolean errorThrown = false;
         String exceptionType = "";
         try {
             mockMvc.perform(put("/questions/{id}", "333")
@@ -254,9 +253,7 @@ class QuestionControllerTest {
         assertEquals("java.lang.IllegalStateException", exceptionType);
     }
 
-    /*******************************************/
-    /** DELETE QUESTION                       **/
-    /*******************************************/
+    //DELETE QUESTION
     @Test
     void when_deleteQuestion_validInput_thenReturns200() throws Exception {
 
@@ -265,9 +262,7 @@ class QuestionControllerTest {
                 .andExpect(status().isOk());
     }
 
-    /*******************************************/
-    /** GET QUESTION BATCH                    **/
-    /*******************************************/
+    // GET QUESTION BATCH
     @Test
     void when_getQuestionBatch_validInput_thenReturns200() throws Exception {
         String[] idArray = new String[]{
@@ -293,8 +288,8 @@ class QuestionControllerTest {
         JSONObject request = new JSONObject();
         request.put("idsToFetch", ids);
 
-        when(service.getById(eq("123"))).thenReturn(RANDOM_QUESTION);
-        when(service.getById(eq("678"))).thenReturn(QUESTION_BY_ID);
+        when(service.getById(eq(123))).thenReturn(RANDOM_QUESTION);
+        when(service.getById(eq(678))).thenReturn(QUESTION_BY_ID);
 
         MvcResult mvcResult =mockMvc.perform(post("/questions/batch")
                         .content(request.toString())
@@ -334,11 +329,11 @@ class QuestionControllerTest {
         JSONObject request = new JSONObject();
         request.put("idsToFetch", ids);
 
-        when(service.getById(eq("123"))).thenReturn(RANDOM_QUESTION);
-        when(service.getById(eq("678"))).thenReturn(QUESTION_BY_ID);
+        when(service.getById(eq(123))).thenReturn(RANDOM_QUESTION);
+        when(service.getById(eq(678))).thenReturn(QUESTION_BY_ID);
 
 
-        Boolean errorThrown = false;
+        boolean errorThrown = false;
         String exceptionType = "";
         try {
             mockMvc.perform(post("/questions/batch")
