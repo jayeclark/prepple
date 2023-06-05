@@ -8,8 +8,10 @@ import com.prepple.api.dto.QuestionDto;
 import com.prepple.api.model.Question;
 import com.prepple.api.model.QuestionBatchRequest;
 import com.prepple.api.service.QuestionService;
+import com.prepple.api.service.SessionService;
 import com.prepple.api.util.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -29,29 +31,33 @@ public class QuestionController {
     QuestionService service;
 
     @Autowired
+    SessionService sessionService;
+
+    @Autowired
     ObjectMapper mapper = Mapper.getInstance();
 
     /**
-     * Retrieves a random question from the database
+     * Retrieves a random question or questions from the database
      * TODO: Add in session storage and the option to sample questions with and without replacement
      * @return Map<String, QuestionDto> A REST API json response containing a single question data transfer object
      */
     @RequestMapping(path = "/question/random", method = RequestMethod.GET)
-    public Map<String, QuestionDto> getRandomQuestion() {
-        QuestionDto question = service.getRandom();
-        Map<String, QuestionDto> response = new HashMap<>();
+    public Map<String, List<QuestionDto>> getRandomQuestion(@RequestParam Integer maxResults, @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken) {
+        List<String> seenQuestionUrns = authToken == null ? null: sessionService.getSeenQuestionUrns(authToken);
+        List<QuestionDto> question = service.getRandom(maxResults, seenQuestionUrns);
+        Map<String, List<QuestionDto>> response = new HashMap<>();
         response.put("question", question);
         return response;
     }
 
     /**
-     * Retrieves a single question from the database based on its unique id
-     * @param id String The id of the question that should be retrieved
+     * Retrieves a single question from the database based on its unique urn
+     * @param urn String The id of the question that should be retrieved
      * @return Map<String, QuestionDto> A REST API json response containing a single question data transfer object
      */
-    @RequestMapping(path = "/questions/{id}", method = RequestMethod.GET)
-    public Map<String, QuestionDto> getQuestionById(@PathVariable(value="id") String id) {
-        QuestionDto question = service.getById(id);
+    @RequestMapping(path = "/questions/{urn}", method = RequestMethod.GET)
+    public Map<String, QuestionDto> getQuestionById(@PathVariable(value="urn") String urn) {
+        QuestionDto question = service.getByUrn(urn);
         Map<String, QuestionDto> response = new HashMap<>();
         response.put("question", question);
         return response;
@@ -75,16 +81,16 @@ public class QuestionController {
 
     /**
      * Updates a question in the database
-     * @param id String The id of the question that should be updated
+     * @param urn String The urn of the question that should be updated
      * @param body String A parsable JSON object containing the new entity data
      * @return Map<String, String> A response indicating that the update was successful
      * TODO: Change response type to indicate whether entity was upserted or not, or whether there were changes
      * @throws JsonProcessingException
      */
-    @RequestMapping(path = "/questions/{id}", method = RequestMethod.PUT)
-    public Map<String, String> updateQuestion(@PathVariable(value="id") String id, @RequestBody String body) throws JsonProcessingException {
+    @RequestMapping(path = "/questions/{urn}", method = RequestMethod.PUT)
+    public Map<String, String> updateQuestion(@PathVariable(value="urn") String urn, @RequestBody String body) throws JsonProcessingException {
         Question entityToUpdate = mapper.readValue(body, Question.class);
-        Preconditions.checkState(entityToUpdate.getId().equals(id));
+        Preconditions.checkState(entityToUpdate.getUrn().equals(urn));
         service.update(entityToUpdate);
         Map<String, String> response = new HashMap<>();
         response.put("update", "success");
@@ -94,13 +100,13 @@ public class QuestionController {
     /**
      * Deletes a question from the postgres database
      * TODO: What happens to questions stored elsewhere in other data stores when this happens?
-     * @param id String The ID of the question to be deleted
+     * @param urn String The URN of the question to be deleted
      * @return Map<String, String> A response indicating that the deletion was successful
      * TODO: Change response type to indicate more useful information
      */
-    @RequestMapping(path = "/questions/{id}", method = RequestMethod.DELETE)
-    public Map<String, String> deleteQuestion(@PathVariable(value="id") String id) {
-        service.deleteById(id);
+    @RequestMapping(path = "/questions/{urn}", method = RequestMethod.DELETE)
+    public Map<String, String> deleteQuestion(@PathVariable(value="urn") String urn) {
+        service.deleteByUrn(urn);
         Map<String, String> response = new HashMap<>();
         response.put("delete", "success");
         return response;
@@ -127,10 +133,10 @@ public class QuestionController {
     @RequestMapping(path = "/questions/batch", method = RequestMethod.POST)
     public Map<String, List<QuestionDto>> getQuestionsBatch(@RequestBody String body) throws JsonProcessingException {
         QuestionBatchRequest request = mapper.readValue(body, QuestionBatchRequest.class);
-        List<String> ids = request.getIdsToFetch();
-        Preconditions.checkState(ids.size() <= ServiceConfig.MAX_QUESTION_BATCH_SIZE);
+        List<String> urns = request.getUrnsToFetch();
+        Preconditions.checkState(urns.size() <= ServiceConfig.MAX_QUESTION_BATCH_SIZE);
 
-        List<QuestionDto> questions = ids.stream().map(id -> service.getById(id)).collect(Collectors.toList());
+        List<QuestionDto> questions = urns.stream().map(urn -> service.getByUrn(urn)).collect(Collectors.toList());
         Map<String, List<QuestionDto>> response = new HashMap<>();
         response.put("question", questions);
         return response;

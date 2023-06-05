@@ -6,6 +6,8 @@ import com.prepple.api.model.Question;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -18,9 +20,16 @@ public class QuestionService implements IGenericService<Question> {
     QuestionDao dao;
 
     // TODO: Implement randomization with and without replacement based on session store
-    public QuestionDto getRandom() {
-        List<Question> questions = dao.findAll();
-        return mapQuestionToQuestionDto(questions.get(0));
+    public List<QuestionDto> getRandom(Integer maxResults, List<String> urnsToExclude) {
+        List<Question> questions = maxResults ==  null ?  Arrays.asList(dao.findOneRandom(urnsToExclude)) : dao.findXRandom(maxResults, urnsToExclude);
+        return mapQuestionsToQuestionDtoList(questions);
+    }
+
+    public List<QuestionDto> getRandom(Integer maxResults) {
+        return getRandom(maxResults, null);
+    }
+    public List<QuestionDto> getRandom() {
+        return getRandom(null);
     }
 
     @Override
@@ -30,8 +39,14 @@ public class QuestionService implements IGenericService<Question> {
     }
 
     @Override
-    public QuestionDto getById(String questionID) {
+    public QuestionDto getById(long questionID) {
         Question result = dao.findOne(questionID);
+        return mapQuestionToQuestionDto(result);
+    }
+
+    @Override
+    public QuestionDto getByUrn(String questionUrn) {
+        Question result = dao.findOne(questionUrn);
         return mapQuestionToQuestionDto(result);
     }
 
@@ -41,8 +56,13 @@ public class QuestionService implements IGenericService<Question> {
     }
 
     @Override
-    public void deleteById(String questionID) {
-        dao.deleteById(questionID);
+    public void deleteById(long questionId) {
+        dao.deleteById(questionId);
+    }
+
+    @Override
+    public void deleteByUrn(String questionUrn) {
+        dao.deleteByUrn(questionUrn);
     }
 
     /**
@@ -63,6 +83,17 @@ public class QuestionService implements IGenericService<Question> {
         result.setVariation(question.getVariation());
         result.setCreatedAt(question.getCreatedAt());
         result.setUpdatedAt(question.getUpdatedAt());
+        return result;
+    }
+
+    /**
+     * Converts question entity returned by Dao into a safe Dto object
+     * @param questions Question The list of questions to convert
+     * @return List<QuestionDto> A list containing simplified data transfer objects to avoid exposing business logic
+     */
+    public static List<QuestionDto> mapQuestionsToQuestionDtoList(List<Question> questions) {
+        List<QuestionDto> result = new ArrayList<>();
+        questions.stream().forEach(question -> result.add(mapQuestionToQuestionDto(question)));
         return result;
     }
 }
