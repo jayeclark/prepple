@@ -4,6 +4,9 @@ import lombok.*;
 
 import java.util.List;
 
+/**
+ * Entity model for saving session data in ddb
+ */
 @Data
 @Builder
 @NoArgsConstructor

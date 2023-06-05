@@ -43,9 +43,13 @@ public interface IGenericDao<T extends Serializable> {
 
     /**
      * Delete an entity based on id
-     * @param entityId String
+     * @param entityId long
      */
     void deleteById(long entityId);
 
+    /**
+     * Delete an entity based on urn
+     * @param entityUrn String
+     */
     void deleteByUrn(String entityUrn);
 }

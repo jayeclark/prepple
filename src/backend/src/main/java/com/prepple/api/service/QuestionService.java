@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,15 +20,29 @@ public class QuestionService implements IGenericService<Question> {
     @Autowired
     QuestionDao dao;
 
-    // TODO: Implement randomization with and without replacement based on session store
+
+    /**
+     * Method to get a list of random questions when maxResults and urnsToExclude are both provided in
+     * the function call (they may be null)
+     * @return List<QuestionDto>
+     */
     public List<QuestionDto> getRandom(Integer maxResults, List<String> urnsToExclude) {
-        List<Question> questions = maxResults ==  null ?  Arrays.asList(dao.findOneRandom(urnsToExclude)) : dao.findXRandom(maxResults, urnsToExclude);
+        List<Question> questions = maxResults ==  null ? Collections.singletonList(dao.findOneRandom(urnsToExclude)) : dao.findXRandom(maxResults, urnsToExclude);
         return mapQuestionsToQuestionDtoList(questions);
     }
 
+    /**
+     * Overload to get a list of random questions when no urnsToExclude are defined
+     * @return List<QuestionDto>
+     */
     public List<QuestionDto> getRandom(Integer maxResults) {
         return getRandom(maxResults, null);
     }
+
+    /**
+     * Overload to get a list of random questions when no maxResults or urnsToExclude are defined
+     * @return List<QuestionDto>
+     */
     public List<QuestionDto> getRandom() {
         return getRandom(null);
     }

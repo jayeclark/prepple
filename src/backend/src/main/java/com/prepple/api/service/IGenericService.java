@@ -41,9 +41,13 @@ public interface IGenericService<T extends Serializable> {
 
     /**
      * A service should include a method to delete an entity based on its id
-     * @param id String
+     * @param id long
      */
     public void deleteById(long id);
 
-    public void deleteByUrn(String id);
+    /**
+     * A service should include a method to delete an entity based on its urn
+     * @param urn String
+     */
+    public void deleteByUrn(String urn);
 }
