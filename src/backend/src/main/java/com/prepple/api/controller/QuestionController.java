@@ -42,11 +42,14 @@ public class QuestionController {
      * @return Map<String, QuestionDto> A REST API json response containing a single question data transfer object
      */
     @RequestMapping(path = "/question/random", method = RequestMethod.GET)
-    public Map<String, List<QuestionDto>> getRandomQuestion(@RequestParam Integer maxResults, @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken) {
+    public Map<String, List<QuestionDto>> getRandomQuestion(@RequestParam(required = false) Integer maxResults, @RequestHeader(required = false, value=HttpHeaders.AUTHORIZATION) String authToken) {
         List<String> seenQuestionUrns = authToken == null ? null: sessionService.getSeenQuestionUrns(authToken);
-        List<QuestionDto> question = service.getRandom(maxResults, seenQuestionUrns);
+        System.out.println("DEBUG");
+        System.out.println(seenQuestionUrns);
+        List<QuestionDto> questions = service.getRandom(maxResults, seenQuestionUrns);
+        System.out.println(questions.size());
         Map<String, List<QuestionDto>> response = new HashMap<>();
-        response.put("question", question);
+        response.put("question", questions);
         return response;
     }
 
@@ -56,7 +59,7 @@ public class QuestionController {
      * @return Map<String, QuestionDto> A REST API json response containing a single question data transfer object
      */
     @RequestMapping(path = "/questions/{urn}", method = RequestMethod.GET)
-    public Map<String, QuestionDto> getQuestionById(@PathVariable(value="urn") String urn) {
+    public Map<String, QuestionDto> getQuestionByUrn(@PathVariable(value="urn") String urn) {
         QuestionDto question = service.getByUrn(urn);
         Map<String, QuestionDto> response = new HashMap<>();
         response.put("question", question);

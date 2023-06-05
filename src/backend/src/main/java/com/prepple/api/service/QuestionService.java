@@ -6,6 +6,7 @@ import com.prepple.api.model.Question;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,22 +30,6 @@ public class QuestionService implements IGenericService<Question> {
     public List<QuestionDto> getRandom(Integer maxResults, List<String> urnsToExclude) {
         List<Question> questions = maxResults ==  null ? Collections.singletonList(dao.findOneRandom(urnsToExclude)) : dao.findXRandom(maxResults, urnsToExclude);
         return mapQuestionsToQuestionDtoList(questions);
-    }
-
-    /**
-     * Overload to get a list of random questions when no urnsToExclude are defined
-     * @return List<QuestionDto>
-     */
-    public List<QuestionDto> getRandom(Integer maxResults) {
-        return getRandom(maxResults, null);
-    }
-
-    /**
-     * Overload to get a list of random questions when no maxResults or urnsToExclude are defined
-     * @return List<QuestionDto>
-     */
-    public List<QuestionDto> getRandom() {
-        return getRandom(null);
     }
 
     @Override
@@ -88,16 +73,18 @@ public class QuestionService implements IGenericService<Question> {
     public static QuestionDto mapQuestionToQuestionDto(Question question) {
         Question parent = question.getParent();
 
-        QuestionDto result = new QuestionDto();
-        result.setId(question.getId());
-        result.setTitle(question.getTitle());
-        result.setQuestion(question.getQuestion());
-        result.setParentId(parent != null ? parent.getId() : null);
-        result.setAcceptance(question.getAcceptance());
-        result.setFrequency(question.getFrequency());
-        result.setVariation(question.getVariation());
-        result.setCreatedAt(question.getCreatedAt());
-        result.setUpdatedAt(question.getUpdatedAt());
+        QuestionDto result = QuestionDto.builder()
+                .id(question.getId() == null ? 0 : question.getId())
+                .urn(question.getUrn())
+                .title(question.getTitle())
+                .question(question.getQuestion())
+                .parentId(parent != null ? parent.getId() : null)
+                .acceptance(question.getAcceptance())
+                .frequency(question.getFrequency())
+                .variation(question.getVariation())
+                .createdAt(question.getCreatedAt())
+                .updatedAt(question.getUpdatedAt() != null ? question.getUpdatedAt() : null)
+                .build();
         return result;
     }
 

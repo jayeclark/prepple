@@ -2,6 +2,7 @@ package com.prepple.api.service;
 
 import com.prepple.api.dao.ddb.SessionDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -10,8 +11,10 @@ import java.util.List;
  * Service for retrieving session information, including:
  * - questions that the user has seen in their current session
  */
+
 @Component
 public class SessionService {
+
     @Autowired
     SessionDao dao;
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prepple.api.dto.QuestionDto;
 import com.prepple.api.model.Question;
 import com.prepple.api.service.QuestionService;
+import com.prepple.api.service.SessionService;
 import com.prepple.api.util.Mapper;
 
 import org.json.JSONArray;
@@ -38,18 +39,22 @@ class QuestionControllerTest {
     @MockBean
     private QuestionService service;
 
-    private List<String> idsToFetch;
+    @MockBean
+    private SessionService sessionService;
 
-    private final QuestionDto RANDOM_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
-            .id(123L)
+    private List<String> urnsToFetch;
+
+    private final Question RANDOM_QUESTION_OBJECT = Question.builder()
+            .id(new Long("123"))
             .urn("abc")
             .title("first title")
             .question("random question")
             .createdAt(new Time(System.currentTimeMillis()))
-            .build());
+            .build();
+    private final QuestionDto RANDOM_QUESTION = QuestionService.mapQuestionToQuestionDto(RANDOM_QUESTION_OBJECT);
 
-    private final QuestionDto QUESTION_BY_ID = QuestionService.mapQuestionToQuestionDto(Question.builder()
-            .id(678L)
+    private final QuestionDto QUESTION_BY_URN = QuestionService.mapQuestionToQuestionDto(Question.builder()
+            .id(new Long("678"))
             .urn("def")
             .title("second title")
             .question("question retrieved by id")
@@ -57,22 +62,24 @@ class QuestionControllerTest {
             .build());
 
     private final QuestionDto CREATE_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
-            .id(345L)
+            .id(new Long("345"))
             .urn("cde")
             .title("request title")
             .question("request question")
             .createdAt(new Time(System.currentTimeMillis() - 1000))
             .build());
 
-    private final QuestionDto UPDATE_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
-            .id(345L)
+    private final Question UPDATE_QUESTION_OBJECT = Question.builder()
+            .id(new Long(345))
             .urn("cde")
             .title("request title")
             .question("request question")
             .createdAt(new Time(System.currentTimeMillis() - 1000))
             .acceptance(0.7)
             .frequency(0.5)
-            .build());
+            .build();
+
+    private final QuestionDto UPDATE_QUESTION = QuestionService.mapQuestionToQuestionDto(UPDATE_QUESTION_OBJECT);
 
     private JSONObject addQuestionJSON;
     private JSONObject updateQuestionJSON;
@@ -80,7 +87,8 @@ class QuestionControllerTest {
     // GET RANDOM QUESTION
     @Test
     void when_getRandomQuestion_validInput_thenReturns200() throws Exception {
-        when(service.getRandom()).thenReturn(Collections.singletonList(RANDOM_QUESTION));
+        when(service.getRandom(anyInt(), anyList())).thenReturn(Collections.singletonList(RANDOM_QUESTION));
+        when(sessionService.getSeenQuestionUrns(anyString())).thenReturn(null);
 
         mockMvc.perform(get("/question/random")
                         .contentType("application/json"))
@@ -89,14 +97,17 @@ class QuestionControllerTest {
 
     @Test
     void when_getRandomQuestion_validInput_thenReturnsExpectedOutput() throws Exception {
-        when(service.getRandom()).thenReturn(Collections.singletonList(RANDOM_QUESTION));
+        when(service.getRandom(anyInt(), anyList())).thenReturn(Collections.singletonList(RANDOM_QUESTION));
+        when(service.getRandom(eq(null), eq(null))).thenReturn(Collections.singletonList(RANDOM_QUESTION));
+
+        when(sessionService.getSeenQuestionUrns(anyString())).thenReturn(new ArrayList<>());
 
         MvcResult mvcResult = mockMvc.perform(get("/question/random")
                         .contentType("application/json"))
                 .andReturn();
 
-        Map<String, QuestionDto> expectedResponse = new HashMap<>();
-        expectedResponse.put("question", RANDOM_QUESTION);
+        Map<String, List<QuestionDto>> expectedResponse = new HashMap<>();
+        expectedResponse.put("question", Collections.singletonList(RANDOM_QUESTION));
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         assertEquals(actualResponseBody,
                 mapper.writeValueAsString(expectedResponse));
@@ -104,7 +115,8 @@ class QuestionControllerTest {
 
     @Test
     void when_getRandomQuestion_invalidPostMethod_thenReturns4xx() throws Exception {
-        when(service.getRandom()).thenReturn(Collections.singletonList(RANDOM_QUESTION));
+        when(service.getRandom(anyInt(), anyList())).thenReturn(Collections.singletonList(RANDOM_QUESTION));
+        when(sessionService.getSeenQuestionUrns(anyString())).thenReturn(null);
 
         mockMvc.perform(post("/question/random")
                         .contentType("application/json"))
@@ -113,7 +125,8 @@ class QuestionControllerTest {
 
     @Test
     void when_getRandomQuestion_invalidPutMethod_thenReturns4xx() throws Exception {
-        when(service.getRandom()).thenReturn(Collections.singletonList(RANDOM_QUESTION));
+        when(service.getRandom(anyInt(), anyList())).thenReturn(Collections.singletonList(RANDOM_QUESTION));
+        when(sessionService.getSeenQuestionUrns(anyString())).thenReturn(null);
 
         mockMvc.perform(put("/question/random")
                         .contentType("application/json"))
@@ -122,7 +135,8 @@ class QuestionControllerTest {
 
     @Test
     void when_getRandomQuestion_invalidDeleteMethod_thenReturns4xx() throws Exception {
-        when(service.getRandom()).thenReturn(Collections.singletonList(RANDOM_QUESTION));
+        when(service.getRandom(anyInt(), anyList())).thenReturn(Collections.singletonList(RANDOM_QUESTION));
+        when(sessionService.getSeenQuestionUrns(anyString())).thenReturn(null);
 
         mockMvc.perform(delete("/question/random")
                         .contentType("application/json"))
@@ -131,34 +145,34 @@ class QuestionControllerTest {
 
     //GET QUESTION BY ID
     @Test
-    void when_getQuestionById_validInput_thenReturns200() throws Exception {
-        when(service.getById(anyLong())).thenReturn(QUESTION_BY_ID);
+    void when_getQuestionByUrn_validInput_thenReturns200() throws Exception {
+        when(service.getByUrn(anyString())).thenReturn(QUESTION_BY_URN);
 
-        mockMvc.perform(get("/questions/{id}", "678")
+        mockMvc.perform(get("/questions/{urn}", "def")
                         .contentType("application/json"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void when_getQuestionById_validInput_thenReturnsExpectedOutput() throws Exception {
-        when(service.getById(eq(678))).thenReturn(QUESTION_BY_ID);
+    void when_getQuestionByUrn_validInput_thenReturnsExpectedOutput() throws Exception {
+        when(service.getByUrn(eq("def"))).thenReturn(QUESTION_BY_URN);
 
-        MvcResult mvcResult = mockMvc.perform(get("/questions/{id}", "678")
+        MvcResult mvcResult = mockMvc.perform(get("/questions/{urn}", "def")
                         .contentType("application/json"))
                 .andReturn();
 
         Map<String, QuestionDto> expectedResponse = new HashMap<>();
-        expectedResponse.put("question", QUESTION_BY_ID);
+        expectedResponse.put("question", QUESTION_BY_URN);
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         assertEquals(actualResponseBody,
                 mapper.writeValueAsString(expectedResponse));
     }
 
     @Test
-    void when_getQuestionById_invalidPostMethod_thenReturns4xx() throws Exception {
-        when(service.getById(anyLong())).thenReturn(QUESTION_BY_ID);
+    void when_getQuestionByUrn_invalidPostMethod_thenReturns4xx() throws Exception {
+        when(service.getByUrn(anyString())).thenReturn(QUESTION_BY_URN);
 
-        mockMvc.perform(post("/questions/{id}", "678")
+        mockMvc.perform(post("/questions/{urn}", "def")
                         .contentType("application/json"))
                 .andExpect(status().is4xxClientError());
     }
@@ -219,7 +233,7 @@ class QuestionControllerTest {
                 .put("frequency", UPDATE_QUESTION.getFrequency());
         doNothing().when(service).update(any(Question.class));
 
-        mockMvc.perform(put("/questions/{id}", "345")
+        mockMvc.perform(put("/questions/{urn}", "cde")
                         .content(updateQuestionJSON.toString())
                         .contentType("application/json"))
                 .andExpect(status().isOk());
@@ -257,7 +271,7 @@ class QuestionControllerTest {
     @Test
     void when_deleteQuestion_validInput_thenReturns200() throws Exception {
 
-        mockMvc.perform(delete("/questions/{id}", "345")
+        mockMvc.perform(delete("/questions/{urn}", "def")
                         .contentType("application/json"))
                 .andExpect(status().isOk());
     }
@@ -268,11 +282,11 @@ class QuestionControllerTest {
         String[] idArray = new String[]{
                 "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
         };
-        idsToFetch = new ArrayList<>();
-        idsToFetch.addAll(Arrays.asList(idArray));
+        urnsToFetch = new ArrayList<>();
+        urnsToFetch.addAll(Arrays.asList(idArray));
         JSONObject request = new JSONObject();
-        JSONArray ids = new JSONArray(idsToFetch);
-        request.put("idsToFetch", ids);
+        JSONArray ids = new JSONArray(urnsToFetch);
+        request.put("urnsToFetch", ids);
         mockMvc.perform(post("/questions/batch")
                         .content(request.toString())
                         .contentType("application/json"))
@@ -281,15 +295,15 @@ class QuestionControllerTest {
 
     @Test
     void when_getQuestionBatch_validInput_thenReturnsExpectedResult() throws Exception {
-        String[] idArray = new String[]{"123", "678"};
-        idsToFetch = new ArrayList<>();
-        idsToFetch.addAll(Arrays.asList(idArray));
-        JSONArray ids = new JSONArray(idsToFetch);
+        String[] urnArray = new String[]{"123", "678"};
+        urnsToFetch = new ArrayList<>();
+        urnsToFetch.addAll(Arrays.asList(urnArray));
+        JSONArray ids = new JSONArray(urnsToFetch);
         JSONObject request = new JSONObject();
-        request.put("idsToFetch", ids);
+        request.put("urnsToFetch", ids);
 
-        when(service.getById(eq(123))).thenReturn(RANDOM_QUESTION);
-        when(service.getById(eq(678))).thenReturn(QUESTION_BY_ID);
+        when(service.getByUrn(eq("123"))).thenReturn(RANDOM_QUESTION);
+        when(service.getByUrn(eq("678"))).thenReturn(QUESTION_BY_URN);
 
         MvcResult mvcResult =mockMvc.perform(post("/questions/batch")
                         .content(request.toString())
@@ -297,7 +311,7 @@ class QuestionControllerTest {
                 .andReturn();
 
         QuestionDto expectedQuestion1 = RANDOM_QUESTION;
-        QuestionDto expectedQuestion2 = QUESTION_BY_ID;
+        QuestionDto expectedQuestion2 = QUESTION_BY_URN;
 
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         JSONObject actualResponse = new JSONObject(actualResponseBody);
@@ -323,14 +337,14 @@ class QuestionControllerTest {
                 "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
                 "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
         };
-        idsToFetch = new ArrayList<>();
-        idsToFetch.addAll(Arrays.asList(idArray));
-        JSONArray ids = new JSONArray(idsToFetch);
+        urnsToFetch = new ArrayList<>();
+        urnsToFetch.addAll(Arrays.asList(idArray));
+        JSONArray ids = new JSONArray(urnsToFetch);
         JSONObject request = new JSONObject();
-        request.put("idsToFetch", ids);
+        request.put("urnsToFetch", ids);
 
         when(service.getById(eq(123))).thenReturn(RANDOM_QUESTION);
-        when(service.getById(eq(678))).thenReturn(QUESTION_BY_ID);
+        when(service.getById(eq(678))).thenReturn(QUESTION_BY_URN);
 
 
         boolean errorThrown = false;
