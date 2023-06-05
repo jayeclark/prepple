@@ -49,7 +49,7 @@ class QuestionControllerTest {
             .build());
 
     private final QuestionDto QUESTION_BY_ID = QuestionService.mapQuestionToQuestionDto(Question.builder()
-            .id(678)
+            .id(678L)
             .urn("def")
             .title("second title")
             .question("question retrieved by id")
@@ -57,7 +57,7 @@ class QuestionControllerTest {
             .build());
 
     private final QuestionDto CREATE_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
-            .id(345)
+            .id(345L)
             .urn("cde")
             .title("request title")
             .question("request question")
@@ -65,7 +65,7 @@ class QuestionControllerTest {
             .build());
 
     private final QuestionDto UPDATE_QUESTION = QuestionService.mapQuestionToQuestionDto(Question.builder()
-            .id(345)
+            .id(345L)
             .urn("cde")
             .title("request title")
             .question("request question")
