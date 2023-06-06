@@ -32,6 +32,10 @@ public class ServiceConfig {
         return null;
     }
 
+    /**
+     * Returns the JWT secret key used to encode the JWT
+     * @return String the secret key
+     */
     public static String getJwtSecretKey() {
         return System.getenv(JWT_SECRET_KEY);
     }

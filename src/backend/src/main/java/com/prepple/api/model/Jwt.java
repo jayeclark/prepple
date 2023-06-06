@@ -3,9 +3,9 @@ package com.prepple.api.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.Date;
-import java.util.Map;
-
+/**
+ * Class to model components of the Jwt passed to the CORE API
+ */
 @Data
 @AllArgsConstructor
 public class Jwt {

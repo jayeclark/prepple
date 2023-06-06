@@ -29,7 +29,6 @@ public class Label implements Serializable {
     @NonNull
     private String description;
 
-    @NonNull
     @Column(name="user_generated")
     private boolean userGenerated;
 

@@ -48,17 +48,17 @@ public class QuestionController {
      * @return Map<String, QuestionDto> A REST API json response containing a single question data transfer object
      */
     @RequestMapping(path = "/question/random", method = RequestMethod.GET)
-    public Map<String, List<QuestionDto>> getRandomQuestion(
+    public Map<Object, Object> getRandomQuestion(
             @RequestParam(required = false) Integer maxResults,
             @RequestHeader(required = false, value=HttpHeaders.AUTHORIZATION) String authToken
     ) {
-        if (authService.isUserAuthorizedToAccessRoute(Route.GET_RANDOM_QUESTION, authToken) == false) {
+        if (!authService.isUserAuthorizedToAccessRoute(Route.GET_RANDOM_QUESTION, authToken)) {
             Authorization.throwUnauthorizedResponseStatusException();
         }
 
         List<String> seenQuestionUrns = authToken == null ? null: sessionService.getSeenQuestionUrns(authToken);
         List<QuestionDto> questions = service.getRandom(maxResults, seenQuestionUrns);
-        Map<String, List<QuestionDto>> response = (Map)ImmutableMap.builder().put("question", questions).build();
+        Map<Object, Object> response = ImmutableMap.builder().put("question", questions).build();
         return response;
     }
 
@@ -68,16 +68,16 @@ public class QuestionController {
      * @return Map<String, QuestionDto> A REST API json response containing a single question data transfer object
      */
     @RequestMapping(path = "/questions/{urn}", method = RequestMethod.GET)
-    public Map<String, QuestionDto> getQuestionByUrn(
+    public Map<Object, Object> getQuestionByUrn(
             @PathVariable(value="urn") String urn,
             @RequestHeader(required = false, value=HttpHeaders.AUTHORIZATION) String authToken
     ) {
-        if (authService.isUserAuthorizedToAccessRoute(Route.GET_QUESTION_BY_URN, authToken) == false) {
+        if (!authService.isUserAuthorizedToAccessRoute(Route.GET_QUESTION_BY_URN, authToken)) {
             Authorization.throwUnauthorizedResponseStatusException();
         }
 
         QuestionDto question = service.getByUrn(urn);
-        Map<String, QuestionDto> response = (Map)ImmutableMap.builder().put("question", question).build();
+        Map<Object, Object> response = ImmutableMap.builder().put("question", question).build();
         return response;
     }
 
@@ -89,17 +89,17 @@ public class QuestionController {
      * @throws JsonProcessingException
      */
     @RequestMapping(path = "/questions", method = RequestMethod.POST)
-    public Map<String, QuestionDto> addQuestion(
+    public Map<Object, Object> addQuestion(
             @RequestBody String body,
             @RequestHeader(required = false, value=HttpHeaders.AUTHORIZATION) String authToken
     ) throws JsonProcessingException {
-        if (authService.isUserAuthorizedToAccessRoute(Route.ADD_QUESTION, authToken) == false) {
+        if (!authService.isUserAuthorizedToAccessRoute(Route.ADD_QUESTION, authToken)) {
             Authorization.throwUnauthorizedResponseStatusException();
         }
 
         Question entityToCreate = mapper.readValue(body, Question.class);
         QuestionDto question = service.create(entityToCreate);
-        Map<String, QuestionDto> response = (Map)ImmutableMap.builder().put("question", question).build();
+        Map<Object, Object> response = ImmutableMap.builder().put("question", question).build();
         return response;
     }
 
@@ -112,20 +112,20 @@ public class QuestionController {
      * @throws JsonProcessingException
      */
     @RequestMapping(path = "/questions/{urn}", method = RequestMethod.PUT)
-    public Map<String, String> updateQuestion(
+    public Map<Object, Object> updateQuestion(
             @PathVariable(value="urn") String urn,
             @RequestBody String body,
             @RequestHeader(required = false, value=HttpHeaders.AUTHORIZATION) String authToken
 
     ) throws JsonProcessingException {
-        if (authService.isUserAuthorizedToAccessRoute(Route.UPDATE_QUESTION, authToken) == false) {
+        if (!authService.isUserAuthorizedToAccessRoute(Route.UPDATE_QUESTION, authToken)) {
             Authorization.throwUnauthorizedResponseStatusException();
         }
 
         Question entityToUpdate = mapper.readValue(body, Question.class);
         Preconditions.checkState(entityToUpdate.getUrn().equals(urn));
         service.update(entityToUpdate);
-        Map<String, String> response = (Map)ImmutableMap.builder().put("update", "success").build();
+        Map<Object, Object> response = ImmutableMap.builder().put("update", "success").build();
         return response;
     }
 
@@ -137,16 +137,16 @@ public class QuestionController {
      * TODO: Change response type to indicate more useful information
      */
     @RequestMapping(path = "/questions/{urn}", method = RequestMethod.DELETE)
-    public Map<String, String> deleteQuestion(
+    public Map<Object, Object> deleteQuestion(
             @PathVariable(value="urn") String urn,
             @RequestHeader(required = false, value=HttpHeaders.AUTHORIZATION) String authToken
     ) {
-        if (authService.isUserAuthorizedToAccessRoute(Route.DELETE_QUESTION, authToken) == false) {
+        if (!authService.isUserAuthorizedToAccessRoute(Route.DELETE_QUESTION, authToken)) {
             Authorization.throwUnauthorizedResponseStatusException();
         }
 
         service.deleteByUrn(urn);
-        Map<String, String> response = (Map)ImmutableMap.builder().put("delete", "success").build();
+        Map<Object, Object> response = ImmutableMap.builder().put("delete", "success").build();
         return response;
     }
 
@@ -158,7 +158,7 @@ public class QuestionController {
     public Map<String, String> searchQuestions(
             @RequestHeader(required = false, value=HttpHeaders.AUTHORIZATION) String authToken
     ) {
-        if (authService.isUserAuthorizedToAccessRoute(Route.SEARCH_QUESTIONS, authToken) == false) {
+        if (!authService.isUserAuthorizedToAccessRoute(Route.SEARCH_QUESTIONS, authToken)) {
             Authorization.throwUnauthorizedResponseStatusException();
         }
 
@@ -175,11 +175,11 @@ public class QuestionController {
      * @throws JsonProcessingException
      */
     @RequestMapping(path = "/questions/batch", method = RequestMethod.POST)
-    public Map<String, List<QuestionDto>> getQuestionsBatch(
+    public Map<Object, Object> getQuestionsBatch(
             @RequestBody String body,
             @RequestHeader(required = false, value=HttpHeaders.AUTHORIZATION) String authToken
     ) throws JsonProcessingException {
-        if (authService.isUserAuthorizedToAccessRoute(Route.GET_QUESTIONS_BATCH, authToken) == false) {
+        if (!authService.isUserAuthorizedToAccessRoute(Route.GET_QUESTIONS_BATCH, authToken)) {
             Authorization.throwUnauthorizedResponseStatusException();
         }
 
@@ -188,7 +188,7 @@ public class QuestionController {
         Preconditions.checkState(urns.size() <= ServiceConfig.MAX_QUESTION_BATCH_SIZE);
 
         List<QuestionDto> questions = urns.stream().map(urn -> service.getByUrn(urn)).collect(Collectors.toList());
-        Map<String, List<QuestionDto>> response = (Map)ImmutableMap.builder().put("question", questions).build();
+        Map<Object, Object> response = ImmutableMap.builder().put("question", questions).build();
         return response;
     }
 }

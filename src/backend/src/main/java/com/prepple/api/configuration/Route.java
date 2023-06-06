@@ -1,5 +1,8 @@
 package com.prepple.api.configuration;
 
+/**
+ * Contains path definitions for the various API routes
+ */
 public class Route {
     public static final String GET_RANDOM_QUESTION = "GET:/question/random";
     public static final String GET_QUESTION_BY_URN = "GET:/questions/{urn}";
