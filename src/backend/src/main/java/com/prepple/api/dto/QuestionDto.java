@@ -1,5 +1,8 @@
 package com.prepple.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.prepple.api.model.Question;
 import lombok.*;
 
@@ -10,17 +13,30 @@ import java.sql.Time;
  */
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class QuestionDto implements IGenericDto<Question> {
-    private Long id;
-    private String urn;
-    private String title;
-    private String question;
-    private Long parentId;
-    private double acceptance;
-    private double variation;
-    private double frequency;
-    private Time createdAt;
-    private Time updatedAt;
+    private final Long id;
+
+    @NonNull
+    private final String urn;
+
+    @NonNull
+    private final String title;
+
+    @NonNull
+    private final String question;
+
+    private final Long parentId;
+
+    private final double acceptance;
+
+    private final double variation;
+
+    private final double frequency;
+
+    @NonNull
+    private final Time createdAt;
+
+    private final Time updatedAt;
+
 }
