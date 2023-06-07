@@ -4,6 +4,8 @@ package com.prepple.api.dao.postgres;
 import com.google.common.base.Preconditions;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
@@ -28,8 +30,19 @@ public abstract class AbstractHibernateDao<T extends Serializable> {
      * @param id String The id of the entity to be retrieved
      * @return <T> The entity matching the requested id
      */
-    public T findOne(final String id) {
+    public T findOne(final long id) {
         return (T) getCurrentSession().get(entity, id);
+    }
+
+    /**
+     * Generic method for retrieving an entity from the database
+     * @param urn String The id of the entity to be retrieved
+     * @return <T> The entity matching the requested id
+     */
+    public T findOne(final String urn) {
+        DetachedCriteria query = DetachedCriteria.forClass(entity);
+        query.add(Restrictions.eq("urn", urn));
+        return (T) query.getExecutableCriteria(getCurrentSession()).list();
     }
 
     /**
@@ -72,10 +85,20 @@ public abstract class AbstractHibernateDao<T extends Serializable> {
 
     /**
      * A generic method for deleting an entity based on its id
-     * @param entityId String The id of the entity to be deleted
+     * @param entityId long The id of the entity to be deleted
      */
-    public void deleteById(final String entityId) {
+    public void deleteById(final long entityId) {
         final T entity = findOne(entityId);
+        Preconditions.checkNotNull(entity);
+        delete(entity);
+    }
+
+    /**
+     * A generic method for deleting an entity based on its id
+     * @param entityUrn String The urn of the entity to be deleted
+     */
+    public void deleteByUrn(final String entityUrn) {
+        final T entity = findOne(entityUrn);
         Preconditions.checkNotNull(entity);
         delete(entity);
     }

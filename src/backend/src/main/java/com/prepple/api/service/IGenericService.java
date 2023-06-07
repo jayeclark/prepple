@@ -21,10 +21,17 @@ public interface IGenericService<T extends Serializable> {
 
     /**
      * A service should include a method to get an entity by its id
-     * @param id String
+     * @param id long
      * @return IGenericDto<T>
      */
-    public IGenericDto<T> getById(String id);
+    public IGenericDto<T> getById(long id);
+
+    /**
+     * A service should include a method to get an entity by its urn
+     * @param urn String
+     * @return IGenericDto<T>
+     */
+    public IGenericDto<T> getByUrn(String urn);
 
     /**
      * A service should include a method to update an entity
@@ -34,7 +41,13 @@ public interface IGenericService<T extends Serializable> {
 
     /**
      * A service should include a method to delete an entity based on its id
-     * @param id String
+     * @param id long
      */
-    public void deleteById(String id);
+    public void deleteById(long id);
+
+    /**
+     * A service should include a method to delete an entity based on its urn
+     * @param urn String
+     */
+    public void deleteByUrn(String urn);
 }

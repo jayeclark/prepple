@@ -1,24 +1,12 @@
 package com.prepple.api.configuration;
 
-import static com.prepple.api.configuration.Constants.POSTGRES_URL_KEY;
-import static com.prepple.api.configuration.Constants.POSTGRES_USERNAME_KEY;
-import static com.prepple.api.configuration.Constants.POSTGRES_PASSWORD_KEY;
+import static com.prepple.api.configuration.Constants.*;
 
 /**
  * Obtains environment variables and makes them available as static service configuration variables
  */
 public class ServiceConfig {
-    private static String pgUrl;
-    private static String pgUsername;
-    private static String pgPassword;
-
     public static final Integer MAX_QUESTION_BATCH_SIZE = 25;
-
-    private ServiceConfig() {
-        pgUrl = System.getenv(POSTGRES_URL_KEY);
-        pgUsername = System.getenv(POSTGRES_USERNAME_KEY);
-        pgPassword = System.getenv(POSTGRES_PASSWORD_KEY);
-    }
 
     public static String getDbUrl(Database db) {
         switch(db) {
@@ -42,5 +30,13 @@ public class ServiceConfig {
                 return System.getenv(POSTGRES_PASSWORD_KEY);
         }
         return null;
+    }
+
+    /**
+     * Returns the JWT secret key used to encode the JWT
+     * @return String the secret key
+     */
+    public static String getJwtSecretKey() {
+        return System.getenv(JWT_SECRET_KEY);
     }
 }
