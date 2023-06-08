@@ -20,7 +20,6 @@ public class User implements Serializable {
     @Column(unique=true)
     private String urn;
 
-    @NonNull
     @Column(name="first_name")
     private String firstName;
 
