@@ -51,7 +51,7 @@ public class UserDtoTest {
     }
 
     @Test
-    void questionDTO_hasValidEqualsContract_whenObjectsAreDifferent() {
+    void userDTO_hasValidEqualsContract_whenObjectsAreDifferent() {
         Time createdAt = new Time(Instant.now().toEpochMilli());
         UserDto testEntity1 = UserDto.builder()
                 .urn("abc")
