@@ -87,8 +87,8 @@ public class UserDtoTest {
     }
 
     @Test
-    void questionDto_valuesCannotChangeOnceSet() {
-        Method[] methods = QuestionDto.class.getDeclaredMethods();
+    void userDto_valuesCannotChangeOnceSet() {
+        Method[] methods = UserDto.class.getDeclaredMethods();
         Arrays.asList(methods).forEach(method -> assertFalse(method.getName().contains("set")));
     }
 }
