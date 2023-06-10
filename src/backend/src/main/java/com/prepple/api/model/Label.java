@@ -26,11 +26,10 @@ public class Label implements Serializable {
     @NonNull
     private String name;
 
-    @NonNull
     private String description;
 
     @Column(name="user_generated")
-    private boolean userGenerated;
+    private Boolean userGenerated;
 
     @ManyToOne
     @JoinColumn(name="user_id", referencedColumnName="id")
