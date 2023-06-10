@@ -16,10 +16,12 @@ public class LabelAssignment implements Serializable {
     @GeneratedValue
     private Long id;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name="question_id", referencedColumnName="id")
     private Question question;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name="label_id", referencedColumnName="id")
     private Label label;
