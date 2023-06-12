@@ -30,6 +30,7 @@ public class AuthorProfile implements Serializable {
     @Column(unique=true)
     private String urn;
 
+    @NonNull
     @OneToOne
     @JoinColumn(name="user_id", referencedColumnName="id")
     @JsonProperty("userId")
