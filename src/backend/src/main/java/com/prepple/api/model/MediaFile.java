@@ -39,6 +39,6 @@ public class MediaFile implements Serializable {
     @Column(name="updated_at")
     private Time updatedAt;
 
-    @Column(name="updated_at")
+    @Column(name="expires_at")
     private Time expiresAt;
 }
