@@ -1,6 +1,6 @@
 package com.prepple.api.dto;
 
-import com.prepple.api.model.AuthorProfile;
+import com.prepple.api.model.MentorProfile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +11,7 @@ import java.sql.Time;
 @Data
 @Builder
 @AllArgsConstructor
-public class MentorProfileDto implements IGenericDto<AuthorProfile>{
+public class MentorProfileDto implements IGenericDto<MentorProfile>{
     private final Long id;
 
     @NonNull

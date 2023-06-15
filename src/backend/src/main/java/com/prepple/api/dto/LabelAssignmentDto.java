@@ -1,7 +1,6 @@
 package com.prepple.api.dto;
 
 import com.prepple.api.model.LabelAssignment;
-import com.prepple.api.model.LabelType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
