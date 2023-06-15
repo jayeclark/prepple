@@ -1,14 +1,15 @@
 package com.prepple.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.prepple.api.util.HashMapConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import org.json.JSONObject;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -17,6 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import java.io.Serializable;
 import java.sql.Time;
+import java.util.Map;
 
 @Entity
 @Data
@@ -46,15 +48,19 @@ public class Recording implements Serializable {
     @Column(name="answer_id")
     private String answerId;
 
-    private JSONObject content;
+    @Convert(converter = HashMapConverter.class)
+    private Map<String, Object> content;
 
-    private JSONObject listenability;
+    @Convert(converter = HashMapConverter.class)
+    private Map<String, Object> listenability;
 
     @Column(name="facial_expression")
-    private JSONObject facialExpression;
+    @Convert(converter = HashMapConverter.class)
+    private Map<String, Object> facialExpression;
 
     @Column(name="audio_tone")
-    private JSONObject audioTone;
+    @Convert(converter = HashMapConverter.class)
+    private Map<String, Object> audioTone;
 
     @Column(name="created_at")
     @NonNull
