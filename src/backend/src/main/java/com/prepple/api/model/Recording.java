@@ -42,25 +42,28 @@ public class Recording implements Serializable {
 
     @NonNull
     @OneToOne
+    @JsonProperty("fileId")
     private MediaFile file;
 
     @NonNull
     @Column(name="answer_id")
     private String answerId;
 
+    @Column(name="content")
     @Convert(converter = HashMapConverter.class)
-    private Map<String, Object> content;
+    private Map<String, Object> contentAnalysis;
 
+    @Column(name="listenability")
     @Convert(converter = HashMapConverter.class)
-    private Map<String, Object> listenability;
+    private Map<String, Object> listenabilityAnalysis;
 
     @Column(name="facial_expression")
     @Convert(converter = HashMapConverter.class)
-    private Map<String, Object> facialExpression;
+    private Map<String, Object> facialExpressionAnalysis;
 
     @Column(name="audio_tone")
     @Convert(converter = HashMapConverter.class)
-    private Map<String, Object> audioTone;
+    private Map<String, Object> audioToneAnalysis;
 
     @Column(name="created_at")
     @NonNull
