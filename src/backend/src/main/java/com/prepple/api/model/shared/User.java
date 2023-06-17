@@ -1,6 +1,5 @@
-package com.prepple.api.model;
+package com.prepple.api.model.shared;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +10,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.sql.Time;
 
@@ -21,7 +18,7 @@ import java.sql.Time;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Question implements Serializable {
+public class User implements Serializable {
     @Id
     @GeneratedValue
     private Long id;
@@ -30,25 +27,22 @@ public class Question implements Serializable {
     @Column(unique=true)
     private String urn;
 
-    @NonNull
-    private String title;
+    @Column(name="first_name")
+    private String firstName;
+
+    @Column(name="middle_name")
+    private String middleName;
 
     @NonNull
-    private String question;
+    @Column(name="last_name")
+    private String lastName;
 
-    @ManyToOne
-    @JoinColumn(name="parent_id", referencedColumnName="id")
-    @JsonProperty("parentId")
-    private Question parent;
+    @NonNull
+    private String email;
 
-    @Column(name="guide_id")
-    private String guideId;
-
-    private double acceptance;
-
-    private double variation;
-
-    private double frequency;
+    @Column(name="subscription_tier")
+    @NonNull
+    private Subscription subscriptionTier;
 
     @Column(name="created_at")
     @NonNull

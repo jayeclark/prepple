@@ -2,13 +2,11 @@ package com.prepple.api.service;
 
 import com.prepple.api.dao.postgres.QuestionDao;
 import com.prepple.api.dto.QuestionDto;
-import com.prepple.api.model.Question;
+import com.prepple.api.model.questions.Question;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

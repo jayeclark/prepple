@@ -1,6 +1,8 @@
-package com.prepple.api.model;
+package com.prepple.api.model.practice;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.prepple.api.model.questions.Question;
+import com.prepple.api.model.shared.MediaFile;
 import com.prepple.api.util.HashMapConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

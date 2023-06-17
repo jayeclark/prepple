@@ -1,7 +1,9 @@
-package com.prepple.api.model;
+package com.prepple.api.model.practice;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import com.prepple.api.model.questions.Question;
+import com.prepple.api.model.shared.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

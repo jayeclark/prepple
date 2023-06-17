@@ -1,6 +1,6 @@
 package com.prepple.api.configuration;
 
-import com.prepple.api.model.Subscription;
+import com.prepple.api.model.shared.Subscription;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 

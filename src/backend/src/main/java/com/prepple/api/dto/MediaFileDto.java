@@ -1,6 +1,6 @@
 package com.prepple.api.dto;
 
-import com.prepple.api.model.MediaFile;
+import com.prepple.api.model.shared.MediaFile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.prepple.api.model;
+package com.prepple.api.model.shared;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,31 +18,19 @@ import java.sql.Time;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User implements Serializable {
+public class MediaFile implements Serializable {
     @Id
     @GeneratedValue
     private Long id;
 
     @NonNull
     @Column(unique=true)
-    private String urn;
+    private String s3Key;
 
-    @Column(name="first_name")
-    private String firstName;
-
-    @Column(name="middle_name")
-    private String middleName;
+    private String name;
 
     @NonNull
-    @Column(name="last_name")
-    private String lastName;
-
-    @NonNull
-    private String email;
-
-    @Column(name="subscription_tier")
-    @NonNull
-    private Subscription subscriptionTier;
+    private Boolean isPrivate;
 
     @Column(name="created_at")
     @NonNull
@@ -50,4 +38,7 @@ public class User implements Serializable {
 
     @Column(name="updated_at")
     private Time updatedAt;
+
+    @Column(name="expires_at")
+    private Time expiresAt;
 }

@@ -1,5 +1,6 @@
-package com.prepple.api.model;
+package com.prepple.api.model.questions;
 
+import com.prepple.api.model.shared.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.sql.Time;
 
@@ -18,19 +21,29 @@ import java.sql.Time;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MediaFile implements Serializable {
+public class Label implements Serializable {
     @Id
     @GeneratedValue
     private Long id;
 
     @NonNull
     @Column(unique=true)
-    private String s3Key;
-
-    private String name;
+    private String urn;
 
     @NonNull
-    private Boolean isPrivate;
+    private LabelType type;
+
+    @NonNull
+    private String name;
+
+    private String description;
+
+    @Column(name="user_generated")
+    private Boolean userGenerated;
+
+    @ManyToOne
+    @JoinColumn(name="user_id", referencedColumnName="id")
+    private User user;
 
     @Column(name="created_at")
     @NonNull
@@ -39,6 +52,4 @@ public class MediaFile implements Serializable {
     @Column(name="updated_at")
     private Time updatedAt;
 
-    @Column(name="expires_at")
-    private Time expiresAt;
 }

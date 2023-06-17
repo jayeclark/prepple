@@ -1,6 +1,6 @@
 package com.prepple.api.dto;
 
-import com.prepple.api.model.AuthorProfile;
+import com.prepple.api.model.questions.AuthorProfile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

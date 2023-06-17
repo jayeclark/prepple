@@ -1,4 +1,4 @@
-package com.prepple.api.model;
+package com.prepple.api.model.shared;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

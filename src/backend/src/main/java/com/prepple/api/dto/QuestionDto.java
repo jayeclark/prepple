@@ -1,9 +1,6 @@
 package com.prepple.api.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.prepple.api.model.Question;
+import com.prepple.api.model.questions.Question;
 import lombok.*;
 
 import java.sql.Time;

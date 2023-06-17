@@ -1,6 +1,6 @@
 package com.prepple.api.query.postgres;
 
-import com.prepple.api.model.Question;
+import com.prepple.api.model.questions.Question;
 import org.hibernate.criterion.DetachedCriteria;
 
 /**

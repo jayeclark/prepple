@@ -1,7 +1,7 @@
 package com.prepple.api.dto;
 
-import com.prepple.api.model.Status;
-import com.prepple.api.model.UserActivity;
+import com.prepple.api.model.practice.Status;
+import com.prepple.api.model.practice.UserActivity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

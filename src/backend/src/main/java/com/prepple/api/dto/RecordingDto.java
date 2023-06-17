@@ -1,15 +1,11 @@
 package com.prepple.api.dto;
 
-import com.prepple.api.model.MediaFile;
-import com.prepple.api.model.Recording;
-import com.prepple.api.util.HashMapConverter;
+import com.prepple.api.model.practice.Recording;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
 import java.sql.Time;
 import java.util.Map;
 

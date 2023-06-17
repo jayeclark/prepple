@@ -1,7 +1,6 @@
 package com.prepple.api.dto;
 
-import com.prepple.api.model.LabelType;
-import com.prepple.api.model.Status;
+import com.prepple.api.model.questions.LabelType;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;

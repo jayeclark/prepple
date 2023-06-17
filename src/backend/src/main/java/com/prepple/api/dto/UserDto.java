@@ -1,7 +1,7 @@
 package com.prepple.api.dto;
 
-import com.prepple.api.model.Subscription;
-import com.prepple.api.model.User;
+import com.prepple.api.model.shared.Subscription;
+import com.prepple.api.model.shared.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

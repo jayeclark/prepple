@@ -1,6 +1,5 @@
 package com.prepple.api.dto;
 
-import com.prepple.api.model.LabelType;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;

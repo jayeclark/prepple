@@ -1,7 +1,6 @@
 package com.prepple.api.dto;
 
-import com.prepple.api.model.Status;
-import com.prepple.api.model.Subscription;
+import com.prepple.api.model.practice.Status;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;

@@ -2,7 +2,7 @@ package com.prepple.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prepple.api.dto.QuestionDto;
-import com.prepple.api.model.Question;
+import com.prepple.api.model.questions.Question;
 import com.prepple.api.service.AuthService;
 import com.prepple.api.service.QuestionService;
 import com.prepple.api.service.SessionService;

@@ -1,4 +1,4 @@
-package com.prepple.api.model;
+package com.prepple.api.model.practice;
 
 public enum Status {
     PLANNED,

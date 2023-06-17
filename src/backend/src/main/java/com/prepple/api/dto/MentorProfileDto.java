@@ -1,6 +1,6 @@
 package com.prepple.api.dto;
 
-import com.prepple.api.model.MentorProfile;
+import com.prepple.api.model.mentorship.MentorProfile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

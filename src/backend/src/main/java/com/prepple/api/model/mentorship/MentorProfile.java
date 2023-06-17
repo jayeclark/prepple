@@ -1,6 +1,7 @@
-package com.prepple.api.model;
+package com.prepple.api.model.mentorship;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.prepple.api.model.shared.User;
 import lombok.*;
 
 import javax.persistence.*;

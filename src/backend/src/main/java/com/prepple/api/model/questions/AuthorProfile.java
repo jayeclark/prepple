@@ -1,5 +1,7 @@
-package com.prepple.api.model;
+package com.prepple.api.model.questions;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.prepple.api.model.shared.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import java.io.Serializable;
 import java.sql.Time;
 
@@ -20,7 +22,7 @@ import java.sql.Time;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Label implements Serializable {
+public class AuthorProfile implements Serializable {
     @Id
     @GeneratedValue
     private Long id;
@@ -30,19 +32,17 @@ public class Label implements Serializable {
     private String urn;
 
     @NonNull
-    private LabelType type;
+    @OneToOne
+    @JoinColumn(name="user_id", referencedColumnName="id")
+    @JsonProperty("userId")
+    private User user;
 
     @NonNull
-    private String name;
+    @Column(name="display_name")
+    private String displayName;
 
-    private String description;
-
-    @Column(name="user_generated")
-    private Boolean userGenerated;
-
-    @ManyToOne
-    @JoinColumn(name="user_id", referencedColumnName="id")
-    private User user;
+    @NonNull
+    private String bio;
 
     @Column(name="created_at")
     @NonNull
@@ -50,5 +50,4 @@ public class Label implements Serializable {
 
     @Column(name="updated_at")
     private Time updatedAt;
-
 }
