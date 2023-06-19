@@ -1,0 +1,60 @@
+package com.prepple.api.model.mentorship;
+
+import com.prepple.api.model.shared.Currency;
+import com.prepple.api.model.shared.User;
+import lombok.*;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.sql.Time;
+
+@Entity
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class MicroMentorshipRequest implements Serializable {
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @NonNull
+    @Column(unique=true)
+    private String urn;
+
+    @NonNull
+    private Long contentId;
+
+    @NonNull
+    private ContentType contentType;
+
+    @NonNull
+    private MentorProfile mentor;
+
+    @NonNull
+    @ManyToOne
+    @JoinColumn(name="user_id", referencedColumnName="id")
+    private User mentee;
+
+    @NonNull
+    private Integer cost;
+
+    @NonNull
+    private Currency currency;
+
+    @NonNull
+    private String notes;
+
+    @Column(name="created_at")
+    @NonNull
+    private Time createdAt;
+
+    @Column(name="accepted_at")
+    private Time acceptedAt;
+
+    @Column(name="fulfilled_at")
+    private Time fulfilledAt;
+
+    @Column(name="declined_at")
+    private Time declinedAt;
+}
