@@ -1,5 +1,6 @@
 package com.prepple.api.model.recruiting;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.prepple.api.model.practice.Recording;
 import com.prepple.api.util.HashMapConverter;
 import lombok.AllArgsConstructor;
@@ -33,13 +34,22 @@ public class VideoResume implements Serializable {
     @Column(unique=true)
     private String urn;
 
+    @NonNull
+    @Column(name="name")
+    private String resumeName;
+
+    @NonNull
     @ManyToOne
-    @JoinColumn(name="video_ids", referencedColumnName="id")
+    @JoinColumn(name="recording_ids", referencedColumnName="id")
+    @JsonProperty("recordingIds")
     private Recording[] recordings;
 
     @NonNull
     @Convert(converter = HashMapConverter.class)
     private Map<String, Object> resume;
+
+    @NonNull
+    private Boolean isArchived;
 
     @Column(name="created_at")
     @NonNull
