@@ -1,5 +1,6 @@
 package com.prepple.api.model.mentorship;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.prepple.api.model.shared.Currency;
 import com.prepple.api.model.shared.User;
 import lombok.*;
@@ -29,11 +30,13 @@ public class MicroMentorshipRequest implements Serializable {
     private ContentType contentType;
 
     @NonNull
+    @JsonProperty("mentorId")
     private MentorProfile mentor;
 
     @NonNull
     @ManyToOne
     @JoinColumn(name="user_id", referencedColumnName="id")
+    @JsonProperty("menteeId")
     private User mentee;
 
     @NonNull
