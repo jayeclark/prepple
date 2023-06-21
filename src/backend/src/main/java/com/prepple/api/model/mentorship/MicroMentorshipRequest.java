@@ -3,9 +3,18 @@ package com.prepple.api.model.mentorship;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.prepple.api.model.shared.Currency;
 import com.prepple.api.model.shared.User;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.sql.Time;
 
