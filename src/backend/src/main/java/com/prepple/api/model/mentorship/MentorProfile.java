@@ -1,6 +1,7 @@
 package com.prepple.api.model.mentorship;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.prepple.api.model.shared.Currency;
 import com.prepple.api.model.shared.User;
 import lombok.*;
 
@@ -35,6 +36,12 @@ public class MentorProfile implements Serializable {
     private Boolean isAcceptingRequests;
 
     private Integer maxRequestsPerWeek;
+
+    private Integer costPerVideo;
+
+    private Integer costPerResume;
+
+    private Currency preferredCurrency;
 
     @NonNull
     @Column(name="turnaround_time")
