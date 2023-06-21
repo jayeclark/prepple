@@ -34,9 +34,11 @@ public class Score implements Serializable {
     @NonNull
     private ScoreType scoreType;
 
+    @NonNull
     @Column(name="possible_points")
     private Double totalPossiblePoints;
 
+    @NonNull
     @Column(name="awarded_points")
     private Double awardedPoints;
 
