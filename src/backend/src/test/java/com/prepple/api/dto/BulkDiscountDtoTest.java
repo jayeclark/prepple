@@ -1,7 +1,6 @@
 package com.prepple.api.dto;
 
 import com.prepple.api.model.mentorship.ContentType;
-import com.prepple.api.model.questions.LabelType;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -11,7 +10,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BulkDiscountDtoTest {
+class BulkDiscountDtoTest {
     @Test
     void bulkDiscountDTO_hasValidEqualsContract_whenObjectsAreSame() {
         Instant now = Instant.now();
@@ -47,7 +46,7 @@ public class BulkDiscountDtoTest {
         assertTrue(testEntity1.equals(testEntity1));
         assertTrue(testEntity1.equals(testEntity2) && testEntity2.equals(testEntity1));
         assertTrue(testEntity1.equals(testEntity3));
-        assertTrue(testEntity1.equals(testEntity2) && testEntity1.equals(testEntity2) && testEntity1.equals(testEntity2) );
+        assertTrue(testEntity1.equals(testEntity2) && testEntity1.equals(testEntity2) && testEntity1.equals(testEntity2) ); // skipcq: JAVA-E0034
         assertFalse(testEntity1.equals(null));
 
         assertEquals(testEntity1, testEntity2);
@@ -95,7 +94,6 @@ public class BulkDiscountDtoTest {
 
         assertTrue(testEntity1.equals(testEntity1));
         assertFalse(testEntity1.equals(testEntity2) && testEntity2.equals(testEntity1));
-        assertFalse(testEntity1.equals(testEntity2) && testEntity1.equals(testEntity2) && testEntity1.equals(testEntity2) );
 
         assertNotEquals(testEntity1, testEntity2);
         assertNotEquals(testEntity1.hashCode(), testEntity2.hashCode());

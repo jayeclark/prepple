@@ -1,6 +1,5 @@
 package com.prepple.api.dto;
 
-import com.prepple.api.model.questions.LabelType;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -10,7 +9,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RatingDtoTest {
+class RatingDtoTest {
     @Test
     void ratingDTO_hasValidEqualsContract_whenObjectsAreSame() {
         Time createdAt = new Time(Instant.now().toEpochMilli());
@@ -37,7 +36,7 @@ public class RatingDtoTest {
         assertTrue(testEntity1.equals(testEntity1));
         assertTrue(testEntity1.equals(testEntity2) && testEntity2.equals(testEntity1));
         assertTrue(testEntity1.equals(testEntity3));
-        assertTrue(testEntity1.equals(testEntity2) && testEntity1.equals(testEntity2) && testEntity1.equals(testEntity2) );
+        assertTrue(testEntity1.equals(testEntity2) && testEntity1.equals(testEntity2) && testEntity1.equals(testEntity2) ); // skipcq: JAVA-E0034
         assertFalse(testEntity1.equals(null));
 
         assertEquals(testEntity1, testEntity2);
@@ -75,7 +74,6 @@ public class RatingDtoTest {
 
         assertTrue(testEntity1.equals(testEntity1));
         assertFalse(testEntity1.equals(testEntity2) && testEntity2.equals(testEntity1));
-        assertFalse(testEntity1.equals(testEntity2) && testEntity1.equals(testEntity2) && testEntity1.equals(testEntity2) );
 
         assertNotEquals(testEntity1, testEntity2);
         assertNotEquals(testEntity1.hashCode(), testEntity2.hashCode());

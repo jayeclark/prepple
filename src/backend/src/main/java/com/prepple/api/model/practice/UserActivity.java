@@ -62,19 +62,19 @@ public class UserActivity implements Serializable {
     private Time lastRecordedAt;
 
     public void setId() {
-        Preconditions.checkState(!this.question.equals(null) && !this.user.equals(null));
+        Preconditions.checkState(this.question != null && this.user != null);
         this.id = this.user.getId() + "-" + this.question.getId();
     }
 
     public void setLastPlannedAt(Time time) {
-        if (this.firstPlannedAt.equals(null)) {
+        if (this.firstPlannedAt == null) {
             this.firstPlannedAt = time;
         }
         this.lastPlannedAt = time;
     }
 
     public void setLastRecordedAt(Time time) {
-        if (this.firstRecordedAt.equals(null)) {
+        if (this.firstRecordedAt == null) {
             this.firstRecordedAt = time;
         }
         this.lastRecordedAt = time;

@@ -17,10 +17,10 @@ public class UserActivityDto implements IGenericDto<UserActivity>{
     private final String id;
 
     @NonNull
-    private final long questionId;
+    private final Long questionId;
 
     @NonNull
-    private final long userId;
+    private final Long userId;
 
     @NonNull
     private final Status status;
