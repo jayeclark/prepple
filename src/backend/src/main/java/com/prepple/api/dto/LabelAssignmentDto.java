@@ -8,6 +8,9 @@ import lombok.NonNull;
 
 import java.sql.Time;
 
+/**
+ * Dto implementation for the Label Assignment entity
+ */
 @Data
 @Builder
 @AllArgsConstructor

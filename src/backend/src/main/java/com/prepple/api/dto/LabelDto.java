@@ -9,6 +9,9 @@ import lombok.NonNull;
 
 import java.sql.Time;
 
+/**
+ * Dto implementation for the Label entity
+ */
 @Data
 @Builder
 @AllArgsConstructor

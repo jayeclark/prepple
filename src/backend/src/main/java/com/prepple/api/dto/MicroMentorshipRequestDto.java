@@ -10,6 +10,9 @@ import lombok.NonNull;
 
 import java.sql.Time;
 
+/**
+ * Dto implementation for the Micro Mentorship Request entity
+ */
 @Data
 @Builder
 @AllArgsConstructor

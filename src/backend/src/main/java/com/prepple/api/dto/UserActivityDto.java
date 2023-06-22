@@ -9,6 +9,9 @@ import lombok.NonNull;
 
 import java.sql.Time;
 
+/**
+ * Dto implementation for the User Activity entity
+ */
 @Data
 @Builder
 @AllArgsConstructor

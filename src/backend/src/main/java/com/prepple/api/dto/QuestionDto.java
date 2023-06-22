@@ -1,7 +1,10 @@
 package com.prepple.api.dto;
 
 import com.prepple.api.model.questions.Question;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NonNull;
 
 import java.sql.Time;
 
@@ -35,5 +38,4 @@ public class QuestionDto implements IGenericDto<Question> {
     private final Time createdAt;
 
     private final Time updatedAt;
-
 }

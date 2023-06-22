@@ -1,7 +1,6 @@
 package com.prepple.api.dto;
 
 import com.prepple.api.model.mentorship.Rating;
-import com.prepple.api.model.questions.LabelType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +8,9 @@ import lombok.NonNull;
 
 import java.sql.Time;
 
+/**
+ * Dto implementation for the Rating entity
+ */
 @Data
 @Builder
 @AllArgsConstructor

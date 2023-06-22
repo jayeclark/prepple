@@ -11,6 +11,9 @@ import lombok.NonNull;
 
 import java.sql.Time;
 
+/**
+ * Dto implementation for the Bulk Discount entity
+ */
 @Data
 @Builder
 @AllArgsConstructor

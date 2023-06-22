@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Converter used for DTO implementations where info is stored in flexible JSON format rather than
+ * more specific data structures (ie recording analysis, which may change versions over time)
+ */
 public class HashMapConverter implements AttributeConverter<Map<String, Object>, String> {
 
     @Autowired

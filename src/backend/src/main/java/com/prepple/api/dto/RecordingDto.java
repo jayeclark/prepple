@@ -9,6 +9,9 @@ import lombok.NonNull;
 import java.sql.Time;
 import java.util.Map;
 
+/**
+ * Dto implementation for the Recording entity
+ */
 @Data
 @Builder
 @AllArgsConstructor

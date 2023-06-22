@@ -8,6 +8,9 @@ import lombok.NonNull;
 
 import java.sql.Time;
 
+/**
+ * Dto implementation for the Mentor Profile entity
+ */
 @Data
 @Builder
 @AllArgsConstructor
