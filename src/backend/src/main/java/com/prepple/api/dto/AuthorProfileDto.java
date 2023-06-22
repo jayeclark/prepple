@@ -1,6 +1,6 @@
 package com.prepple.api.dto;
 
-import com.prepple.api.model.questions.Question;
+import com.prepple.api.model.questions.AuthorProfile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,30 +9,25 @@ import lombok.NonNull;
 import java.sql.Time;
 
 /**
- * Dto implementation for the question entity
+ * Dto implementation for the Author Profile entity
  */
 @Data
 @Builder
 @AllArgsConstructor
-public class QuestionDto implements IGenericDto<Question> {
+public class AuthorProfileDto implements IGenericDto<AuthorProfile>{
     private final Long id;
 
     @NonNull
     private final String urn;
 
     @NonNull
-    private final String title;
+    private final Long userId;
 
     @NonNull
-    private final String question;
+    private final String displayName;
 
-    private final Long parentId;
-
-    private final double acceptance;
-
-    private final double variation;
-
-    private final double frequency;
+    @NonNull
+    private final String bio;
 
     @NonNull
     private final Time createdAt;

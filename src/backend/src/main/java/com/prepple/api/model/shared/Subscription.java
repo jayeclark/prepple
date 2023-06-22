@@ -1,4 +1,4 @@
-package com.prepple.api.model;
+package com.prepple.api.model.shared;
 
 /**
  * Types of subscriptions that a user may have

@@ -1,5 +1,6 @@
-package com.prepple.api.model;
+package com.prepple.api.model.questions;
 
+import com.prepple.api.model.shared.AbstractBatchRequest;
 import lombok.Data;
 
 /**

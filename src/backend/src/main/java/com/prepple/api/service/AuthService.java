@@ -2,7 +2,7 @@ package com.prepple.api.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.prepple.api.configuration.Authorization;
-import com.prepple.api.model.Subscription;
+import com.prepple.api.model.shared.Subscription;
 import com.prepple.api.util.JwtDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

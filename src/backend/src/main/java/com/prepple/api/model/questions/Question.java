@@ -1,5 +1,6 @@
-package com.prepple.api.model;
+package com.prepple.api.model.questions;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,6 +38,7 @@ public class Question implements Serializable {
 
     @ManyToOne
     @JoinColumn(name="parent_id", referencedColumnName="id")
+    @JsonProperty("parentId")
     private Question parent;
 
     @Column(name="guide_id")

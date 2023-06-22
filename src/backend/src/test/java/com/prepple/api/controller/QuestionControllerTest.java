@@ -2,7 +2,7 @@ package com.prepple.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prepple.api.dto.QuestionDto;
-import com.prepple.api.model.Question;
+import com.prepple.api.model.questions.Question;
 import com.prepple.api.service.AuthService;
 import com.prepple.api.service.QuestionService;
 import com.prepple.api.service.SessionService;
@@ -339,13 +339,13 @@ class QuestionControllerTest {
         JSONArray actualResponseQuestions = actualResponse.getJSONArray("question");
 
         String q1 = actualResponseQuestions.getString(0);
-        QuestionDto actualQuestion1 = mapper.readValue(q1, QuestionDto.class);
+        QuestionDto actualQuestion1 = QuestionService.mapQuestionToQuestionDto(mapper.readValue(q1, Question.class));
         assertEquals(expectedQuestion1.getId(), actualQuestion1.getId());
         assertEquals(expectedQuestion1.getTitle(), actualQuestion1.getTitle());
         assertEquals(expectedQuestion1.getQuestion(), actualQuestion1.getQuestion());
 
         String q2 = actualResponseQuestions.getString(1);
-        QuestionDto actualQuestion2 = mapper.readValue(q2, QuestionDto.class);
+        QuestionDto actualQuestion2 = QuestionService.mapQuestionToQuestionDto(mapper.readValue(q2, Question.class));
         assertEquals(expectedQuestion2.getId(), actualQuestion2.getId());
         assertEquals(expectedQuestion2.getTitle(), actualQuestion2.getTitle());
         assertEquals(expectedQuestion2.getQuestion(), actualQuestion2.getQuestion());

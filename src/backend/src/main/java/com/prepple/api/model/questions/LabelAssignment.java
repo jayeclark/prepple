@@ -1,8 +1,17 @@
-package com.prepple.api.model;
+package com.prepple.api.model.questions;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.sql.Time;
 
@@ -16,10 +25,12 @@ public class LabelAssignment implements Serializable {
     @GeneratedValue
     private Long id;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name="question_id", referencedColumnName="id")
     private Question question;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name="label_id", referencedColumnName="id")
     private Label label;

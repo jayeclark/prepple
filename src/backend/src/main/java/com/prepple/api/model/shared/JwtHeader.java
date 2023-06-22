@@ -1,4 +1,4 @@
-package com.prepple.api.model;
+package com.prepple.api.model.shared;
 
 /**
  * Header component of JSON web token model

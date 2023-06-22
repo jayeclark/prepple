@@ -1,16 +1,12 @@
 package com.prepple.api.dao.postgres;
 
-import com.prepple.api.model.Question;
+import com.prepple.api.model.questions.Question;
 import com.prepple.api.query.postgres.OrderRandom;
 import com.prepple.api.query.postgres.RandomQuestion;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Dao implementation for Question entity

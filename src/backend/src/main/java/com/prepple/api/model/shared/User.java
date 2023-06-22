@@ -1,8 +1,15 @@
-package com.prepple.api.model;
+package com.prepple.api.model.shared;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.sql.Time;
 
@@ -20,7 +27,6 @@ public class User implements Serializable {
     @Column(unique=true)
     private String urn;
 
-    @NonNull
     @Column(name="first_name")
     private String firstName;
 
