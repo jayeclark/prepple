@@ -32,6 +32,7 @@ public class Favorite implements Serializable {
     @NonNull
     private EntityType entityType;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name="user_id", referencedColumnName="id")
     @JsonProperty("userId")
