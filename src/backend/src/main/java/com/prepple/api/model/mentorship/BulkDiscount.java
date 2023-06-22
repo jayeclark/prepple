@@ -26,6 +26,7 @@ public class BulkDiscount implements Serializable {
     @GeneratedValue
     private Long id;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name="mentor_id", referencedColumnName="id")
     @JsonProperty("mentorId")
@@ -41,6 +42,9 @@ public class BulkDiscount implements Serializable {
     private Integer discountPercent;
 
     private String comments;
+
+    @NonNull
+    private Boolean isActive;
 
     @Column(name="start_time")
     @NonNull
