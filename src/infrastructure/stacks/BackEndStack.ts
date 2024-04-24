@@ -10,7 +10,7 @@ import {
 import { DatabaseCluster as DocdbDatabaseCluster } from "aws-cdk-lib/aws-docdb";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
+import { Authorizer, CfnAuthorizer, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { getCfnResourceName, DeploymentEnvironment, getDomainName } from '../utils/cfnUtils';
 import { DefaultCustomStackProps } from "../utils/types";
 import { VpcStack } from './VpcStack';
@@ -86,7 +86,7 @@ export class BackEndStack extends Stack {
 
     const buckets = { videoBucket, photoBucket, transcriptsBucket, videoResumeBucket };
 
-    // User Pool & 
+    // User Pool & Client
     const { userPool, groups } = this.createUserPool(buckets);
     const userPoolClient = this.createUserPoolClient(userPool.userPoolId);
 
@@ -306,8 +306,10 @@ export class BackEndStack extends Stack {
       generateSecret: false,
       userPoolId,
       allowedOAuthFlows: ['code'],
-      allowedOAuthScopes: ['openid', 'email', 'profile'],
+      allowedOAuthScopes: ['aws.cognito.signin.user.admin', 'openid', 'email', 'profile'],
+      allowedOAuthFlowsUserPoolClient: true,
       callbackUrLs: [getDomainName(this.env)],
+      explicitAuthFlows: ['ALLOW_USER_PASSWORD_AUTH', 'ALLOW_REFRESH_TOKEN_AUTH'],
       supportedIdentityProviders: ['COGNITO']
     })
   }
