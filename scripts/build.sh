@@ -6,7 +6,7 @@ cd src/backend && sam build && cd ../..
 
 # Build quarkus backend
 echo "Building quarkus backend..."
-cd src/backend-core && quarkus build && cd ../..
+cd src/backend-core && ./gradlew build && cd ../..
 
 # Build frontend
 echo "Building frontend..."
