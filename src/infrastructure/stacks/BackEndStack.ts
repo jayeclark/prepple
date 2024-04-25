@@ -93,7 +93,6 @@ export class BackEndStack extends Stack {
     })
     ddbCoreTable.grantReadWriteData(quarkusApp);
 
-
     this.createSSMParameters(userPool, userPoolClient, groups);
 
     // Backend
