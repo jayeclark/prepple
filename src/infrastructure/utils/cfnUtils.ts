@@ -9,8 +9,8 @@ export interface DeploymentEnvironment {
 }
 
 export function getCfnResourceName(resourceName: string, environment: DeploymentEnvironment) {
-  const { realm, stage, user } = environment;
-  return `${resourceName}-${realm.toString()}-${stage}${user ? `-${user}`:''}`
+  const { region, stage, user } = environment;
+  return `${resourceName}-${region.toString()}-${stage}${user ? `-${user}`:''}`
 } 
 
 export function getDomainName({ realm, stage }: DeploymentEnvironment) {

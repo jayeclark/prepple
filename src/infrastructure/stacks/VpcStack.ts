@@ -102,7 +102,7 @@ export class VpcStack extends Stack {
     const elasticIP = new CfnEIP(this, getCfnResourceName('frontend-eip', deploymentEnvironment));
     
     const hostedZone = new HostedZone(this, getCfnResourceName('app-hosted-zone', deploymentEnvironment), {
-      zoneName: "mydevinterview.com"
+      zoneName: "prepple.com"
     });
 
     new ARecord(this, getCfnResourceName('frontend-arecord', deploymentEnvironment), {
