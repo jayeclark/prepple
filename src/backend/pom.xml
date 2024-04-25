@@ -83,7 +83,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-
+            <version>1.18.30</version>
             <scope>provided</scope>
         </dependency>
 
@@ -98,6 +98,12 @@
             <artifactId>postgresql</artifactId>
             <version>42.6.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.jsonschema2pojo</groupId>
+            <artifactId>jsonschema2pojo-maven-plugin</artifactId>
+            <version>0.3.7</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.zaxxer</groupId>
