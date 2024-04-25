@@ -29,7 +29,7 @@ export class DeploymentPipeline extends Stack {
           'npm run test:unit',
           'npm run test:integration',
           'npm run build',
-          `AWS_ACCOUNT_ID=${account} npx cdk synth`,
+          'npx cdk synth',
         ],
         primaryOutputDirectory: './cdk.out',
       }),
