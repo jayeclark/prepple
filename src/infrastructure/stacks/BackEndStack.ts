@@ -1,39 +1,17 @@
-import { App, CfnOutput, Stack } from 'aws-cdk-lib';
+import { App, Stack } from 'aws-cdk-lib';
 import { DockerImageFunction, DockerImageCode } from "aws-cdk-lib/aws-lambda";
 import { Bucket } from "aws-cdk-lib/aws-s3";
-import { Vpc, IVpc, SubnetType, SecurityGroup } from "aws-cdk-lib/aws-ec2";
-import {
-  DatabaseInstance as RdsDatabaseInstance,
-  DatabaseInstanceReadReplica as RdsDatabaseInstanceReadReplica,
-  Credentials,
-} from "aws-cdk-lib/aws-rds";
-import { DatabaseCluster as DocdbDatabaseCluster } from "aws-cdk-lib/aws-docdb";
-import { Secret } from "aws-cdk-lib/aws-secretsmanager";
+import { Vpc } from "aws-cdk-lib/aws-ec2";
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { getCfnResourceName, DeploymentEnvironment, getDomainName } from '../utils/cfnUtils';
 import { DefaultCustomStackProps } from "../utils/types";
 import { VpcStack } from './VpcStack';
 import path = require('path');
-import { CfnUserPoolClient, CfnUserPoolGroup, UserPool, UserPoolIdentityProvider, UserPoolIdentityProviderGoogle, VerificationEmailStyle } from 'aws-cdk-lib/aws-cognito';
+import { CfnUserPoolClient, CfnUserPoolGroup, UserPool, VerificationEmailStyle } from 'aws-cdk-lib/aws-cognito';
 import { FederatedPrincipal, Role, PolicyStatementProps, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { UserPoolGroupTypes, UserPoolGroupConfig } from '../config/userPoolConfig';
 import { VIDEO_BUCKET_NAME, PHOTO_BUCKET_NAME, TRANSCRIPT_BUCKET_NAME, VIDEO_RESUME_BUCKET_NAME } from '../config/resourceNames';
-import {
-  PG_ENGINE,
-  PG_WRITE_INSTANCE_TYPE,
-  PG_MAX_ALLOCATED_STORAGE,
-  PG_PORT,
-  PG_DBNAME,
-  PG_READ_INSTANCE_TYPE,
-  DOCDB_INSTANCE_TYPE,
-  DOCDB_READ_INSTANCE_COUNT,
-  POSTGRES_USERNAME,
-  DOCDB_USERNAME,
-  POSTGRES_READ_INSTANCE_COUNT,
-  POSTGRES_DB_ABBREVIATION,
-  DOCDB_DB_ABBREVIATION
-} from '../config/backendStackConfig';
 import { AttributeType, GlobalSecondaryIndexProps, SchemaOptions, Table } from 'aws-cdk-lib/aws-dynamodb';
 
 interface BackEndStackProps extends DefaultCustomStackProps {
