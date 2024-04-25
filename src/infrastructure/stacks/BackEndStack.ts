@@ -64,13 +64,6 @@ export class BackEndStack extends Stack {
 
     // Data stores
     const { ddbCoreTable } = this.createDdbResources(props.deploymentEnvironment);
-    const { postgresWriteInstance, postgresReadReplicas, pgCredentials } = this.createPostgresDBResources(props.vpcStack.vpc);
-    const pgReadEndpoints: Record<string, string> = {};
-    postgresReadReplicas.forEach((replica, index) => {
-      const key = `PG_READ_ENDPOINT_${index + 1}`;
-      pgReadEndpoints[key] = replica.dbInstanceEndpointAddress;
-    })
-    const { docdbCluster, docdbCredentials } = this.createDocDBResources(props.vpcStack.vpc);
 
     // Storage
     const videoBucketName = getCfnResourceName(VIDEO_BUCKET_NAME, props.deploymentEnvironment);
@@ -95,39 +88,13 @@ export class BackEndStack extends Stack {
     const quarkusApp = new DockerImageFunction(this, getCfnResourceName("QuarkusApi", props.deploymentEnvironment), {
       code: DockerImageCode.fromImageAsset(path.join(__dirname, "../../backend-core"))
     })
-    const quarkusRestAPI = new LambdaRestApi(this, `Backend-API-Quarkus-${props.deploymentEnvironment.stage}`, {
+    const quarkusRestAPI = new LambdaRestApi(this, getCfnResourceName("Backend-API-Quarkus", props.deploymentEnvironment), {
       handler: quarkusApp,
     })
     ddbCoreTable.grantReadWriteData(quarkusApp);
 
-    // Spring App
-/*     const springApp = new Function(this, getCfnResourceName('LambdaAPI', props.deploymentEnvironment), {
-      runtime: Runtime.JAVA_11,
-      memorySize: 256,
-      handler: 'com.prepple.api.StreamLambdaHandler::handleRequest', 
-      code: Code.fromAsset(path.join(__dirname, "../../backend/.aws-sam/build/PreppleAPI")), 
-      environment: {
-        PG_WRITE_ENDPOINT: postgresWriteInstance.dbInstanceEndpointAddress,
-        ...pgReadEndpoints,
-        PG_USERNAME: POSTGRES_USERNAME,
-        PG_PASSWORD: pgCredentials.secretValueFromJson('password').toString(),
-        DOCDB_WRITE_HOSTNAME: docdbCluster.clusterEndpoint.hostname,
-        DOCDB_WRITE_PORT: docdbCluster.clusterEndpoint.portAsString(),
-        DOCDB_READ_HOSTNAME: docdbCluster.clusterReadEndpoint.hostname,
-        DOCDB_READ_PORT: docdbCluster.clusterReadEndpoint.portAsString(),
-        DOCDB_USERNAME: DOCDB_USERNAME,
-        DOCDB_PASSWORD: docdbCredentials.secretValueFromJson('password').toString(),
-      }
-    }) */
 
-/*     postgresWriteInstance.grantConnect(springApp);
-    postgresReadReplicas.forEach((replica) => replica.grantConnect(springApp));
-
-    const restAPI = new LambdaRestApi(this, `Backend-API-${props.deploymentEnvironment.stage}`, {
-      handler: springApp,
-    }) */
-
-    this.createSSMParameters(userPool, userPoolClient, groups, postgresWriteInstance, postgresReadReplicas);
+    this.createSSMParameters(userPool, userPoolClient, groups);
 
     // Backend
     // Requires RDS (postgresql)
@@ -177,7 +144,7 @@ export class BackEndStack extends Stack {
   }
 
   createDynamoDbRelationalTable(environment: DeploymentEnvironment) {
-    const TABLE_NAME = "prepple-core"
+    const TABLE_NAME = "backend-core"
     const PARTITION_KEY: SchemaOptions["partitionKey"] = {
       name: "pk",
       type: AttributeType.STRING,
@@ -216,99 +183,6 @@ export class BackEndStack extends Stack {
 
   createDynamoDbDocumentsTable(vpc: Vpc) {
     
-  }
-
-  createPostgresDBResources(vpc: Vpc) {  
-    const pgCredentials = this.createPostgresDBCredentials();
-    new StringParameter(this, getCfnResourceName('PgCredentialsArn', this.env), {
-      parameterName: `${this.env.stage}-pg-credentials-arn`,
-      stringValue: pgCredentials.secretArn,
-    });
-
-    const defaultSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `SG-${this.env.stage}`, vpc.vpcDefaultSecurityGroup);
-
-    const postgresWriteInstance: RdsDatabaseInstance = new RdsDatabaseInstance(this, getCfnResourceName('PostgresInstance', this.env), {
-      engine: PG_ENGINE,
-      port: PG_PORT,
-      instanceType: PG_WRITE_INSTANCE_TYPE,
-      databaseName: PG_DBNAME,
-      vpc,
-      securityGroups: [defaultSecurityGroup],
-      maxAllocatedStorage: PG_MAX_ALLOCATED_STORAGE,
-
-      credentials: Credentials.fromSecret(pgCredentials),
-    });
-
-    const postgresReadReplicas: RdsDatabaseInstanceReadReplica[] = [];
-
-    let count = 1;
-    for (count = 1; count <= POSTGRES_READ_INSTANCE_COUNT; count += 1) {
-      const currentReadReplicaInstance = new RdsDatabaseInstanceReadReplica(this, getCfnResourceName(`PostgresReadReplica-${count}`, this.env), {
-        sourceDatabaseInstance: postgresWriteInstance,
-        instanceType: PG_READ_INSTANCE_TYPE,
-        vpc,
-      });
-      postgresReadReplicas.push(currentReadReplicaInstance);
-    }
-
-    new CfnOutput(this, `RDSWriteEndpoint-${this.env.stage}`, { value: postgresWriteInstance.dbInstanceEndpointAddress });
-    postgresReadReplicas.forEach((replica, index) => {
-      new CfnOutput(this, `RDSReadEndpoint${index+1}-${this.env.stage}`, { value: replica.dbInstanceEndpointAddress });
-    })
-    return { postgresWriteInstance, postgresReadReplicas, pgCredentials }
-  }
-
-  createDocDBResources(vpc: IVpc) {
-    const docdbCredentials = this.createDocDBCredentials();
-    new StringParameter(this, getCfnResourceName('DocdbCredentialsArn', this.env), {
-      parameterName: `${this.env.stage}-docdb-credentials-arn`,
-      stringValue: docdbCredentials.secretArn,
-    });
-
-    const docdbCluster = new DocdbDatabaseCluster(this, 'Database', {
-      masterUser: {
-        username: docdbCredentials.secretValueFromJson('username').toString(),
-        password: docdbCredentials.secretValueFromJson('password'),
-      },
-      instanceType: DOCDB_INSTANCE_TYPE,
-      instances: 1 + DOCDB_READ_INSTANCE_COUNT,
-      vpcSubnets: {
-        subnetType: SubnetType.PRIVATE_ISOLATED,
-      },
-      vpc
-    });
-
-    docdbCluster.connections.allowDefaultPortInternally('Allow internal connections to the default port');
-
-    return { docdbCluster, docdbCredentials };
-  }
-
-  createDBCredentials(username: string, dbName: string) {
-    const dbCredentialsSecret = new Secret(this, `${this.env.stage}-${dbName}-CredentialsSecret`, {
-      secretName: `${this.env.stage}-${dbName}-credentials`,
-      generateSecretString: {
-        secretStringTemplate: JSON.stringify({
-          username,
-        }),
-        excludePunctuation: true,
-        includeSpace: false,
-        generateStringKey: 'password'
-      }
-    });
-
-    new CfnOutput(this, `${dbName} Secret Name`, { exportName: getSecretNameExportName(dbName), value: dbCredentialsSecret.secretName }); 
-    new CfnOutput(this, `${dbName} Secret ARN`, { exportName: getSecretArnExportName(dbName), value: dbCredentialsSecret.secretArn}); 
-    new CfnOutput(this, `${dbName} Secret Full ARN`, { exportName: getSecretFullArnExportName(dbName), value: dbCredentialsSecret.secretFullArn || '' });
-
-    return dbCredentialsSecret;
-  }
-
-  createPostgresDBCredentials() {
-    return this.createDBCredentials(POSTGRES_USERNAME, POSTGRES_DB_ABBREVIATION);
-  }
-
-  createDocDBCredentials() {
-    return this.createDBCredentials(DOCDB_USERNAME, DOCDB_DB_ABBREVIATION);
   }
 
   createUserPool(buckets: Record<string, Bucket>) {
@@ -399,8 +273,6 @@ export class BackEndStack extends Stack {
     userPool: UserPool,
     userPoolClient: CfnUserPoolClient,
     userPoolGroups: Record<string, {group: CfnUserPoolGroup, role: Role}>,
-    pgWriteInstance: RdsDatabaseInstance,
-    pgReadInstances: RdsDatabaseInstanceReadReplica[]
   ) {
     new StringParameter(this, getCfnResourceName('user-pool-id', this.env), {
       parameterName: getCfnResourceName('user-pool-id', this.env),
@@ -421,27 +293,5 @@ export class BackEndStack extends Stack {
       parameterName: getCfnResourceName('freemium-group', this.env),
       stringValue: userPoolGroups.Freemium.group.groupName as string,
     });
-
-    new StringParameter(this, getCfnResourceName('pg-write-host', this.env), {
-      parameterName: getCfnResourceName('pg-write-host', this.env),
-      stringValue: pgWriteInstance.dbInstanceEndpointAddress as string,
-    });
-
-    new StringParameter(this, getCfnResourceName('pg-dbname', this.env), {
-      parameterName: getCfnResourceName('pg-dbname', this.env),
-      stringValue: PG_DBNAME,
-    });
-
-    new StringParameter(this, getCfnResourceName('pg-port', this.env), {
-      parameterName: getCfnResourceName('pg-port', this.env),
-      stringValue: pgWriteInstance.dbInstanceEndpointPort as string,
-    });
-
-    pgReadInstances.forEach((replica, i) => {
-      new StringParameter(this, getCfnResourceName(`pg-read-host-${i+1}`, this.env), {
-        parameterName: getCfnResourceName(`pg-read-host-${i+1}`, this.env),
-        stringValue: pgWriteInstance.dbInstanceEndpointAddress as string,
-      });
-    })
   }
 }
