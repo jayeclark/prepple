@@ -1,4 +1,4 @@
-package com.prepple.api.dao.ddb;
+package com.prepple.api.dao.docmentDb;
 
 import org.springframework.stereotype.Repository;
 

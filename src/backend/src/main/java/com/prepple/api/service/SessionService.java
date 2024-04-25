@@ -1,8 +1,7 @@
 package com.prepple.api.service;
 
-import com.prepple.api.dao.ddb.SessionDao;
+import com.prepple.api.dao.docmentDb.SessionDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
