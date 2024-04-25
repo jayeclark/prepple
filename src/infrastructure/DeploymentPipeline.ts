@@ -3,6 +3,7 @@ import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelin
 import { PipelineDeploymentStage } from './PipelineDeploymentStage';
 
 import { PipelineStageConfig, stages } from './config/stageConfig';
+import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
 
 export class DeploymentPipeline extends Stack {
   readonly context: App;
@@ -29,6 +30,18 @@ export class DeploymentPipeline extends Stack {
         ],
         primaryOutputDirectory: './cdk.out',
       }),
+      synthCodeBuildDefaults: {
+        partialBuildSpec: BuildSpec.fromObject({
+            phases: {
+                install: {
+                    "runtime-versions": {
+                      nodejs: "18",
+                      java: "21"
+                    }
+                }
+            }
+        })
+      }
     });
 
     stages.filter(isNotFeatureFlagged).forEach((stageConfig: PipelineStageConfig) => {
