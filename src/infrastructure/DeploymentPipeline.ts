@@ -15,18 +15,20 @@ export class DeploymentPipeline extends Stack {
     this.context = scope;
     this.props = props;
 
+    const account = process.env.AWS_ACCOUNT_ID;
+
     const pipeline = new CodePipeline(this, 'Pipeline', {
       crossAccountKeys: true,
       synth: new ShellStep('Synth', {
         input: CodePipelineSource.connection('jayeclark/prepple', 'main', {
-          connectionArn: `arn:aws:codestar-connections:us-west-2:${process.env.AWS_ACCOUNT_ID}:connection/d0c1c474-baaf-44e6-b4dd-ee755ed47cd9`,
+          connectionArn: `arn:aws:codestar-connections:us-west-2:${account}:connection/d0c1c474-baaf-44e6-b4dd-ee755ed47cd9`,
         }),
         commands: [
           'npm install',
           'npm run test:unit',
           'npm run test:integration',
           'npm run build',
-          'npx cdk synth',
+          `AWS_ACCOUNT_ID=${account} npx cdk synth`,
         ],
         primaryOutputDirectory: './cdk.out',
       }),
