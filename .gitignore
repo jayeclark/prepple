@@ -7,7 +7,6 @@ build
 .gradle
 src/backend/target
 .aws-sam
-cdk.context.json
 .DS_Store
 **/.DS_Store
 */.DS_Store
