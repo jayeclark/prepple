@@ -1,23 +1,22 @@
-FROM gradle:8.7.0-jdk21-alpine AS build
-COPY --chown=gradle:gradle . /home/gradle/src
-WORKDIR /home/gradle/src
-RUN gradle build --no-daemon
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:21 as base
 
-FROM registry.access.redhat.com/ubi8/openjdk-21:1.18
+FROM base as build
+RUN yum install -y gradle
+WORKDIR /src
 
-ENV LANGUAGE='en_US:en'
+RUN ./gradlew build
 
+COPY --from=build /src/target/dependency/*.jar ./
+COPY --from=build /src/target/*.jar ./
 
-# We make four distinct layers so if there are application changes the library layers can be re-used
-COPY --chown=185 build/quarkus-app/lib/ /deployments/lib/
-COPY --chown=185 build/quarkus-app/*.jar /deployments/
-COPY --chown=185 build/quarkus-app/app/ /deployments/app/
-COPY --chown=185 build/quarkus-app/quarkus/ /deployments/quarkus/
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.9
+WORKDIR /work/
+RUN chown 1001 /work \
+    && chmod "g+rwX" /work \
+    && chown 1001:root /work
+COPY --chown=1001:root build/*-runner /work/application
 
 EXPOSE 8080
-USER 185
-ENV JAVA_OPTS_APPEND="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
-ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
+USER 1001
 
-ENTRYPOINT [ "/opt/jboss/container/java/run/run-java.sh" ]
-
+ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"]
