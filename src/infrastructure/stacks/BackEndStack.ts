@@ -1,5 +1,5 @@
 import { App, CfnOutput, Stack } from 'aws-cdk-lib';
-import { Function, Runtime, Code } from "aws-cdk-lib/aws-lambda";
+import { DockerImageFunction, DockerImageCode } from "aws-cdk-lib/aws-lambda";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { Vpc, IVpc, SubnetType, SecurityGroup } from "aws-cdk-lib/aws-ec2";
 import {
@@ -19,7 +19,6 @@ import { CfnUserPoolClient, CfnUserPoolGroup, UserPool, UserPoolIdentityProvider
 import { FederatedPrincipal, Role, PolicyStatementProps, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { UserPoolGroupTypes, UserPoolGroupConfig } from '../config/userPoolConfig';
 import { VIDEO_BUCKET_NAME, PHOTO_BUCKET_NAME, TRANSCRIPT_BUCKET_NAME, VIDEO_RESUME_BUCKET_NAME } from '../config/resourceNames';
-import { Domain } from '../utils/constants';
 import {
   PG_ENGINE,
   PG_WRITE_INSTANCE_TYPE,
@@ -35,6 +34,7 @@ import {
   POSTGRES_DB_ABBREVIATION,
   DOCDB_DB_ABBREVIATION
 } from '../config/backendStackConfig';
+import { AttributeType, GlobalSecondaryIndexProps, SchemaOptions, Table } from 'aws-cdk-lib/aws-dynamodb';
 
 interface BackEndStackProps extends DefaultCustomStackProps {
   vpcStack: VpcStack;
@@ -63,6 +63,7 @@ export class BackEndStack extends Stack {
     this.env = props.deploymentEnvironment;
 
     // Data stores
+    const { ddbCoreTable } = this.createDdbResources(props.deploymentEnvironment);
     const { postgresWriteInstance, postgresReadReplicas, pgCredentials } = this.createPostgresDBResources(props.vpcStack.vpc);
     const pgReadEndpoints: Record<string, string> = {};
     postgresReadReplicas.forEach((replica, index) => {
@@ -86,15 +87,24 @@ export class BackEndStack extends Stack {
 
     const buckets = { videoBucket, photoBucket, transcriptsBucket, videoResumeBucket };
 
-    // User Pool & 
+    // User Pool & Client
     const { userPool, groups } = this.createUserPool(buckets);
     const userPoolClient = this.createUserPoolClient(userPool.userPoolId);
 
+    // Quarkus
+    const quarkusApp = new DockerImageFunction(this, getCfnResourceName("QuarkusApi", props.deploymentEnvironment), {
+      code: DockerImageCode.fromImageAsset(path.join(__dirname, "../../backend-core"))
+    })
+    const quarkusRestAPI = new LambdaRestApi(this, `Backend-API-Quarkus-${props.deploymentEnvironment.stage}`, {
+      handler: quarkusApp,
+    })
+    ddbCoreTable.grantReadWriteData(quarkusApp);
+
     // Spring App
-    const springApp = new Function(this, 'LambdaAPI', {
+/*     const springApp = new Function(this, getCfnResourceName('LambdaAPI', props.deploymentEnvironment), {
       runtime: Runtime.JAVA_11,
       memorySize: 256,
-      handler: 'com.prepple.api.StreamLambdaHandler::handleRequest', //'com.mydevinterview.api.StreamLambdaHandler::handleRequest',
+      handler: 'com.prepple.api.StreamLambdaHandler::handleRequest', 
       code: Code.fromAsset(path.join(__dirname, "../../backend/.aws-sam/build/PreppleAPI")), 
       environment: {
         PG_WRITE_ENDPOINT: postgresWriteInstance.dbInstanceEndpointAddress,
@@ -108,14 +118,14 @@ export class BackEndStack extends Stack {
         DOCDB_USERNAME: DOCDB_USERNAME,
         DOCDB_PASSWORD: docdbCredentials.secretValueFromJson('password').toString(),
       }
-    })
+    }) */
 
-    postgresWriteInstance.grantConnect(springApp);
+/*     postgresWriteInstance.grantConnect(springApp);
     postgresReadReplicas.forEach((replica) => replica.grantConnect(springApp));
 
     const restAPI = new LambdaRestApi(this, `Backend-API-${props.deploymentEnvironment.stage}`, {
       handler: springApp,
-    })
+    }) */
 
     this.createSSMParameters(userPool, userPoolClient, groups, postgresWriteInstance, postgresReadReplicas);
 
@@ -135,6 +145,77 @@ export class BackEndStack extends Stack {
     // - Analyze planned answers
     // - Auth functions
     // - Subscription functions
+  }
+
+  createDdbResources(environment: DeploymentEnvironment) {
+    const ddbCoreTable = this.createDynamoDbRelationalTable(environment);
+    return { ddbCoreTable };
+  }
+
+  createDynamoDbTable(
+    environment: DeploymentEnvironment,
+    tableName: string,
+    partitionKey: SchemaOptions["partitionKey"],
+    sortKey?: SchemaOptions["sortKey"],
+    secondaryIndexes?: GlobalSecondaryIndexProps[],
+  ) {
+    const persistenceLayer = new Table(this, getCfnResourceName(tableName, environment), {
+      partitionKey,
+      sortKey
+    })
+
+    secondaryIndexes?.forEach(gsi => {
+      const { indexName, partitionKey, sortKey } = gsi;
+      persistenceLayer.addGlobalSecondaryIndex({
+        indexName,
+        partitionKey,
+        sortKey,
+      })
+    })
+
+    return persistenceLayer;
+  }
+
+  createDynamoDbRelationalTable(environment: DeploymentEnvironment) {
+    const TABLE_NAME = "prepple-core"
+    const PARTITION_KEY: SchemaOptions["partitionKey"] = {
+      name: "pk",
+      type: AttributeType.STRING,
+    }
+    const SORT_KEY: SchemaOptions["sortKey"] = {
+      name: "sk",
+      type: AttributeType.STRING,
+    }
+    const GLOBAL_SECONDARY_INDEXES: GlobalSecondaryIndexProps[] = [
+      {
+        indexName: "gsi1",
+        partitionKey: {
+          name: "gsi1_pk",
+          type: AttributeType.STRING
+        },
+        sortKey: {
+          name: "gsi1_sk",
+          type: AttributeType.STRING
+        }
+      },
+      {
+        indexName: "gsi2",
+        partitionKey: {
+          name: "gsi2_pk",
+          type: AttributeType.STRING
+        },
+        sortKey: {
+          name: "gsi2_sk",
+          type: AttributeType.NUMBER
+        }
+      }
+    ];
+
+    return this.createDynamoDbTable(environment, TABLE_NAME, PARTITION_KEY, SORT_KEY, GLOBAL_SECONDARY_INDEXES)
+  }
+
+  createDynamoDbDocumentsTable(vpc: Vpc) {
+    
   }
 
   createPostgresDBResources(vpc: Vpc) {  
@@ -306,8 +387,10 @@ export class BackEndStack extends Stack {
       generateSecret: false,
       userPoolId,
       allowedOAuthFlows: ['code'],
-      allowedOAuthScopes: ['openid', 'email', 'profile'],
+      allowedOAuthScopes: ['aws.cognito.signin.user.admin', 'openid', 'email', 'profile'],
+      allowedOAuthFlowsUserPoolClient: true,
       callbackUrLs: [getDomainName(this.env)],
+      explicitAuthFlows: ['ALLOW_USER_PASSWORD_AUTH', 'ALLOW_REFRESH_TOKEN_AUTH'],
       supportedIdentityProviders: ['COGNITO']
     })
   }
