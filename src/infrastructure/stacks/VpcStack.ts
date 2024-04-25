@@ -20,7 +20,7 @@ export class VpcStack extends Stack {
   constructor(scope: App, id: string, props: VpcProps) {
     super(scope, id, props)
 
-    const natGatewayProvider = NatProvider.instance({
+    const natGatewayProvider = NatProvider.instanceV2({
       instanceType: new InstanceType('t3.micro'),
     });
 
