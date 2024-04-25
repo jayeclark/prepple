@@ -12,7 +12,7 @@ Prepple is a web and mobile application in development that helps job seekers un
 
 ## Technologies Used
 Prepple is a reimagining of MyDevInterview, a quick app I put together during a previous job search. It's built on an AWS and makes use of the following AWS services:
-* Code Pipeline
+* Code Pipeline...
 * RDS (PostgreSQL & DocumentDB)
 * DynamoDB
 * Serverless Lambda
