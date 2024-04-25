@@ -15,7 +15,7 @@ export class DeploymentPipeline extends Stack {
     this.context = scope;
     this.props = props;
 
-    const account = process.env.AWS_ACCOUNT_ID;
+    const account = 541563788130;
 
     const pipeline = new CodePipeline(this, 'Pipeline', {
       crossAccountKeys: true,
