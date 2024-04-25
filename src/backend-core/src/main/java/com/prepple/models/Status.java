@@ -6,7 +6,7 @@ public enum Status {
     DISABLED("disabled"),
     DEPRECATED("deprecated");
 
-    private String value;
+    private String value = "";
 
     Status(String status) {
         switch (status) {
