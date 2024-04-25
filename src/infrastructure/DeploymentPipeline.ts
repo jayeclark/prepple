@@ -4,6 +4,7 @@ import { PipelineDeploymentStage } from './PipelineDeploymentStage';
 
 import { PipelineStageConfig, stages } from './config/stageConfig';
 import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
+import { env } from 'process';
 
 export class DeploymentPipeline extends Stack {
   readonly context: App;
@@ -35,12 +36,24 @@ export class DeploymentPipeline extends Stack {
       synthCodeBuildDefaults: {
         partialBuildSpec: BuildSpec.fromObject({
             phases: {
-                install: {
+              install: {
                     "runtime-versions": {
                       nodejs: "18",
                       java: "corretto21"
                     }
-                }
+              },
+              build: {
+                env: {
+                  environmentVariables: {
+                    'AWS_ACCOUNT_ID': process.env.AWS_ACCOUNT_ID,
+                    'AWS_ACCESS_KEY_ID': process.env.AWS_ACCESS_KEY_ID,
+                    'AWS_SECRET_ACCESS_KEY': process.env.AWS_SECRET_ACCESS_KEY,
+                    'CDK_DEFAULT_ACCOUNT': process.env.CDK_DEFAULT_ACCOUNT,
+                    'CDK_DEFAULT_REGION': process.env.CDK_DEFAULT_REGION
+                    }
+                  }
+              }
+                
             }
         })
       }
