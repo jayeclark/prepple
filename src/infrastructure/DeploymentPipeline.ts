@@ -36,7 +36,7 @@ export class DeploymentPipeline extends Stack {
                 install: {
                     "runtime-versions": {
                       nodejs: "18",
-                      java: "21"
+                      java: "coretto21"
                     }
                 }
             }
