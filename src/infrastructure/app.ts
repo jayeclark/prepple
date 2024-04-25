@@ -5,8 +5,8 @@ const app = new App();
 
 const pipeline = new DeploymentPipeline(app, 'DeploymentPipeline', {
   env: {
-    account: process.env.CDK_DEFAULT_ACCOUNT,
-    region: process.env.CDK_DEFAULT_REGION
+    account: "541563788130",
+    region: "us-west-2"
   }
 })
 
