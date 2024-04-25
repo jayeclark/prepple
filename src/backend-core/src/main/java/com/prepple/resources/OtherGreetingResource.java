@@ -1,4 +1,4 @@
-package com.prepple;
+package com.prepple.resources;
 
 import com.prepple.models.Question;
 import com.prepple.models.Schema;
@@ -9,17 +9,17 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.UUID;
 
-@Path("/hello")
-public class GreetingResource {
+@Path("/goodbye")
+public class OtherGreetingResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Question hello() {
+    public Question goodbye() {
         return Question.builder()
                 .schema(Schema.QUESTION)
                 .schemaVersion(1)
                 .id(UUID.randomUUID().toString())
-                .title("test title")
+                .title("test title 2")
                 .question("test question")
                 .guidesCount(0)
                 .build();
