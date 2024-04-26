@@ -5,7 +5,7 @@ interface HoldingStageProps extends StageProps {
   deploymentEnvironments: DeploymentEnvironment[]
 }
 
-export class PipelineDeploymentStage extends Stage {
+export class HoldingStage extends Stage {
 
   readonly scope: App;
   readonly props: HoldingStageProps;

@@ -1,10 +1,12 @@
 import { App, Stack, StackProps } from 'aws-cdk-lib';
-import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
+import { CodePipeline, CodePipelineSource, ShellStep, StageDeployment } from 'aws-cdk-lib/pipelines';
 import { PipelineDeploymentStage } from './PipelineDeploymentStage';
 
 import { PipelineStageConfig, stages } from './config/stageConfig';
 import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
 import { env } from 'process';
+import { Domain } from './utils/constants';
+import { HoldingStage } from './HoldingStage';
 
 export class DeploymentPipeline extends Stack {
   readonly context: App;
@@ -65,8 +67,13 @@ export class DeploymentPipeline extends Stack {
 
   }
 
-  addStageToPipeline(pipeline: CodePipeline, {name, environments, preDeploymentApprovalSteps, postDeploymentApprovalSteps}: PipelineStageConfig) {
-    const pipelineStage = pipeline.addStage(new PipelineDeploymentStage(this.context, name, { deploymentEnvironments: environments }));
+  addStageToPipeline(pipeline: CodePipeline, { name, environments, preDeploymentApprovalSteps, postDeploymentApprovalSteps }: PipelineStageConfig) {
+    let pipelineStage: StageDeployment;
+    if (name == Domain.HOLDING) {
+      pipelineStage = pipeline.addStage(new HoldingStage(this.context, name, { deploymentEnvironments: environments }))
+    } else {
+      pipelineStage = pipeline.addStage(new PipelineDeploymentStage(this.context, name, { deploymentEnvironments: environments }));
+    }
     preDeploymentApprovalSteps?.forEach((preDeploymentApprovalStep) => pipelineStage.addPre(preDeploymentApprovalStep));
     postDeploymentApprovalSteps?.forEach((postDeploymentApprovalStep) => pipelineStage.addPost(postDeploymentApprovalStep));
   }
