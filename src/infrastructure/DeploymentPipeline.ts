@@ -30,6 +30,9 @@ export class DeploymentPipeline extends Stack {
           'npm run test:unit',
           'npm run test:integration',
           'npm run build',
+          'rm -rf /src/backend-core/build',
+          'rm -rf /src/frontend/build',
+          'rm -rf /build',
           'npx cdk synth',
         ],
         primaryOutputDirectory: './cdk.out',
@@ -53,26 +56,11 @@ export class DeploymentPipeline extends Stack {
                     'CDK_DEFAULT_REGION': process.env.CDK_DEFAULT_REGION
                     }
                   }
-              }
-                
+              },
             }
         })
       }
     });
-
-    const stripAssetsStep = new CodeBuildStep(
-      'StripAssetsFromAssembly', {
-              input: pipeline.cloudAssemblyFileSet,
-            commands: [
-                'S3_PATH=${CODEBUILD_SOURCE_VERSION#"arn:aws:s3:::"}',
-                'ZIP_ARCHIVE=$(basename $S3_PATH)',
-                'rm -rfv asset.*',
-                'zip -r -q -A $ZIP_ARCHIVE *',
-                'aws s3 cp $ZIP_ARCHIVE s3://$S3_PATH',
-            ],
-            }
-        )
-    pipeline.addWave('BeforeDeploy', { pre: [stripAssetsStep] })
 
     stages.filter(isNotFeatureFlagged).forEach((stageConfig: PipelineStageConfig) => {
       this.addStageToPipeline(pipeline, stageConfig)
