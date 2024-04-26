@@ -103,9 +103,10 @@ export class BackEndStack extends Stack {
     sortKey?: SchemaOptions["sortKey"],
     secondaryIndexes?: GlobalSecondaryIndexProps[],
   ) {
-    const persistenceLayer = new Table(this, getCfnResourceName(tableName, environment), {
+    const persistenceLayer = new Table(this, tableName, {
       partitionKey,
-      sortKey
+      sortKey,
+      tableName: getCfnResourceName(tableName, environment)
     })
 
     secondaryIndexes?.forEach(gsi => {
