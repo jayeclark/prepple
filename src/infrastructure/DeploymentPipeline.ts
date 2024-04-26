@@ -1,10 +1,9 @@
 import { App, Stack, StackProps } from 'aws-cdk-lib';
-import { CodePipeline, CodePipelineSource, ShellStep, StageDeployment } from 'aws-cdk-lib/pipelines';
+import { CodeBuildStep, CodePipeline, CodePipelineSource, ShellStep, StageDeployment } from 'aws-cdk-lib/pipelines';
 import { PipelineDeploymentStage } from './PipelineDeploymentStage';
 
 import { PipelineStageConfig, stages } from './config/stageConfig';
 import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
-import { env } from 'process';
 import { Domain } from './utils/constants';
 import { HoldingStage } from './HoldingStage';
 
@@ -60,6 +59,20 @@ export class DeploymentPipeline extends Stack {
         })
       }
     });
+
+    const stripAssetsStep = new CodeBuildStep(
+      'StripAssetsFromAssembly', {
+              input: pipeline.cloudAssemblyFileSet,
+            commands: [
+                'S3_PATH=${CODEBUILD_SOURCE_VERSION#"arn:aws:s3:::"}',
+                'ZIP_ARCHIVE=$(basename $S3_PATH)',
+                'rm -rfv asset.*',
+                'zip -r -q -A $ZIP_ARCHIVE *',
+                'aws s3 cp $ZIP_ARCHIVE s3://$S3_PATH',
+            ],
+            }
+        )
+    pipeline.addWave('BeforeDeploy', { pre: [stripAssetsStep] })
 
     stages.filter(isNotFeatureFlagged).forEach((stageConfig: PipelineStageConfig) => {
       this.addStageToPipeline(pipeline, stageConfig)
