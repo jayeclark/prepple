@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Build quarkus backend
-# echo "Building quarkus backend..."
-# cd src/backend-core && ./gradlew build && cd ../..
+echo "Building quarkus backend..."
+cd src/backend-core && ./gradlew build && cd ../..
 
 # Build frontend
 echo "Building frontend..."
